@@ -53,7 +53,7 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  }
 
  # low level API
- my $bam          = Bio::DB::Bam->open('/path/to/bamfile');
+ my $bam          = Bio::DB::HTS->open('/path/to/bamfile');
  my $header       = $bam->header;
  my $target_count = $header->n_targets;
  my $target_names = $header->target_name;
@@ -64,8 +64,8 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
     my $cigar     = $align->cigar_str;
  }
 
- my $index = Bio::DB::Bam->index_open('/path/to/bamfile');
- my $index = Bio::DB::Bam->index_open_in_safewd('/path/to/bamfile');
+ my $index = Bio::DB::HTS->index_open('/path/to/bamfile');
+ my $index = Bio::DB::HTS->index_open_in_safewd('/path/to/bamfile');
 
  my $callback = sub {
      my $alignment = shift;
@@ -171,11 +171,11 @@ The B<main object classes> that you will be dealing with in the
 high-level API are as follows:
 
  * Bio::DB::HTS               -- A collection of alignments and reference sequences.
- * Bio::DB::Bam::Alignment    -- The alignment between a query and the reference.
- * Bio::DB::Bam::Query        -- An object corresponding to the query sequence in
+ * Bio::DB::HTS::Alignment    -- The alignment between a query and the reference.
+ * Bio::DB::HTS::Query        -- An object corresponding to the query sequence in
                                   which both (+) and (-) strand alignments are
                                   shown in the reference (+) strand.
- * Bio::DB::Bam::Target       -- An interface to the query sequence in which
+ * Bio::DB::HTS::Target       -- An interface to the query sequence in which
                                    (-) strand alignments are shown in reverse
                                    complement
 
@@ -184,12 +184,12 @@ You may encounter other classes as well. These include:
  * Bio::DB::HTS::Segment       -- This corresponds to a region on the reference
                                   sequence.
  * Bio::DB::HTS::Constants     -- This defines CIGAR symbol constants and flags.
- * Bio::DB::Bam::AlignWrapper  -- An alignment helper object that adds split
-                                  alignment functionality. See Bio::DB::Bam::Alignment
+ * Bio::DB::HTS::AlignWrapper  -- An alignment helper object that adds split
+                                  alignment functionality. See Bio::DB::HTS::Alignment
                                   for the documentation on using it.
- * Bio::DB::Bam::ReadIterator  -- An iterator that mediates the one-feature-at-a-time 
+ * Bio::DB::HTS::ReadIterator  -- An iterator that mediates the one-feature-at-a-time 
                                   retrieval mechanism.
- * Bio::DB::Bam::FetchIterator -- Another iterator for feature-at-a-time retrieval.
+ * Bio::DB::HTS::FetchIterator -- Another iterator for feature-at-a-time retrieval.
 
 =head2 The low-level API
 
@@ -205,11 +205,11 @@ The classes you will be interacting with in the low-level API are as
 follows:
 
  * Bio::DB::Tam            -- Methods that read and write TAM (text SAM) files.
- * Bio::DB::Bam            -- Methods that read and write BAM (binary SAM) files.
- * Bio::DB::Bam::Header    -- Methods for manipulating the BAM file header.
- * Bio::DB::Bam::Index     -- Methods for retrieving data from indexed BAM files.
- * Bio::DB::Bam::Alignment -- Methods for manipulating alignment data.
- * Bio::DB::Bam::Pileup    -- Methods for manipulating the pileup data structure.
+ * Bio::DB::HTS            -- Methods that read and write BAM (binary SAM) files.
+ * Bio::DB::HTS::Header    -- Methods for manipulating the BAM file header.
+ * Bio::DB::HTS::Index     -- Methods for retrieving data from indexed BAM files.
+ * Bio::DB::HTS::Alignment -- Methods for manipulating alignment data.
+ * Bio::DB::HTS::Pileup    -- Methods for manipulating the pileup data structure.
  * Bio::DB::HTS::Fai       -- Methods for creating and reading from indexed Fasta
                               files.
 =head1 METHODS
@@ -323,7 +323,7 @@ B<subsequently.>
 
 =item $header = $sam->header
 
-Return the Bio::DB::Bam::Header object associated with the BAM
+Return the Bio::DB::HTS::Header object associated with the BAM
 file. You can manipulate the header using the low-level API.
 
 =item $bam_path = $sam->bam_path
@@ -333,7 +333,7 @@ makes the sam object more portable.
 
 =item $bam    = $sam->bam
 
-Returns the low-level Bio::DB::Bam object associated with the opened
+Returns the low-level Bio::DB::HTS object associated with the opened
 file.
 
 =item $fai    = $sam->fai
@@ -351,7 +351,7 @@ trappable via an eval {}.
 
 =item $bai    = $sam->bam_index
 
-Return the Bio::DB::Bam::Index object associated with the BAM file. 
+Return the Bio::DB::HTS::Index object associated with the BAM file. 
 
 B<The BAM file index will be built automatically for you if it does
 not already exist.> In addition, if the BAM file is not already sorted
@@ -594,14 +594,14 @@ B<match>. The "match" type corresponds to the unprocessed SAM
 alignment. It will retrieve single reads, either mapped or
 unmapped. Each match feature's primary_tag() method will return the
 string "match." The features returned by this call are of type
-Bio::DB::Bam::AlignWrapper.
+Bio::DB::HTS::AlignWrapper.
 
 B<read_pair>. The "paired_end" type causes the sam interface to find
 and merge together mate pairs. Fetching this type of feature will
 yield a series of Bio::SeqFeatureI objects, each as long as the total
 distance on the reference sequence spanned by the mate pairs. The
 top-level feature is of type Bio::SeqFeature::Lite; it contains two
-Bio::DB::Bam::AlignWrapper subparts. 
+Bio::DB::HTS::AlignWrapper subparts. 
 
 Call get_SeqFeatures() to get the two individual reads. Example:
 
@@ -666,7 +666,7 @@ list of feature types to return:
 
 For a description of the methods available in the features returned
 from this call, please see L<Bio::SeqfeatureI> and
-L<Bio::DB::Bam::Alignment>.
+L<Bio::DB::HTS::Alignment>.
 
 You can B<filter> "match" and "read_pair" features by name, location
 and/or flags. The name and flag filters are not very efficient. Unless
@@ -784,7 +784,7 @@ then the entire reference sequence is traversed. If end is absent,
 then the end of the reference sequence is assumed.
 
 The callback will be called repeatedly with a
-Bio::DB::Bam::AlignWrapper on the argument list.
+Bio::DB::HTS::AlignWrapper on the argument list.
 
 Example:
 
@@ -814,7 +814,7 @@ As with fetch(), the region is specified as a string in the format
 The callback is a coderef that will be invoked with three arguments:
 the seq_id of the reference sequence, the current position on the
 reference (in 1-based coordinates!), and a reference to an array of
-Bio::DB::Bam::Pileup objects. Here is the typical call signature:
+Bio::DB::HTS::Pileup objects. Here is the typical call signature:
 
   sub {
        my ($seqid,$pos,$pileup) = @_;
@@ -849,12 +849,12 @@ at that position. Here is a simple average coverage calculator:
  $sam->pileup('seq1:501-600',$callback);
  print "coverage = ",$depth/$positions;
 
-Each Bio::DB::Bam::Pileup object describes the position of a read in
-the alignment. Briefly, Bio::DB::Bam::Pileup has the following
+Each Bio::DB::HTS::Pileup object describes the position of a read in
+the alignment. Briefly, Bio::DB::HTS::Pileup has the following
 methods:
 
  $pileup->alignment  The alignment at this level (a
-                     Bio::DB::Bam::AlignWrapper object).
+                     Bio::DB::HTS::AlignWrapper object).
  
  $pileup->qpos   The position of the read base at the pileup site,
                  in 0-based coordinates.
@@ -883,8 +883,8 @@ See L</Examples> for a very simple SNP caller.
 =item $sam->fast_pileup($region,$callback [,$keep_level])
 
 This is identical to pileup() except that the pileup object returns
-low-level Bio::DB::Bam::Alignment objects rather than the higher-level
-Bio::DB::Bam::AlignWrapper objects. This makes it roughly 50% faster,
+low-level Bio::DB::HTS::Alignment objects rather than the higher-level
+Bio::DB::HTS::AlignWrapper objects. This makes it roughly 50% faster,
 but you lose the align objects' seq_id() and get_tag_values()
 methods. As a compensation, the callback receives an additional
 argument corresponding to the Bio::DB::HTS object. You can use this to
@@ -894,7 +894,7 @@ create AlignWrapper objects on an as needed basis:
     my($seqid,$pos,$pileup,$sam) = @_;
     for my $p (@$pileup) {
        my $alignment = $p->alignment;
-       my $wrapper   = Bio::DB::Bam::AlignWrapper->new($alignment,$sam);
+       my $wrapper   = Bio::DB::HTS::AlignWrapper->new($alignment,$sam);
        my $has_mate  = $wrapper->get_tag_values('PAIRED');
     }
   };
@@ -927,7 +927,7 @@ low level APIs is that in the high-level API, the reference sequence
 is identified using a human-readable seq_id. However, in the low-level
 API, the reference is identified using a numeric target ID
 ("tid"). The target ID is established during the creation of the BAM
-file and is a small 0-based integer index. The Bio::DB::Bam::Header
+file and is a small 0-based integer index. The Bio::DB::HTS::Header
 object provides methods for converting from seq_ids to tids.
 
 =head2 Indexed Fasta Files
@@ -944,7 +944,7 @@ it. If the index does not exist, it will be created
 automatically. Note that you pass the path to the Fasta file, not the
 index.
 
-For consistency with Bio::DB::Bam->open() this method is also called
+For consistency with Bio::DB::HTS->open() this method is also called
 open().
 
 =item $dna_string = $fai->fetch("seqid:start-end")
@@ -969,7 +969,7 @@ compressed with gzip if desired.
 
 =item $header = $tam->header_read()
 
-Create and return a Bio::DB::Bam::Header object from the information
+Create and return a Bio::DB::HTS::Header object from the information
 contained within @SQ header lines of the Sam file. If there are no @SQ
 lines, then the header will not be useful, and you should call
 header_read2() to generate the missing information from the
@@ -983,7 +983,7 @@ suggested logic:
 
 =item $header = $tam->header_read2('/path/to/file.fa.fai')
 
-Create and return a Bio::DB::Bam::Header object from the information
+Create and return a Bio::DB::HTS::Header object from the information
 contained within the indexed Fasta file of the reference
 sequences. Note that you have to pass the path to the .fai file, and
 not the .fa file. The header object contains information on the
@@ -991,9 +991,9 @@ reference sequence names and lengths.
 
 =item $bytes = $tam->read1($header,$alignment)
 
-Given a Bio::DB::Bam::Header object, such as the one created by
-header_read2(), and a Bio::DB::Bam::Alignment object created by
-Bio::DB::Bam::Alignment->new(), reads one line of alignment information
+Given a Bio::DB::HTS::Header object, such as the one created by
+header_read2(), and a Bio::DB::HTS::Alignment object created by
+Bio::DB::HTS::Alignment->new(), reads one line of alignment information
 into the alignment object from the TAM file and returns a status
 code. The result code will be the number of bytes read.
 
@@ -1006,15 +1006,15 @@ SAM. They usually have a .bam extension.
 
 =over 4
 
-=item $bam = Bio::DB::Bam->open('/path/to/file.bam' [,$mode])
+=item $bam = Bio::DB::HTS->open('/path/to/file.bam' [,$mode])
 
 Open up the BAM file at the indicated path. Mode, if present, must be
 one of the file stream open flags ("r", "w", "a", "r+", etc.). If
 absent, mode defaults to "r".
 
-Note that Bio::DB::Bam objects are not stable across fork()
+Note that Bio::DB::HTS objects are not stable across fork()
 operations. If you fork, and intend to use the object in both parent
-and child, you must reopen the Bio::DB::Bam in either the child or the
+and child, you must reopen the Bio::DB::HTS in either the child or the
 parent (but not both) before attempting to call any of the object's
 methods.
 
@@ -1024,17 +1024,17 @@ below) and all accesses will be performed on the remote BAM file.
 
 Example:
 
-   $bam = Bio::DB::Bam->open('http://some.site.com/nextgen/chr1_bowtie.bam');
+   $bam = Bio::DB::HTS->open('http://some.site.com/nextgen/chr1_bowtie.bam');
 
 =item $header = $bam->header()
 
-Given an open BAM file, return a Bio::DB::Bam::Header object
+Given an open BAM file, return a Bio::DB::HTS::Header object
 containing information about the reference sequence(s). Note that you
 must invoke header() at least once before calling read1().
 
 =item $status_code = $bam->header_write($header)
 
-Given a Bio::DB::Bam::Header object and a BAM file opened in write
+Given a Bio::DB::HTS::Header object and a BAM file opened in write
 mode, write the header to the file. If the write fails the process
 will be terminated at the C layer. The result code is (currently)
 always zero.
@@ -1054,16 +1054,16 @@ from the Fcntl module by importing the ":seek" group:
 =item $alignment = $bam->read1()
 
 Read one alignment from the BAM file and return it as a
-Bio::DB::Bam::Alignment object. Note that you
+Bio::DB::HTS::Alignment object. Note that you
 must invoke header() at least once before calling read1().
 
 =item $bytes = $bam->write1($alignment)
 
 Given a BAM file that has been opened in write mode and a
-Bio::DB::Bam::Alignment object, write the alignment to the BAM file
+Bio::DB::HTS::Alignment object, write the alignment to the BAM file
 and return the number of bytes successfully written.
 
-=item Bio::DB::Bam->sort_core($by_qname,$path,$prefix,$max_mem)
+=item Bio::DB::HTS->sort_core($by_qname,$path,$prefix,$max_mem)
 
 Attempt to sort a BAM file by chromosomal location or name and create a
 new sorted BAM file. Arguments are as follows:
@@ -1089,12 +1089,12 @@ new sorted BAM file. Arguments are as follows:
 
 =head2 BAM index methods
 
-The Bio::DB::Bam::Index object provides access to BAM index (.bai)
+The Bio::DB::HTS::Index object provides access to BAM index (.bai)
 files.
 
 =over 4
 
-=item $status_code = Bio::DB::Bam->index_build('/path/to/file.bam')
+=item $status_code = Bio::DB::HTS->index_build('/path/to/file.bam')
 
 Given the path to a .bam file, this function attempts to build a
 ".bai" index. The process in which the .bam file exists must be
@@ -1103,7 +1103,7 @@ space for the operation or the process will be terminated in the C
 library layer. The result code is currently always zero, but in the
 future may return a negative value to indicate failure.
 
-=item $index = Bio::DB::Bam->index('/path/to/file.bam',$reindex)
+=item $index = Bio::DB::HTS->index('/path/to/file.bam',$reindex)
 
 Attempt to open the index for the indicated BAM file. If $reindex is
 true, and the index either does not exist or is out of date with
@@ -1111,13 +1111,13 @@ respect to the BAM file (by checking modification dates), then attempt
 to rebuild the index. Will throw an exception if the index does not
 exist or if attempting to rebuild the index was unsuccessful.
 
-=item $index = Bio::DB::Bam->index_open('/path/to/file.bam')
+=item $index = Bio::DB::HTS->index_open('/path/to/file.bam')
 
 Attempt to open the index file for a BAM file, returning a
-Bio::DB::Bam::Index object. The filename path to use is the .bam file,
+Bio::DB::HTS::Index object. The filename path to use is the .bam file,
 not the .bai file.
 
-=item $index = Bio::DB::Bam->index_open_in_safewd('/path/to/file.bam' [,$mode])
+=item $index = Bio::DB::HTS->index_open_in_safewd('/path/to/file.bam' [,$mode])
 
 When opening a remote BAM file, you may not wish for the index to be
 downloaded to the current working directory. This version of index_open
@@ -1132,7 +1132,7 @@ This is the low-level equivalent of the $sam->fetch() function
 described for the high-level API. Given a open BAM file object, the
 numeric ID of the reference sequence, start and end ranges on the
 reference, and a coderef, this function will traverse the region and
-repeatedly invoke the coderef with each Bio::DB::Bam::Alignment
+repeatedly invoke the coderef with each Bio::DB::HTS::Alignment
 object that overlaps the region.
 
 Arguments:
@@ -1140,12 +1140,12 @@ Arguments:
  Argument      Description
  --------      -----------
 
- $bam          The Bio::DB::Bam object that corresponds to the
+ $bam          The Bio::DB::HTS object that corresponds to the
                index object.
 
  $tid          The target ID of the reference sequence. This can
                be obtained by calling $header->parse_region() with
-               an appropriate opened Bio::DB::Bam::Header object.
+               an appropriate opened Bio::DB::HTS::Header object.
 
  $start        The start and end positions of the desired range on
                the reference sequence given by $tid, in 0-based 
@@ -1165,7 +1165,7 @@ The coderef's call signature should look like this:
                     ...
                  }
 
-The first argument is a Bio::DB::Bam::Alignment object. The second is
+The first argument is a Bio::DB::HTS::Alignment object. The second is
 the callback data (if any) passed to fetch().
 
 Fetch() returns an integer code, but its meaning is not described in
@@ -1180,12 +1180,12 @@ are:
  Argument      Description
  --------      -----------
 
- $bam          The Bio::DB::Bam object that corresponds to the
+ $bam          The Bio::DB::HTS object that corresponds to the
                index object.
 
  $tid          The target ID of the reference sequence. This can
                be obtained by calling $header->parse_region() with
-               an appropriate opened Bio::DB::Bam::Header object.
+               an appropriate opened Bio::DB::HTS::Header object.
 
  $start        The start and end positions of the desired range on
                the reference sequence given by $tid, in 0-based 
@@ -1200,7 +1200,7 @@ are:
 
 The callback will be invoked with four arguments corresponding to the
 numeric sequence ID of the reference sequence, the B<zero-based>
-position on the alignment, an arrayref of Bio::DB::Bam::Pileup
+position on the alignment, an arrayref of Bio::DB::HTS::Pileup
 objects, and the callback data, if any. A typical call signature will
 be this:
 
@@ -1213,7 +1213,7 @@ be this:
 Note that the position argument is zero-based rather than 1-based, as
 it is in the high-level API.
 
-The Bio::DB::Bam::Pileup object was described earlier in the
+The Bio::DB::HTS::Pileup object was described earlier in the
 description of the high-level pileup() method.
 
 =item $coverage = $index->coverage($bam,$tid,$start,$end [,$bins [,maxcnt]])
@@ -1238,18 +1238,18 @@ specifying that you want an unlimited cap.
 
 =head2 BAM header methods
 
-The Bio::DB::Bam::Header object contains information regarding the
+The Bio::DB::HTS::Header object contains information regarding the
 reference sequence(s) used to construct the corresponding TAM or BAM
 file. It is most frequently used to translate between numeric target
 IDs and human-readable seq_ids. Headers can be created either from
 reading from a .fai file with the Bio::DB::Tam->header_read2() method,
-or by reading from a BAM file using Bio::DB::Bam->header(). You can
+or by reading from a BAM file using Bio::DB::HTS->header(). You can
 also create header objects from scratch, although there is not much
 that you can do with such objects at this point.
 
 =over 4
 
-=item $header = Bio::DB::Bam::Header->new()
+=item $header = Bio::DB::HTS::Header->new()
 
 Return a new, empty, header object.
 
@@ -1293,16 +1293,16 @@ position is omitted, then the end of the sequence is assumed.
 
 =item $header->view1($alignment)
 
-This method will accept a Bio::DB::Bam::Alignment object, convert it
+This method will accept a Bio::DB::HTS::Alignment object, convert it
 to a line of TAM output, and write the output to STDOUT. In the
 low-level API there is currently no way to send the output to a
 different filehandle or capture it as a string.
 
 =back
 
-=head2 Bio::DB::Bam::Pileup methods
+=head2 Bio::DB::HTS::Pileup methods
 
-An array of Bio::DB::Bam::Pileup object is passed to the pileup()
+An array of Bio::DB::HTS::Pileup object is passed to the pileup()
 callback for each position of a multi-read alignment. Each pileup
 object contains information about the alignment of a single read at a
 single position.
@@ -1311,7 +1311,7 @@ single position.
 
 =item $alignment = $pileup->alignment
 
-Return the Bio::DB::Bam::Alignment object at this level. This provides
+Return the Bio::DB::HTS::Alignment object at this level. This provides
 you with access to the aligning read.
 
 =item $alignment = $pileup->b
@@ -1357,8 +1357,8 @@ exported to the Perl API just in case.
 
 =head2 The alignment objects
 
-Please see L<Bio::DB::Bam::Alignment> for documentation of the
-Bio::DB::Bam::Alignment and Bio::DB::Bam::AlignWrapper objects.
+Please see L<Bio::DB::HTS::Alignment> for documentation of the
+Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
 =cut
 
@@ -1372,12 +1372,12 @@ use Bio::PrimarySeq;
 use base 'DynaLoader';
 bootstrap Bio::DB::HTS;
 
-use Bio::DB::Bam::Alignment;
+use Bio::DB::HTS::Alignment;
 use Bio::DB::HTS::Segment;
-use Bio::DB::Bam::AlignWrapper;
-use Bio::DB::Bam::PileupWrapper;
-use Bio::DB::Bam::FetchIterator;
-use Bio::DB::Bam::ReadIterator;
+use Bio::DB::HTS::AlignWrapper;
+use Bio::DB::HTS::PileupWrapper;
+use Bio::DB::HTS::FetchIterator;
+use Bio::DB::HTS::ReadIterator;
 
 use constant DUMP_INTERVAL => 1_000_000;
 
@@ -1397,7 +1397,7 @@ sub new {
 	-r _  or croak "is not readable";
     }
 
-    my $bam = Bio::DB::Bam->open($bam_path)      or croak "$bam_path open: $!";
+    my $bam = Bio::DB::HTS->open($bam_path)      or croak "$bam_path open: $!";
 
     my $fai = $class->new_dna_accessor($fa_path) if $fa_path;
 
@@ -1426,7 +1426,7 @@ sub is_remote {
 
 sub clone {
     my $self = shift;
-    $self->{bam} = Bio::DB::Bam->open($self->{bam_path})     if $self->{bam_path};
+    $self->{bam} = Bio::DB::HTS->open($self->{bam_path})     if $self->{bam_path};
     $self->{fai} = $self->new_dna_accessor($self->{fa_path}) if $self->{fa_path};
 }
 
@@ -1575,7 +1575,7 @@ sub fetch {
     
     my $code     = sub {
 	my ($align,$self) = @_;
-	$callback->(Bio::DB::Bam::AlignWrapper->new($align,$self));
+	$callback->(Bio::DB::HTS::AlignWrapper->new($align,$self));
     };
     $self->_fetch($region,$code);
 }
@@ -1595,7 +1595,7 @@ sub pileup {
 	my ($tid,$pos,$pileup) = @_;
 	my $seqid = $refnames->[$tid];
 	my @p = map {
-	      Bio::DB::Bam::PileupWrapper->new($_,$self)
+	      Bio::DB::HTS::PileupWrapper->new($_,$self)
 	      } @$pileup;
 	$callback->($seqid,$pos+1,\@p);
     };
@@ -1791,7 +1791,7 @@ sub features {
 	    $self->reset_read;
 	    my $code = eval "sub {my \$a=shift;$filter;1}";
 	    die $@ if $@;
-	    return Bio::DB::Bam::ReadIterator->new($self,$self->{bam},$code);
+	    return Bio::DB::HTS::ReadIterator->new($self,$self->{bam},$code);
 	}
 
 	# TAM filehandle retrieval is requested
@@ -1834,7 +1834,7 @@ sub features {
 	
     }
 
-    return $iterator ? Bio::DB::Bam::FetchIterator->new(\@result,$self->last_feature_count)
+    return $iterator ? Bio::DB::HTS::FetchIterator->new(\@result,$self->last_feature_count)
 	             : @result;
 }
 
@@ -1933,7 +1933,7 @@ sub _push_features {
     # simple case -- no max specified. Will push onto an array called
     # @result.
 
-    return 'push @result,Bio::DB::Bam::AlignWrapper->new($a,$self)'
+    return 'push @result,Bio::DB::HTS::AlignWrapper->new($a,$self)'
 	unless $max;
 
     $self->{_result_count} = 0;
@@ -1942,9 +1942,9 @@ sub _push_features {
     my $code=<<END;
     my \$count = ++\$self->{_result_count};
     if (\@result < $max) {
-	push \@result,Bio::DB::Bam::AlignWrapper->new(\$a,\$self);
+	push \@result,Bio::DB::HTS::AlignWrapper->new(\$a,\$self);
     } else {
-	\$result[rand \@result] = Bio::DB::Bam::AlignWrapper->new(\$a,\$self) 
+	\$result[rand \@result] = Bio::DB::HTS::AlignWrapper->new(\$a,\$self) 
 	    if rand() < $max/\$count;
     }
 END
@@ -2087,7 +2087,7 @@ sub _segment_search {
 
 sub bam_index {
     my $self = shift;
-    return $self->{bai} ||= Bio::DB::Bam->index($self->{bam_path},$self->autoindex);
+    return $self->{bai} ||= Bio::DB::HTS->index($self->{bam_path},$self->autoindex);
 }
 
 sub _features_fh {
@@ -2110,7 +2110,7 @@ sub tam_fh {
 
 sub max_pileup_cnt { 
     my $self = shift;
-    return Bio::DB::Bam->max_pileup_cnt(@_);
+    return Bio::DB::HTS->max_pileup_cnt(@_);
 }
 
 # return a fragment of code that will be placed in the eval "" filter
@@ -2213,7 +2213,7 @@ sub gff3_string {
     return $gff3;
 }
 
-package Bio::DB::Bam;
+package Bio::DB::HTS;
 
 use File::Spec;
 use Cwd;
@@ -2392,7 +2392,7 @@ reference genome. In this case, modify the db_args line to read:
 
 =head1 SEE ALSO
 
-L<Bio::Perl>, L<Bio::DB::Bam::Alignment>, L<Bio::DB::Bam::Constants>
+L<Bio::Perl>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>
 
 =head1 AUTHOR
 

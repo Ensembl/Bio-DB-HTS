@@ -12,13 +12,13 @@ Bio::DB::HTS::Pileup -- Object passed to pileup() callback
 
 =head1 SYNOPSIS
 
-See L<Bio::DB::Sam/The generic fetch() and pileup() methods> for how
+See L<Bio::DB::HTS/The generic fetch() and pileup() methods> for how
 this object is passed to pileup callbacks.
 
 =head1 DESCRIPTION
 
 A Bio::DB::HTS::Pileup object (or a Bio::DB::HTS::PileupWrapper
-object) is passed to the callback passed to the Bio::DB::Sam->pileup()
+object) is passed to the callback passed to the Bio::DB::HTS->pileup()
 method for each column in a sequence alignment. The only difference
 between the two is that the latter returns the more convenient
 Bio::DB::HTS::AlignWrapper objects in response to the alignment()
@@ -74,7 +74,7 @@ These fields are defined in bam.h but their interpretation is obscure.
 
 =head1 SEE ALSO
 
-L<Bio::Perl>, L<Bio::DB::Sam>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>
+L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>
 
 =head1 AUTHOR
 

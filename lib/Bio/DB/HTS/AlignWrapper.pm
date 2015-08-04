@@ -33,7 +33,7 @@ L<Bio::DB::HTS::Alignment/High-level Bio::DB::HTS::Alignment methods>.
 
 =head1 SEE ALSO
 
-L<Bio::Perl>, L<Bio::DB::Sam>, L<Bio::DB::HTS::Constants>
+L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
 =head1 AUTHOR
 

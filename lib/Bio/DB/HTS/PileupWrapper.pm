@@ -7,7 +7,7 @@ Bio::DB::HTS::PileupWrapper -- Add high-level methods to Bio::DB::HTS::Pileup
 
 =head1 SYNOPSIS
 
-See L<Bio::DB::Sam/The generic fetch() and pileup() methods> for usage of the pileup() method.
+See L<Bio::DB::HTS/The generic fetch() and pileup() methods> for usage of the pileup() method.
 
 =head1 DESCRIPTION
 
@@ -18,7 +18,7 @@ than Bio::DB::HTS::Alignment.
 
 =head1 SEE ALSO
 
-L<Bio::Perl>, L<Bio::DB::Sam>, L<Bio::DB::HTS::Constants>
+L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
 =head1 AUTHOR
 

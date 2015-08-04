@@ -42,7 +42,7 @@ The Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper classes
 together represent an alignment between a sequence read (the "query")
 and a reference sequence (the "target"). Bio::DB::HTS::Alignment
 adheres strictly to the C-level BAM library's definition of a bam1_t*
-and is used in the Bio::DB::Sam low-level API The latter adds
+and is used in the Bio::DB::HTS low-level API The latter adds
 convenience methods that make it similar to a BioPerl Bio::SeqFeatureI
 object. This manual page describes both.
 
@@ -120,7 +120,7 @@ format -1 or +1.
 Returns the B<reference> sequence's DNA across the aligned region. If
 an MD tag is present in the alignment, it will be used preferentially
 to reconstruct the reference sequence. Otherwise the reference DNA
-access object passed to Bio::DB::Sam->new() will be used.
+access object passed to Bio::DB::HTS->new() will be used.
 
 =item $ref_dna        = $align->seq
 
@@ -262,9 +262,9 @@ This is provided for Bio::SeqFeatureI compatibility. Return the string
 Return subfeatures of this alignment. If you have fetched a
 "read_pair" feature, this will be the two mate pair objects (both of
 type Bio::DB::HTS::AlignWrapper). If you have -split_splices set to
-true in the Bio::DB::Sam database, calling get_SeqFeatures() will
+true in the Bio::DB::HTS database, calling get_SeqFeatures() will
 return the components of split alignments. See
-L<Bio::DB::Sam/Bio::DB::Sam Constructor and basic accessors> for an
+L<Bio::DB::HTS/Bio::DB::HTS Constructor and basic accessors> for an
 example of how to use this.
 
 =back
@@ -627,7 +627,7 @@ sub hit { shift->target(@_); }
 
 =head1 SEE ALSO
 
-L<Bio::Perl>, L<Bio::DB::Sam>, L<Bio::DB::HTS::Constants>
+L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
 =head1 AUTHOR
 
