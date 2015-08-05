@@ -38,7 +38,7 @@ typedef bam_hdr_t*      Bio__DB__HTS__Header;
 typedef bam1_t*         Bio__DB__HTS__Alignment;
 typedef hts_idx_t*      Bio__DB__HTS__Index;
 typedef faidx_t*        Bio__DB__HTS__Fai;
-typedef bam_pileup1_t*  Bio__DB__Bam__Pileup;
+typedef bam_pileup1_t*  Bio__DB__HTS__Pileup;
 
 typedef struct {
   SV* callback;
@@ -129,7 +129,7 @@ int invoke_pileup_callback_fun(uint32_t tid,
   av_extend(pileup,n);
   for (i=0;i<n;i++) {
     p = newSV(sizeof(bam_pileup1_t));	
-    sv_setref_pv(p,"Bio::DB::Bam::Pileup",(void*) &pl[i]);
+    sv_setref_pv(p,"Bio::DB::HTS::Pileup",(void*) &pl[i]);
     av_push(pileup,p);
   } 
   
@@ -790,11 +790,11 @@ bam_DESTROY(bamh)
 
 
 
-MODULE = Bio::DB::HTS PACKAGE = Bio::DB::Bam::Pileup PREFIX=pl_
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Pileup PREFIX=pl_
 
 int
 pl_qpos(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->qpos;
   OUTPUT:
@@ -802,7 +802,7 @@ pl_qpos(pl)
 
 int
 pl_pos(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->qpos+1;
   OUTPUT:
@@ -810,7 +810,7 @@ pl_pos(pl)
 
 int
 pl_indel(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->indel;
   OUTPUT:
@@ -818,7 +818,7 @@ pl_indel(pl)
 
 int
 pl_level(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->level;
   OUTPUT:
@@ -826,7 +826,7 @@ pl_level(pl)
 
 int
 pl_is_del(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_del;
   OUTPUT:
@@ -834,7 +834,7 @@ pl_is_del(pl)
 
 int
 pl_is_refskip(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_refskip;
   OUTPUT:
@@ -842,7 +842,7 @@ pl_is_refskip(pl)
 
 int
 pl_is_head(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_head;
   OUTPUT:
@@ -850,7 +850,7 @@ pl_is_head(pl)
 
 int
 pl_is_tail(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_tail;
   OUTPUT:
@@ -858,7 +858,7 @@ pl_is_tail(pl)
 
 Bio::DB::HTS::Alignment
 pl_b(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = bam_dup1(pl->b);
   OUTPUT:
@@ -866,7 +866,7 @@ pl_b(pl)
 
 Bio::DB::HTS::Alignment
 pl_alignment(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = bam_dup1(pl->b);
   OUTPUT:
