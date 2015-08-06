@@ -179,6 +179,49 @@ int coverage_from_pileup_fun (uint32_t tid,
 }
 
 
+/**
+   From bam_aux.c in samtools. Needed to allow pileup function to work.
+*/
+int bam_parse_region(bam_header_t *header, const char *str, int *ref_id, int *beg, int *end)
+{
+    const char *name_lim = hts_parse_reg(str, beg, end);
+    if (name_lim) {
+        char *name = malloc(name_lim - str + 1);
+        memcpy(name, str, name_lim - str);
+        name[name_lim - str] = '\0';
+        *ref_id = bam_name2id(header, name);
+        free(name);
+    }
+    else {
+        // not parsable as a region, but possibly a sequence named "foo:a"
+        *ref_id = bam_name2id(header, str);
+        *beg = 0; *end = INT_MAX;
+    }
+    if (*ref_id == -1) return -1;
+    return *beg <= *end? 0 : -1;
+}
+
+/**
+   From bam.c in samtools
+*/
+void bam_view1(const bam_header_t *header, const bam1_t *b)
+{
+        char *s = bam_format1(header, b);
+        puts(s);
+        free(s);
+}
+
+
+char *bam_format1(const bam_header_t *header, const bam1_t *b)
+{
+    kstring_t str;
+    str.l = str.m = 0; str.s = NULL;
+    sam_format1(header, b, &str);
+    return str.s;
+}
+
+
+
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Fai PREFIX=fai_
 
@@ -779,6 +822,38 @@ bam_text(bamh, ...)
   OUTPUT:
     RETVAL
 
+
+void
+bam_parse_region(bamh,region)
+    Bio::DB::Bam::Header bamh
+    char*            region
+    PROTOTYPE: $
+    PREINIT:
+       int seqid,start,end;
+    PPCODE:
+    {
+      bam_parse_region(bamh,
+		       region,
+		       &seqid,
+		       &start,
+		       &end);
+      if (seqid < 0)
+	XSRETURN_EMPTY;
+      else {
+	EXTEND(sp,3);
+	PUSHs(sv_2mortal(newSViv(seqid)));
+	PUSHs(sv_2mortal(newSViv(start)));
+	PUSHs(sv_2mortal(newSViv(end)));
+      }
+    }
+
+void
+bam_view1(bamh,alignment)
+     Bio::DB::Bam::Header     bamh
+     Bio::DB::Bam::Alignment  alignment
+     PROTOTYPE: $$
+     CODE:
+       bam_view1(bamh,alignment);
 
 
 void
