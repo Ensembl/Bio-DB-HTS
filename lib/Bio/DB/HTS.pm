@@ -204,10 +204,8 @@ low-level API.
 The classes you will be interacting with in the low-level API are as
 follows:
 
- * Bio::DB::Tam            -- Methods that read and write TAM (text SAM) files.
- * Bio::DB::HTS            -- Methods that read and write BAM (binary SAM) files.
+ * Bio::DB::HTS            -- Methods that read and write SAM, BAM and CRAM files.
  * Bio::DB::HTS::Header    -- Methods for manipulating the BAM file header.
- * Bio::DB::HTS::Index     -- Methods for retrieving data from indexed BAM files.
  * Bio::DB::HTS::Alignment -- Methods for manipulating alignment data.
  * Bio::DB::HTS::Pileup    -- Methods for manipulating the pileup data structure.
  * Bio::DB::HTS::Fai       -- Methods for creating and reading from indexed Fasta
@@ -1039,18 +1037,6 @@ mode, write the header to the file. If the write fails the process
 will be terminated at the C layer. The result code is (currently)
 always zero.
 
-=item $integer = $bam->tell()
-
-Return the current position of the BAM file read/write pointer.
-
-=item $bam->seek($integer,$pos)
-
-Set the current position of the BAM file read/write pointer. $pos is
-one of SEEK_SET, SEEK_CUR, SEEK_END. These constants can be obtained
-from the Fcntl module by importing the ":seek" group:
-
- use Fcntl ':seek';
-
 =item $alignment = $bam->read1()
 
 Read one alignment from the BAM file and return it as a
@@ -1241,9 +1227,8 @@ specifying that you want an unlimited cap.
 The Bio::DB::HTS::Header object contains information regarding the
 reference sequence(s) used to construct the corresponding TAM or BAM
 file. It is most frequently used to translate between numeric target
-IDs and human-readable seq_ids. Headers can be created either from
-reading from a .fai file with the Bio::DB::Tam->header_read2() method,
-or by reading from a BAM file using Bio::DB::HTS->header(). You can
+IDs and human-readable seq_ids. Headers can be created by reading 
+from a BAM file using Bio::DB::HTS->header(). You can
 also create header objects from scratch, although there is not much
 that you can do with such objects at this point.
 
