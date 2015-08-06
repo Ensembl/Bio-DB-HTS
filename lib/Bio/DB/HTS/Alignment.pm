@@ -279,8 +279,8 @@ API.
 
 =item $align = Bio::DB::HTS::Alignment->new
 
-Create a new, empty alignment object. This is usually only needed when
-iterating through a TAM file using Bio::DB::Tam->read1().
+Create a new, empty alignment object. This is usually needed when
+iterating through a HTS file using Bio::DB::HTS->read1().
 
 =item $tid = $align->tid( [$new_tid] )
 
@@ -442,6 +442,7 @@ use Bio::DB::HTS::Target;
 use Bio::DB::HTS::Constants;
 
 sub each_tag_value { shift->get_tag_values(@_)  }
+
 
 sub get_tag_values {
     my $self = shift;
