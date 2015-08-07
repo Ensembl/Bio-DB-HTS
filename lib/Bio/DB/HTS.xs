@@ -182,7 +182,7 @@ int coverage_from_pileup_fun (uint32_t tid,
 /**
    From bam_aux.c in samtools. Needed to allow pileup function to work.
 */
-int bam_parse_region(bam_header_t *header, const char *str, int *ref_id, int *beg, int *end)
+int bam_parse_region(bam_hdr_t *header, const char *str, int *ref_id, int *beg, int *end)
 {
     const char *name_lim = hts_parse_reg(str, beg, end);
     if (name_lim) {
@@ -204,7 +204,16 @@ int bam_parse_region(bam_header_t *header, const char *str, int *ref_id, int *be
 /**
    From bam.c in samtools
 */
-void bam_view1(const bam_header_t *header, const bam1_t *b)
+char *bam_format1(const bam_hdr_t *header, const bam1_t *b)
+{
+    kstring_t str;
+    str.l = str.m = 0; str.s = NULL;
+    sam_format1(header, b, &str);
+    return str.s;
+}
+
+
+void bam_view1(const bam_hdr_t *header, const bam1_t *b)
 {
         char *s = bam_format1(header, b);
         puts(s);
@@ -212,13 +221,6 @@ void bam_view1(const bam_header_t *header, const bam1_t *b)
 }
 
 
-char *bam_format1(const bam_header_t *header, const bam1_t *b)
-{
-    kstring_t str;
-    str.l = str.m = 0; str.s = NULL;
-    sam_format1(header, b, &str);
-    return str.s;
-}
 
 
 
@@ -825,7 +827,7 @@ bam_text(bamh, ...)
 
 void
 bam_parse_region(bamh,region)
-    Bio::DB::Bam::Header bamh
+    Bio::DB::HTS::Header bamh
     char*            region
     PROTOTYPE: $
     PREINIT:
@@ -849,8 +851,8 @@ bam_parse_region(bamh,region)
 
 void
 bam_view1(bamh,alignment)
-     Bio::DB::Bam::Header     bamh
-     Bio::DB::Bam::Alignment  alignment
+     Bio::DB::HTS::Header     bamh
+     Bio::DB::HTS::Alignment  alignment
      PROTOTYPE: $$
      CODE:
        bam_view1(bamh,alignment);
