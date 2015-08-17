@@ -1417,7 +1417,9 @@ sub clone {
     $self->{fai} = $self->new_dna_accessor($self->{fa_path}) if $self->{fa_path};
 }
 
-sub header {
+sub header
+{
+    print("HEADER FUNCTION\n") ;
     my $self = shift;
     my $b = $self->{bam} ;
     return $self->{header} ||= $b->header_read();
@@ -1545,10 +1547,12 @@ sub _fetch {
     my $self     = shift;
     my $region   = shift;
     my $callback = shift;
-
-    my $header              = $self->{bam}->header;
+    print("_FETCH FUNCTION\n" ) ;
+    print("region=$region\n") ;
+    print("callback=$callback\n");
+    my $header              = $self->{bam}->header_read;
     $region                 =~ s/\.\.|,/-/;
-
+    print("region=$region\n") ;
     my ($seqid,$start,$end) = $header->parse_region($region);
 
     return unless defined $seqid;
@@ -1727,8 +1731,8 @@ sub types {
 
 sub features
 {
+    print("FEATURES in HTS.pm\n") ;
     my $self = shift;
-
     my %args;
     if (defined $_[0] && $_[0] !~ /^-/)
     {
@@ -1749,7 +1753,6 @@ sub features
     my $filter    = $args{-filter};
     my $max       = $args{-max_features};
 
-    print("FEATURES in HTS.pm\n") ;
     print("positional info=$seqid:$start:$end\n") ;
     $types        = [$types] unless ref $types;
     $types        = [$args{-class}] if !@$types && defined $args{-class};
@@ -1809,13 +1812,15 @@ sub features
     print( "Apparantly we will now try a little magic\n" ) ;
     # otherwise we're going to do a little magic
     my ($features,@result);
+    print("types:@types\n") ;
     for my $t (@types)
     {
+      print( "type:$t\n" ) ;
       if ($t =~ /^(match|read_pair)/)
       {
         # fetch the features if type is 'match' or 'read_pair'
         $features = $self->_filter_features($seqid,$start,$end,$filter,undef,$max);
-
+        print("filter features returned....\n") ;
         # for "match" just return the alignments
         if ($t =~ /^(match)/)
         {
@@ -1892,11 +1897,12 @@ sub _filter_features {
     my @result;
     my $action = $do_tam_fh ? '\$self->header->view1($a)'
                             : $self->_push_features($max_features);
-
+    print( "filter_features:action=$action\n" ) ;
     my $user_code;
-    if (ref ($filter) eq 'CODE') {
-	$user_code = $filter;
-	$filter = '';
+    if (ref ($filter) eq 'CODE')
+    {
+      $user_code = $filter;
+      $filter = '';
     }
 
     my $callback = defined($seqid) ? <<INDEXED : <<NONINDEXED;
@@ -1917,17 +1923,23 @@ NONINDEXED
 
     my $code = eval $callback;
     die $@ if $@;
-
-    if ($user_code) {
-	my $new_callback = sub {
-	    my $a = shift;
-	    $code->($a) if $user_code->($a);
-	};
-	$self->_features($seqid,$start,$end,$new_callback);
-    } else {
-	$self->_features($seqid,$start,$end,$code);
+    print( "filter_features:callback=$callback\n" ) ;
+    print( "filter_features:user_code=$user_code\n" ) ;
+    if ($user_code)
+    {
+      my $new_callback = sub {
+        my $a = shift;
+        $code->($a) if $user_code->($a);
+      };
+      print( "filter_features:new_callback=$new_callback\n" ) ;
+      $self->_features($seqid,$start,$end,$new_callback);
     }
-
+    else
+    {
+      print( "filter_features:code=$code\n" ) ;
+      print("positional info=$seqid:$start:$end\n") ;
+      $self->_features($seqid,$start,$end,$code);
+    }
     return \@result;
 }
 
@@ -1958,24 +1970,29 @@ END
 
 sub last_feature_count { shift->{_result_count}||0 }
 
-sub _features {
+sub _features
+{
     my $self = shift;
     my ($seqid,$start,$end,$callback) = @_;
-
-    if (defined $seqid) {
- 	my $region = $seqid;
- 	if (defined $start) {
- 	    $region   .= ":$start";
- 	    $region   .= "-$end"   if defined $end;
- 	}
- 	$self->_fetch($region,$callback);
+    print("_FEATURES_ function entered\n") ;
+    print("positional info=$seqid:$start:$end\n") ;
+    if (defined $seqid)
+    {
+      my $region = $seqid;
+      if (defined $start)
+      {
+        $region   .= ":$start";
+        $region   .= "-$end"   if defined $end;
+      }
+      $self->_fetch($region,$callback);
     }
-
-    else {
-	$self->reset_read;
-	while (my $b = $self->{bam}->read1) {
-	    $callback->($b);
- 	}
+    else
+    {
+      $self->reset_read;
+      while (my $b = $self->{bam}->read1)
+      {
+        $callback->($b);
+      }
     }
 }
 
