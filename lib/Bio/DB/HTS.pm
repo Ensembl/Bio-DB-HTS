@@ -30,7 +30,7 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
     my $paired = $a->get_tag_values('PAIRED');
 
     # where does the alignment start in the query sequence
-    my $query_start = $a->query->start;     
+    my $query_start = $a->query->start;
     my $query_end   = $a->query->end;
 
     my $ref_dna   = $a->dna;        # reference sequence bases
@@ -111,7 +111,7 @@ The high-level API provides access to up to four feature "types":
    reference sequence.
 
  * "read_pair": Paired alignments; a single composite
-   feature that contains two subfeatures for the alignments of each 
+   feature that contains two subfeatures for the alignments of each
    of the mates in a mate pair.
 
  * "coverage": A feature that spans a region of interest that contains
@@ -136,7 +136,7 @@ fetches the "FIRST_MATE" tag:
 
 The Bio::SeqFeatureI interface has been extended to retrieve all flags
 as a compact human-readable string, and to return the CIGAR alignment
-in a variety of formats.  
+in a variety of formats.
 
 B<Split alignments>, such as reads that cover introns, are dealt with
 in one of two ways. The default is to leave split alignments alone:
@@ -187,7 +187,7 @@ You may encounter other classes as well. These include:
  * Bio::DB::HTS::AlignWrapper  -- An alignment helper object that adds split
                                   alignment functionality. See Bio::DB::HTS::Alignment
                                   for the documentation on using it.
- * Bio::DB::HTS::ReadIterator  -- An iterator that mediates the one-feature-at-a-time 
+ * Bio::DB::HTS::ReadIterator  -- An iterator that mediates the one-feature-at-a-time
                                   retrieval mechanism.
  * Bio::DB::HTS::FetchIterator -- Another iterator for feature-at-a-time retrieval.
 
@@ -242,7 +242,7 @@ follows:
                    ($seq_id,$start,$end).
 
   -expand_flags  A boolean value. If true then the standard
-                   alignment flags will be broken out as 
+                   alignment flags will be broken out as
                    individual tags such as 'M_UNMAPPED' (default
                    false).
 
@@ -265,7 +265,7 @@ follows:
                    earlier than the BAM file.
 
 An example of a typical new() constructor invocation is:
- 
+
   $sam = Bio::DB::HTS->new(-fasta => '/home/projects/genomes/hu17.fa',
                            -bam   => '/home/projects/alignments/ej88.bam',
                            -expand_flags  => 1,
@@ -326,7 +326,7 @@ file. You can manipulate the header using the low-level API.
 
 =item $hts_path = $sam->hts_path
 
-Return the path of the bam file used to create the sam object. This 
+Return the path of the bam file used to create the sam object. This
 makes the sam object more portable.
 
 =item $bam    = $sam->bam
@@ -349,7 +349,7 @@ trappable via an eval {}.
 
 =item $bai    = $sam->bam_index
 
-Return the Bio::DB::HTS::Index object associated with the BAM file. 
+Return the Bio::DB::HTS::Index object associated with the BAM file.
 
 B<The BAM file index will be built automatically for you if it does
 not already exist.> In addition, if the BAM file is not already sorted
@@ -478,7 +478,7 @@ Bio::DB::HTS->features() method for the full list of options. Here are
 some typical examples:
 
  # get all the overlapping alignments
- @all_alignments = $segment->features;  
+ @all_alignments = $segment->features;
 
  # get an iterator across the alignments
  my $iterator     = $segment->features(-iterator=>1);
@@ -545,7 +545,7 @@ option list selected from the following list of options:
   ------         -------------
 
   -type          Filter on features of a given type. You may provide
-  		 either a scalar typename, or a reference to an 
+  		 either a scalar typename, or a reference to an
                  array of desired feature types. Valid types are
                  "match", "read_pair", "coverage" and "chromosome."
 		 See below for a full explanation of feature types.
@@ -565,7 +565,7 @@ option list selected from the following list of options:
 
   -attributes    The same as -flags, for compatibility with other
   -tags          APIs.
- 
+
   -filter        Filter on features with a coderef. The coderef will
                  receive a single argument consisting of the feature
                  and should return true to keep the feature, or false
@@ -578,7 +578,7 @@ option list selected from the following list of options:
 		 matching features remain.
 
   -fh            Instead of returning a list of features, return a
-                 filehandle. Read from the filehandle to retrieve 
+                 filehandle. Read from the filehandle to retrieve
                  each of the results in TAM format, one alignment
                  per line read. This only works for features of type
                  "match."
@@ -599,7 +599,7 @@ and merge together mate pairs. Fetching this type of feature will
 yield a series of Bio::SeqFeatureI objects, each as long as the total
 distance on the reference sequence spanned by the mate pairs. The
 top-level feature is of type Bio::SeqFeature::Lite; it contains two
-Bio::DB::HTS::AlignWrapper subparts. 
+Bio::DB::HTS::AlignWrapper subparts.
 
 Call get_SeqFeatures() to get the two individual reads. Example:
 
@@ -609,7 +609,7 @@ Call get_SeqFeatures() to get the two individual reads. Example:
  my @ends     = $p->get_SeqFeatures;
  my $left     = $ends[0]->start;
  my $right    = $ends[1]->end;
- 
+
 B<coverage>. The "coverage" type causes the sam interface to calculate
 coverage across the designated region. It only works properly if
 accompanied by the desired location of the coverage graph; -seq_id is
@@ -853,7 +853,7 @@ methods:
 
  $pileup->alignment  The alignment at this level (a
                      Bio::DB::HTS::AlignWrapper object).
- 
+
  $pileup->qpos   The position of the read base at the pileup site,
                  in 0-based coordinates.
 
@@ -905,7 +905,7 @@ The Samtools library caps pileups at a set level, defaulting to
 8000. The callback will not be invoked on a single position more than
 the level set by the cap, even if there are more reads. Called with no
 arguments, this method returns the current cap value. Called with a
-numeric argument, it changes the cap. There is currently no way to 
+numeric argument, it changes the cap. There is currently no way to
 specify an unlimited cap.
 
 This method can be called as an instance method or a class method.
@@ -1063,7 +1063,7 @@ new sorted BAM file. Arguments are as follows:
  $path         Path to the BAM file
 
  $prefix       Prefix to use for the new sorted file. For example,
-               passing "foo" will result in a BAM file named 
+               passing "foo" will result in a BAM file named
 	       "foo.bam".
 
  $max_mem      Maximum core memory to use for the sort. If the sort
@@ -1134,7 +1134,7 @@ Arguments:
                an appropriate opened Bio::DB::HTS::Header object.
 
  $start        The start and end positions of the desired range on
-               the reference sequence given by $tid, in 0-based 
+               the reference sequence given by $tid, in 0-based
  $end          coordinates. Like the $tid, these can be obtained from
                $header->parse_region().
 
@@ -1174,7 +1174,7 @@ are:
                an appropriate opened Bio::DB::HTS::Header object.
 
  $start        The start and end positions of the desired range on
-               the reference sequence given by $tid, in 0-based 
+               the reference sequence given by $tid, in 0-based
  $end          coordinates. Like the $tid, these can be obtained from
                $header->parse_region().
 
@@ -1227,7 +1227,7 @@ specifying that you want an unlimited cap.
 The Bio::DB::HTS::Header object contains information regarding the
 reference sequence(s) used to construct the corresponding TAM or BAM
 file. It is most frequently used to translate between numeric target
-IDs and human-readable seq_ids. Headers can be created by reading 
+IDs and human-readable seq_ids. Headers can be created by reading
 from a BAM file using Bio::DB::HTS->header(). You can
 also create header objects from scratch, although there is not much
 that you can do with such objects at this point.
@@ -1377,7 +1377,7 @@ sub new {
     my $force_refseq  = $args{-force_refseq};
 
     # file existence checks
-    unless ($class->is_remote($hts_path)) 
+    unless ($class->is_remote($hts_path))
     {
 	    -e $hts_path or croak "$hts_path does not exist";
 	    -r _ or croak "is not readable";
@@ -1453,7 +1453,7 @@ sub new_dna_accessor {
 sub can_do_seq {
     my $self = shift;
     my $obj  = shift;
-    return 
+    return
 	UNIVERSAL::can($obj,'seq') ||
 	UNIVERSAL::can($obj,'fetch_sequence');
 }
@@ -1463,7 +1463,7 @@ sub seq {
     my $self = shift;
     my ($seqid,$start,$end) = @_;
     my $fai = $self->fai or return 'N' x ($end-$start+1);
-    return $fai->can('seq')            ? $fai->seq($seqid,$start,$end) 
+    return $fai->can('seq')            ? $fai->seq($seqid,$start,$end)
 	  :$fai->can('fetch_sequence') ? $fai->fetch_sequence($seqid,$start,$end)
 	  :'N' x ($end-$start+1);
 }
@@ -1560,7 +1560,7 @@ sub fetch {
     my $self     = shift;
     my $region   = shift;
     my $callback = shift;
-    
+
     my $code     = sub {
 	my ($align,$self) = @_;
 	$callback->(Bio::DB::HTS::AlignWrapper->new($align,$self));
@@ -1647,7 +1647,7 @@ sub segment {
     return Bio::DB::HTS::Segment->new($self,$seqid,$start,$end);
 }
 
-sub get_features_by_location 
+sub get_features_by_location
 {
   my $self = shift;
   my %args;
@@ -1655,9 +1655,9 @@ sub get_features_by_location
   if ($_[0] =~ /^-/)
   { # named args
     %args = @_;
-  } 
-  else 
-  {             
+  }
+  else
+  {
     # positional args
     $args{-seq_id} = shift;
     $args{-start}  = shift;
@@ -1725,16 +1725,16 @@ sub types {
     return qw(match read_pair coverage region chromosome);
 }
 
-sub features 
+sub features
 {
     my $self = shift;
 
     my %args;
-    if (defined $_[0] && $_[0] !~ /^-/) 
+    if (defined $_[0] && $_[0] !~ /^-/)
     {
       $args{-type} = \@_;
-    } 
-    else 
+    }
+    else
     {
       %args = @_;
     }
@@ -1758,13 +1758,13 @@ sub features
     # we do some special casing to retrieve target (reference) sequences
     # if they are requested
     if (defined($args{-name})
-        && (!@$types || $types->[0]=~/region|chromosome/) 
-        && !defined $seqid) 
+        && (!@$types || $types->[0]=~/region|chromosome/)
+        && !defined $seqid)
     {
       my @results = $self->_segment_search(lc $args{-name});
       return @results if @results;
-    } 
-    elsif (@$types && $types->[0] =~ /region|chromosome/) 
+    }
+    elsif (@$types && $types->[0] =~ /region|chromosome/)
     {
       return map {$self->segment($_)} $self->seq_ids;
     }
@@ -1777,7 +1777,7 @@ sub features
     # the filter is intended to be inserted into a closure
     # it will return undef from the closure unless the filter
     # criteria are satisfied
-    if (!$filter) 
+    if (!$filter)
     {
       $filter = '';
       $filter   .= $self->_filter_by_name(lc $args{-name})
@@ -1788,11 +1788,11 @@ sub features
     print( "filter=$filter\n" ) ;
 
     # Special cases for unmunged data
-    if (@types == 1 && $types[0] =~ /^match/) 
+    if (@types == 1 && $types[0] =~ /^match/)
     {
       # if iterator is requested, and no indexing is possible,
       # then we directly iterate through the database using read1()
-      if ($iterator && !$use_index) 
+      if ($iterator && !$use_index)
       {
         $self->reset_read;
         my $code = eval "sub {my \$a=shift;$filter;1}";
@@ -1800,7 +1800,7 @@ sub features
         return Bio::DB::HTS::ReadIterator->new($self,$self->{bam},$code);
       }
       # TAM filehandle retrieval is requested
-      elsif ($fh) 
+      elsif ($fh)
       {
         return $self->_features_fh($seqid,$start,$end,$filter);
       }
@@ -1809,20 +1809,20 @@ sub features
     print( "Apparantly we will now try a little magic\n" ) ;
     # otherwise we're going to do a little magic
     my ($features,@result);
-    for my $t (@types) 
+    for my $t (@types)
     {
-      if ($t =~ /^(match|read_pair)/) 
+      if ($t =~ /^(match|read_pair)/)
       {
         # fetch the features if type is 'match' or 'read_pair'
         $features = $self->_filter_features($seqid,$start,$end,$filter,undef,$max);
 
         # for "match" just return the alignments
-        if ($t =~ /^(match)/) 
+        if ($t =~ /^(match)/)
         {
           push @result,@$features;
-        } 
+        }
         # otherwise aggregate mate pairs into two-level features
-        elsif ($t =~ /^read_pair/) 
+        elsif ($t =~ /^read_pair/)
         {
           $self->_build_mates($features,\@result);
         }
@@ -1833,7 +1833,7 @@ sub features
       # specify coverage:N, to create a map of N bins
       # units are coverage per bp
       # resulting array will be stored in the "coverage" attribute
-      if ($t =~ /^coverage:?(\d*)/) 
+      if ($t =~ /^coverage:?(\d*)/)
       {
         my $bins = $1;
         push @result,$self->_coverage($seqid,$start,$end,$bins,$filter);
@@ -1847,7 +1847,7 @@ sub coverage2BedGraph {
     my $self = shift;
     my $fh   = shift;
     $fh ||= \*STDOUT;
-    
+
     my $header  = $self->header;
     my $index   = $self->bam_index;
     my $seqids  = $header->target_name;
@@ -1857,10 +1857,10 @@ sub coverage2BedGraph {
     for my $tid (0..$header->n_targets-1) {
 	my $seqid = $seqids->[$tid];
 	my $len   = $lengths->[$tid];
-	
+
 	my $sec_start = -1;
 	my $last_val = -1;
-	
+
 	for (my $start=0;$start <= $len;$start += DUMP_INTERVAL) {
 	    my $end = $start+DUMP_INTERVAL;
 	    $end    = $len if $end > $len;
@@ -1949,7 +1949,7 @@ sub _push_features {
     if (\@result < $max) {
 	push \@result,Bio::DB::HTS::AlignWrapper->new(\$a,\$self);
     } else {
-	\$result[rand \@result] = Bio::DB::HTS::AlignWrapper->new(\$a,\$self) 
+	\$result[rand \@result] = Bio::DB::HTS::AlignWrapper->new(\$a,\$self)
 	    if rand() < $max/\$count;
     }
 END
@@ -1964,12 +1964,12 @@ sub _features {
 
     if (defined $seqid) {
  	my $region = $seqid;
- 	if (defined $start) { 
+ 	if (defined $start) {
  	    $region   .= ":$start";
  	    $region   .= "-$end"   if defined $end;
  	}
  	$self->_fetch($region,$callback);
-    } 
+    }
 
     else {
 	$self->reset_read;
@@ -2038,13 +2038,13 @@ sub _coverage {
     my ($seqid,$start,$end,$bins,$filter) = @_;
 
     # Currently filter is ignored. In reality, we should
-    # turn filter into a callback and invoke it on each 
+    # turn filter into a callback and invoke it on each
     # position in the pileup.
     croak "cannot calculate coverage unless a -seq_id is provided"
 	unless defined $seqid;
 
     my $region = $seqid;
-    if (defined $start) { 
+    if (defined $start) {
 	$region   .= ":$start";
 	$region   .= "-$end"   if defined $end;
     }
@@ -2105,7 +2105,7 @@ sub _features_fh {
 	exit 0;
     }
     return $fh;
-    
+
 }
 
 sub tam_fh {
@@ -2113,7 +2113,7 @@ sub tam_fh {
     return $self->features(-fh=>1);
 }
 
-sub max_pileup_cnt { 
+sub max_pileup_cnt {
     my $self = shift;
     return Bio::DB::HTS->max_pileup_cnt(@_);
 }
@@ -2142,8 +2142,8 @@ sub _filter_by_attribute {
     for my $tag (keys %$attributes) {
 	$result .= "my \$value = lc \$a->get_tag_values('$tag');\n";
 	$result .= "return unless defined \$value;\n";
-	my @comps = ref $attributes->{$tag} eq 'ARRAY' 
-	    ? @{$attributes->{$tag}} 
+	my @comps = ref $attributes->{$tag} eq 'ARRAY'
+	    ? @{$attributes->{$tag}}
 	    : $attributes->{$tag};
 	my @matches;
 	for my $c (@comps) {
@@ -2253,7 +2253,7 @@ sub reindex {
 
     if ($result == 0) { # in child
 	# dup stderr to stdout so that we can intercept messages from library
-	open STDERR,">&STDOUT";  
+	open STDERR,">&STDOUT";
 	$self->index_build($path);
 	exit 0;
     }
@@ -2413,4 +2413,3 @@ License 2.0.  Refer to LICENSE for the full license text. In addition,
 please see DISCLAIMER.txt for disclaimers of warranty.
 
 =cut
-
