@@ -79,7 +79,7 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
 
 =head1 DESCRIPTION
 
-This module provides a Perl interface to the libbam library for
+This module provides a Perl interface to the libhts library for
 indexed and unindexed SAM/BAM sequence alignment databases. It
 provides support for retrieving information on individual alignments,
 read pairs, and alignment coverage information across large
@@ -324,7 +324,7 @@ B<subsequently.>
 Return the Bio::DB::HTS::Header object associated with the BAM
 file. You can manipulate the header using the low-level API.
 
-=item $bam_path = $sam->bam_path
+=item $hts_path = $sam->hts_path
 
 Return the path of the bam file used to create the sam object. This 
 makes the sam object more portable.
@@ -1369,7 +1369,7 @@ use constant DUMP_INTERVAL => 1_000_000;
 sub new {
     my $class         = shift;
     my %args          = $_[0] =~ /^-/ ? @_ : (-bam=>shift);
-    my $bam_path      = $args{-bam}   or croak "-bam argument required";
+    my $hts_path      = $args{-bam}   or croak "-bam argument required";
     my $fa_path       = $args{-fasta};
     my $expand_flags  = $args{-expand_flags};
     my $split_splices = $args{-split} || $args{-split_splices};
@@ -1377,28 +1377,28 @@ sub new {
     my $force_refseq  = $args{-force_refseq};
 
     # file existence checks
-    unless ($class->is_remote($bam_path)) {
-	-e $bam_path or croak "$bam_path does not exist";
+    unless ($class->is_remote($hts_path)) {
+	-e $hts_path or croak "$hts_path does not exist";
 	-r _  or croak "is not readable";
     }
 
-    my $bam = Bio::DB::HTS->open($bam_path)      or croak "$bam_path open: $!";
+    my $bam = Bio::DB::HTS->open($hts_path) or croak "$hts_path open: $!";
 
     my $fai = $class->new_dna_accessor($fa_path) if $fa_path;
 
-    my $self =  bless {
-	fai           => $fai,
-	bam           => $bam,
-	bam_path      => $bam_path,
-	fa_path       => $fa_path,
-	expand_flags  => $expand_flags,
-	split_splices => $split_splices,
-	autoindex     => $autoindex,
-	force_refseq  => $force_refseq,
+    my $self =  bless
+    {
+	    fai           => $fai,
+      bam           => $bam,
+      hts_path      => $hts_path,
+      fa_path       => $fa_path,
+      expand_flags  => $expand_flags,
+      split_splices => $split_splices,
+      autoindex     => $autoindex,
+      force_refseq  => $force_refseq,
     },ref $class || $class;
-    $self->header;  # catch it
-
-    return $self;
+  $self->header;  # catch it
+  return $self;
 }
 
 sub bam { shift->{bam} }
@@ -1411,18 +1411,19 @@ sub is_remote {
 
 sub clone {
     my $self = shift;
-    $self->{bam} = Bio::DB::HTS->open($self->{bam_path})     if $self->{bam_path};
+    $self->{bam} = Bio::DB::HTS->open($self->{hts_path})     if $self->{hts_path};
     $self->{fai} = $self->new_dna_accessor($self->{fa_path}) if $self->{fa_path};
 }
 
 sub header {
     my $self = shift;
-    return $self->{header} ||= $self->{bam}->header;
+    my $b = $self->{bam} ;
+    return $self->{header} ||= $b->header_read;
 }
 
-sub bam_path {
+sub hts_path {
     my $self = shift;
-    return $self->{bam_path};
+    return $self->{hts_path};
 }
 
 sub fai { shift->{fai} }
@@ -2072,7 +2073,7 @@ sub _segment_search {
 
 sub bam_index {
     my $self = shift;
-    return $self->{bai} ||= Bio::DB::HTS->index($self->{bam_path},$self->autoindex);
+    return $self->{bai} ||= Bio::DB::HTS->index($self->{hts_path},$self->autoindex);
 }
 
 sub _features_fh {
