@@ -104,9 +104,9 @@ int bam_fetch_fun (const bam1_t *b, void *data) {
   return 1;
 }
 
-int invoke_pileup_callback_fun(uint32_t tid, 
-			       uint32_t pos, 
-			       int n, 
+int invoke_pileup_callback_fun(uint32_t tid,
+			       uint32_t pos,
+			       int n,
 			       const bam_pileup1_t *pl,
 			       void *data) {
   dSP;
@@ -128,11 +128,11 @@ int invoke_pileup_callback_fun(uint32_t tid,
   pileup = newAV();
   av_extend(pileup,n);
   for (i=0;i<n;i++) {
-    p = newSV(sizeof(bam_pileup1_t));	
+    p = newSV(sizeof(bam_pileup1_t));
     sv_setref_pv(p,"Bio::DB::HTS::Pileup",(void*) &pl[i]);
     av_push(pileup,p);
-  } 
-  
+  }
+
   /* set up subroutine stack for the call */
   ENTER;
   SAVETMPS;
@@ -151,10 +151,10 @@ int invoke_pileup_callback_fun(uint32_t tid,
   LEAVE;
 }
 
-int coverage_from_pileup_fun (uint32_t tid, 
-			      uint32_t pos, 
-			      int n, 
-			      const bam_pileup1_t *pl, 
+int coverage_from_pileup_fun (uint32_t tid,
+			      uint32_t pos,
+			      int n,
+			      const bam_pileup1_t *pl,
 			      void *data) {
   coverage_graph_ptr  cgp;
   int                 bin;
@@ -337,13 +337,19 @@ hts_header_write(hts,header)
       RETVAL
 
 
-int
+Bio::DB::HTS::Alignment
 hts_read1(htsfile,header,alignment)
     Bio::DB::HTS            htsfile
     Bio::DB::HTS::Header    header
-    Bio::DB::HTS::Alignment alignment
+  PREINIT:
+    bam1_t *alignment;
     CODE:
-       RETVAL = sam_read1(htsfile,header,alignment);
+       alignment = bam_init1();
+       if (sam_read1(htsfile,header,alignment) >= 0) {
+         RETVAL = alignment ;
+       }
+       else
+         XSRETURN_EMPTY;
     OUTPUT:
        RETVAL
 
@@ -395,7 +401,7 @@ PROTOTYPE: $
 CODE:
    RETVAL=bam_endpos(b);
 OUTPUT:
-   RETVAL    
+   RETVAL
 
 int
 bama_cigar2qlen(b)
@@ -404,7 +410,7 @@ PROTOTYPE: $
 CODE:
    RETVAL=bam_cigar2qlen(b->core.n_cigar,bam_get_cigar(b));
 OUTPUT:
-   RETVAL    
+   RETVAL
 
 int
 bama_qual(b,...)
@@ -531,15 +537,15 @@ CODE:
 
    int left  = sizeof(str) - strlen(str);
    while (left > 0 && (s < b->data + b->l_data)) {
-        char* d   = str+strlen(str); 
+        char* d   = str+strlen(str);
 
-	key[0] = s[0]; 
+	key[0] = s[0];
 	key[1] = s[1];
  	left -= snprintf(d, left, "%c%c:", key[0], key[1]);
 
 	d    += 3;
 	s    += 2;
-	type = *s++; 
+	type = *s++;
 
 	if (left <= 0) continue;
 
@@ -552,7 +558,7 @@ CODE:
 	else if (type == 'i') { left -= snprintf(d, left, "i:%d", *(int32_t*)s); s += 4; }
 	else if (type == 'f') { left -= snprintf(d, left, "f:%g", *(float*)s);   s += 4; }
 	else if (type == 'd') { left -= snprintf(d, left, "d:%lg", *(double*)s); s += 8; }
-	else if (type == 'Z' || type == 'H') { left -= snprintf(d, left, "%c:", type); 
+	else if (type == 'Z' || type == 'H') { left -= snprintf(d, left, "%c:", type);
 	                                       strncat(d,s,left);
 					       while (*s++) {}
 					       left = sizeof(str) - strlen(str);
@@ -560,7 +566,7 @@ CODE:
 	if (left <= 0) continue;
 	strncat(d,"\t",left);
 	left--;
-   }	  
+   }
    str[strlen(str)-1] = '\0';
    RETVAL = str;
 OUTPUT:
@@ -626,7 +632,7 @@ PPCODE:
      s = bam_get_aux(b);  /* s is a khash macro */
      while (s < b->data + b->l_data) {
        XPUSHs(sv_2mortal(newSVpv(s,2)));
-       s   += 2; 
+       s   += 2;
        type = *s++;
        if      (type == 'A') { ++s; }
        else if (type == 'C') { ++s; }
@@ -754,7 +760,7 @@ CODE:
     c     = bam_get_cigar(b);
     for (i=0;i<b->core.n_cigar;i++)
       av_push(avref, newSViv(c[i]));
-    RETVAL = (SV*) newRV((SV*)avref); 
+    RETVAL = (SV*) newRV((SV*)avref);
 OUTPUT:
   RETVAL
 
@@ -788,7 +794,7 @@ bam_target_name(bamh)
     avref = (AV*) sv_2mortal((SV*)newAV());
     for (i=0;i<bamh->n_targets;i++)
       av_push(avref, newSVpv(bamh->target_name[i],0));
-    RETVAL = (SV*) newRV((SV*)avref); 
+    RETVAL = (SV*) newRV((SV*)avref);
   OUTPUT:
     RETVAL
 
@@ -803,7 +809,7 @@ bam_target_len(bamh)
     avref = (AV*) sv_2mortal((SV*)newAV());
     for (i=0;i<bamh->n_targets;i++)
        av_push(avref, newSViv(bamh->target_len[i]));
-    RETVAL = (SV*) newRV((SV*)avref); 
+    RETVAL = (SV*) newRV((SV*)avref);
   OUTPUT:
     RETVAL
 
@@ -948,6 +954,3 @@ pl_alignment(pl)
     RETVAL = bam_dup1(pl->b);
   OUTPUT:
      RETVAL
-
-
-
