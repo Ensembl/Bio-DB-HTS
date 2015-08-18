@@ -338,9 +338,10 @@ hts_header_write(hts,header)
 
 
 Bio::DB::HTS::Alignment
-hts_read1(htsfile,header,alignment)
+hts_read1(htsfile,header)
     Bio::DB::HTS            htsfile
     Bio::DB::HTS::Header    header
+  PROTOTYPE: $$
   PREINIT:
     bam1_t *alignment;
     CODE:
