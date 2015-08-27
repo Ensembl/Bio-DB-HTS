@@ -1349,9 +1349,12 @@ Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
 use strict;
 use warnings;
+
+#rn6debug aids
 use Scalar::Util qw(reftype);
 
 use Carp 'croak';
+use Carp 'longmess';
 use Bio::SeqFeature::Lite;
 use Bio::PrimarySeq;
 
@@ -1423,6 +1426,8 @@ sub header
     print("HEADER FUNCTION\n") ;
     my $self = shift;
     print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
+    print("argument:$self\n") ;
+    print Carp::longmess();
     my $b = $self->{bam} ;
     return $self->{header} ||= $b->header_read();
 }
@@ -1552,6 +1557,7 @@ sub _fetch {
     print("_FETCH FUNCTION\n" ) ;
     print("region=$region\n") ;
     print("callback=$callback\n");
+    print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
     my $header              = $self->{bam}->header;
     $region                 =~ s/\.\.|,/-/;
     print("region=$region\n") ;
