@@ -1349,6 +1349,7 @@ Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
 use strict;
 use warnings;
+use Scalar::Util qw(reftype);
 
 use Carp 'croak';
 use Bio::SeqFeature::Lite;
@@ -1421,6 +1422,7 @@ sub header
 {
     print("HEADER FUNCTION\n") ;
     my $self = shift;
+    print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
     my $b = $self->{bam} ;
     return $self->{header} ||= $b->header_read();
 }
@@ -1550,7 +1552,7 @@ sub _fetch {
     print("_FETCH FUNCTION\n" ) ;
     print("region=$region\n") ;
     print("callback=$callback\n");
-    my $header              = $self->{bam}->header_read;
+    my $header              = $self->{bam}->header;
     $region                 =~ s/\.\.|,/-/;
     print("region=$region\n") ;
     my ($seqid,$start,$end) = $header->parse_region($region);
@@ -1924,9 +1926,9 @@ NONINDEXED
     my $code = eval $callback;
     die $@ if $@;
     print( "filter_features:callback=$callback\n" ) ;
-    print( "filter_features:user_code=$user_code\n" ) ;
     if ($user_code)
     {
+      print( "filter_features:user_code=$user_code\n" ) ;
       my $new_callback = sub {
         my $a = shift;
         $code->($a) if $user_code->($a);
