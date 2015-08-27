@@ -1558,7 +1558,7 @@ sub _fetch {
     print("region=$region\n") ;
     print("callback=$callback\n");
     print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
-    my $header              = $self->{bam}->header;
+    my $header              = $self->header;
     $region                 =~ s/\.\.|,/-/;
     print("region=$region\n") ;
     my ($seqid,$start,$end) = $header->parse_region($region);
