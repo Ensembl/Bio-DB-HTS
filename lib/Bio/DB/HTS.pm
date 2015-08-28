@@ -1556,9 +1556,12 @@ sub _fetch {
     my $callback = shift;
     print("_FETCH FUNCTION\n" ) ;
     print("region=$region\n") ;
-    print("callback=$callback\n");
     print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
-    my $header              = $self->header;
+    print("argument:$self\n") ;
+    # original line here seems to cause issues
+    my $btest = $self->{bam} ;
+    my $header              = $self->{bam}->header;
+    #my $header              = $self->{bam}->header_read;
     $region                 =~ s/\.\.|,/-/;
     print("region=$region\n") ;
     my ($seqid,$start,$end) = $header->parse_region($region);
@@ -1739,7 +1742,6 @@ sub types {
 
 sub features
 {
-    print("FEATURES in HTS.pm\n") ;
     my $self = shift;
     my %args;
     if (defined $_[0] && $_[0] !~ /^-/)
@@ -1761,7 +1763,6 @@ sub features
     my $filter    = $args{-filter};
     my $max       = $args{-max_features};
 
-    print("positional info=$seqid:$start:$end\n") ;
     $types        = [$types] unless ref $types;
     $types        = [$args{-class}] if !@$types && defined $args{-class};
     my $use_index = defined $seqid;
@@ -1779,7 +1780,6 @@ sub features
     {
       return map {$self->segment($_)} $self->seq_ids;
     }
-    print("  reference sequence not requested\n") ;
 
     my %seenit;
     my @types = grep {!$seenit{$_}++} ref $types ? @$types : $types;
@@ -1796,7 +1796,6 @@ sub features
       $filter   .= $self->_filter_by_attribute($attributes)
         if defined $attributes;
     }
-    print( "filter=$filter\n" ) ;
 
     # Special cases for unmunged data
     if (@types == 1 && $types[0] =~ /^match/)
@@ -1817,18 +1816,15 @@ sub features
       }
     }
 
-    print( "Apparantly we will now try a little magic\n" ) ;
     # otherwise we're going to do a little magic
     my ($features,@result);
     print("types:@types\n") ;
     for my $t (@types)
     {
-      print( "type:$t\n" ) ;
       if ($t =~ /^(match|read_pair)/)
       {
         # fetch the features if type is 'match' or 'read_pair'
         $features = $self->_filter_features($seqid,$start,$end,$filter,undef,$max);
-        print("filter features returned....\n") ;
         # for "match" just return the alignments
         if ($t =~ /^(match)/)
         {
@@ -1852,7 +1848,6 @@ sub features
         push @result,$self->_coverage($seqid,$start,$end,$bins,$filter);
       }
     }
-    print("FEATURE now ending ....\n") ;
     return $iterator ? Bio::DB::HTS::FetchIterator->new(\@result,$self->last_feature_count) : @result;
 }
 
