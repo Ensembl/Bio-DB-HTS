@@ -1423,11 +1423,7 @@ sub clone {
 
 sub header
 {
-    print("HEADER FUNCTION\n") ;
     my $self = shift;
-    print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
-    print("argument:$self\n") ;
-    print Carp::longmess();
     my $b = $self->{hts_file} ;
     return $self->{header} ||= $b->header_read();
 }
@@ -1554,16 +1550,8 @@ sub _fetch {
     my $self     = shift;
     my $region   = shift;
     my $callback = shift;
-    print("_FETCH FUNCTION\n" ) ;
-    print("region=$region\n") ;
-    print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
-    print("argument:$self\n") ;
-    # original line here seems to cause issues
-    my $btest = $self->{hts_file} ;
-    my $header              = $self->{hts_file}->header;
-    #my $header              = $self->{hts_file}->header_read;
+    my $header              = $self->{hts_file}->header_read;
     $region                 =~ s/\.\.|,/-/;
-    print("region=$region\n") ;
     my ($seqid,$start,$end) = $header->parse_region($region);
 
     return unless defined $seqid;
@@ -1818,7 +1806,6 @@ sub features
 
     # otherwise we're going to do a little magic
     my ($features,@result);
-    print("types:@types\n") ;
     for my $t (@types)
     {
       if ($t =~ /^(match|read_pair)/)
@@ -1900,7 +1887,6 @@ sub _filter_features {
     my @result;
     my $action = $do_tam_fh ? '\$self->header->view1($a)'
                             : $self->_push_features($max_features);
-    print( "filter_features:action=$action\n" ) ;
     my $user_code;
     if (ref ($filter) eq 'CODE')
     {
@@ -1926,21 +1912,16 @@ NONINDEXED
 
     my $code = eval $callback;
     die $@ if $@;
-    print( "filter_features:callback=$callback\n" ) ;
     if ($user_code)
     {
-      print( "filter_features:user_code=$user_code\n" ) ;
       my $new_callback = sub {
         my $a = shift;
         $code->($a) if $user_code->($a);
       };
-      print( "filter_features:new_callback=$new_callback\n" ) ;
       $self->_features($seqid,$start,$end,$new_callback);
     }
     else
     {
-      print( "filter_features:code=$code\n" ) ;
-      print("positional info=$seqid:$start:$end\n") ;
       $self->_features($seqid,$start,$end,$code);
     }
     return \@result;
@@ -1977,8 +1958,6 @@ sub _features
 {
     my $self = shift;
     my ($seqid,$start,$end,$callback) = @_;
-    print("_FEATURES_ function entered\n") ;
-    print("positional info=$seqid:$start:$end\n") ;
     if (defined $seqid)
     {
       my $region = $seqid;
