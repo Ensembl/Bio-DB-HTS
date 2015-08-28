@@ -33,7 +33,7 @@
 /* stolen from bam_aux.c */
 #define MAX_REGION 1<<29
 
-typedef htsFile*        Bio__DB__HTS;
+typedef htsFile*        Bio__DB__HTSfile;
 typedef bam_hdr_t*      Bio__DB__HTS__Header;
 typedef bam1_t*         Bio__DB__HTS__Alignment;
 typedef hts_idx_t*      Bio__DB__HTS__Index;
@@ -262,7 +262,7 @@ fai_fetch(fai,reg)
     RETVAL
 
 
-MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS PREFIX=hts_
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTSfile PREFIX=hts_
 
 int
 max_pileup_cnt(packname,...)

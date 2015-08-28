@@ -1387,14 +1387,14 @@ sub new {
 	    -r _ or croak "is not readable";
     }
 
-    my $bam = Bio::DB::HTS->open($hts_path) or croak "$hts_path open: $!";
+    my $hts_file = Bio::DB::HTSfile->open($hts_path) or croak "$hts_path open: $!";
 
     my $fai = $class->new_dna_accessor($fa_path) if $fa_path;
 
     my $self =  bless
     {
 	    fai           => $fai,
-      bam           => $bam,
+      hts_file      => $hts_file,
       hts_path      => $hts_path,
       fa_path       => $fa_path,
       expand_flags  => $expand_flags,
@@ -1402,12 +1402,12 @@ sub new {
       autoindex     => $autoindex,
       force_refseq  => $force_refseq,
     },ref $class || $class;
-  my $b = $self->{bam} ;
+  my $b = $self->{hts_file} ;
   $self->header;  # catch it
   return $self;
 }
 
-sub bam { shift->{bam} }
+sub bam { shift->{hts_file} }
 
 sub is_remote {
     my $self = shift;
@@ -1417,7 +1417,7 @@ sub is_remote {
 
 sub clone {
     my $self = shift;
-    $self->{bam} = Bio::DB::HTS->open($self->{hts_path}) if $self->{hts_path};
+    $self->{hts_file} = Bio::DB::HTSfile->open($self->{hts_path}) if $self->{hts_path};
     $self->{fai} = $self->new_dna_accessor($self->{fa_path}) if $self->{fa_path};
 }
 
@@ -1428,7 +1428,7 @@ sub header
     print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
     print("argument:$self\n") ;
     print Carp::longmess();
-    my $b = $self->{bam} ;
+    my $b = $self->{hts_file} ;
     return $self->{header} ||= $b->header_read();
 }
 
@@ -1507,7 +1507,7 @@ sub force_refseq {
 
 sub reset_read {
     my $self = shift;
-    $self->{bam}->header;
+    $self->{hts_file}->header;
 }
 
 sub n_targets {
@@ -1559,16 +1559,16 @@ sub _fetch {
     print("argument type:".ref($self).", base type:".reftype($self)."\n") ;
     print("argument:$self\n") ;
     # original line here seems to cause issues
-    my $btest = $self->{bam} ;
-    my $header              = $self->{bam}->header;
-    #my $header              = $self->{bam}->header_read;
+    my $btest = $self->{hts_file} ;
+    my $header              = $self->{hts_file}->header;
+    #my $header              = $self->{hts_file}->header_read;
     $region                 =~ s/\.\.|,/-/;
     print("region=$region\n") ;
     my ($seqid,$start,$end) = $header->parse_region($region);
 
     return unless defined $seqid;
     my $index  = $self->bam_index;
-    $index->fetch($self->{bam},$seqid,$start,$end,$callback,$self);
+    $index->fetch($self->{hts_file},$seqid,$start,$end,$callback,$self);
 }
 
 sub fetch {
@@ -1605,9 +1605,9 @@ sub pileup {
 
     my $index  = $self->bam_index;
     if ($keep_level) {
-	$index->lpileup($self->{bam},$seqid,$start,$end,$code);
+	$index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
     } else {
-	$index->pileup($self->{bam},$seqid,$start,$end,$code);
+	$index->pileup($self->{hts_file},$seqid,$start,$end,$code);
     }
 }
 
@@ -1630,9 +1630,9 @@ sub fast_pileup {
 
     my $index  = $self->bam_index;
     if ($keep_level) {
-  $index->lpileup($self->{bam},$seqid,$start,$end,$code);
+  $index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
     } else {
-  $index->pileup($self->{bam},$seqid,$start,$end,$code);
+  $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
     }
 }
 
@@ -1807,7 +1807,7 @@ sub features
         $self->reset_read;
         my $code = eval "sub {my \$a=shift;$filter;1}";
         die $@ if $@;
-        return Bio::DB::HTS::ReadIterator->new($self,$self->{bam},$code);
+        return Bio::DB::HTS::ReadIterator->new($self,$self->{hts_file},$code);
       }
       # TAM filehandle retrieval is requested
       elsif ($fh)
@@ -1992,7 +1992,7 @@ sub _features
     else
     {
       $self->reset_read;
-      while (my $b = $self->{bam}->read1)
+      while (my $b = $self->{hts_file}->read1)
       {
         $callback->($b);
       }
@@ -2069,7 +2069,7 @@ sub _coverage {
 	$region   .= "-$end"   if defined $end;
     }
 
-    my $header     = $self->{bam}->header;
+    my $header     = $self->{hts_file}->header;
     my ($id,$s,$e) = $header->parse_region($region);
     return unless defined $id;
 
@@ -2079,7 +2079,7 @@ sub _coverage {
     $bins ||= $end-$start+1;
 
     my $index      = $self->bam_index;
-    my $coverage   = $index->coverage($self->{bam},
+    my $coverage   = $index->coverage($self->{hts_file},
 				      $id,$s,$e,
 				      $bins);
 
@@ -2112,7 +2112,7 @@ sub _segment_search {
 
 sub bam_index {
     my $self = shift;
-    return $self->{bai} ||= Bio::DB::HTS->index($self->{hts_path},$self->autoindex);
+    return $self->{bai} ||= Bio::DB::HTSfile->index($self->{hts_path},$self->autoindex);
 }
 
 sub _features_fh {
@@ -2135,7 +2135,7 @@ sub tam_fh {
 
 sub max_pileup_cnt {
     my $self = shift;
-    return Bio::DB::HTS->max_pileup_cnt(@_);
+    return Bio::DB::HTSfile->max_pileup_cnt(@_);
 }
 
 # return a fragment of code that will be placed in the eval "" filter
@@ -2238,7 +2238,7 @@ sub gff3_string {
     return $gff3;
 }
 
-package Bio::DB::HTS;
+package Bio::DB::HTSfile;
 
 use File::Spec;
 use Cwd;
@@ -2374,7 +2374,7 @@ information from a shotgun genomic sequencing project. Some notes:
    to a coverage graph.
 
  [bamtest:database]
- db_adaptor    = Bio::DB::HTS
+ db_adaptor    = Bio::DB::HTSfile
  db_args       = -bam   /var/www/gbrowse2/databases/bamtest/ex1.bam
  search options= default
 
