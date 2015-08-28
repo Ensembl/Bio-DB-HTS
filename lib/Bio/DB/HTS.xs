@@ -274,7 +274,7 @@ OUTPUT:
         RETVAL
 
 
-Bio::DB::HTS
+Bio::DB::HTSfile
 hts_open(packname, filename, mode="r")
       char * packname
       char * filename
@@ -288,7 +288,7 @@ hts_open(packname, filename, mode="r")
 
 void
 hts_close(htsfile)
-   Bio::DB::HTS htsfile
+   Bio::DB::HTSfile   htsfile
 PROTOTYPE: $
 CODE:
    hts_close(htsfile);
@@ -305,7 +305,7 @@ hts_index_build(packname, filename)
 
 
 Bio::DB::HTS::Index
-hts_index_open(packname="Bio::DB::HTS", filename, fmt)
+hts_index_open(packname="Bio::DB::HTSfile", filename, fmt)
       char * packname
       char * filename
       int  fmt
@@ -318,7 +318,7 @@ hts_index_open(packname="Bio::DB::HTS", filename, fmt)
 
 Bio::DB::HTS::Header
 hts_header_read(htsfile)
-    Bio::DB::HTS            htsfile
+    Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
     CODE:
       RETVAL = sam_hdr_read(htsfile);
@@ -328,7 +328,7 @@ hts_header_read(htsfile)
 
 int
 hts_header_write(hts,header)
-    Bio::DB::HTS         hts
+    Bio::DB::HTSfile     hts
     Bio::DB::HTS::Header header
     PROTOTYPE: $$
     CODE:
@@ -339,7 +339,7 @@ hts_header_write(hts,header)
 
 Bio::DB::HTS::Alignment
 hts_read1(htsfile,header)
-    Bio::DB::HTS            htsfile
+    Bio::DB::HTSfile        htsfile
     Bio::DB::HTS::Header    header
   PROTOTYPE: $$
   PREINIT:
