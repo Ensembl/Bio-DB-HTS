@@ -53,11 +53,11 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  }
 
  # low level API
- my $bam          = Bio::DB::HTS->open('/path/to/bamfile');
- my $header       = $bam->header;
+ my $hfile          = Bio::DB::HTSfile->open('/path/to/bamfile');
+ my $header       = $hfile->header;
  my $target_count = $header->n_targets;
  my $target_names = $header->target_name;
- while (my $align = $bam->read1) {
+ while (my $align = $hfile->read1) {
     my $seqid     = $target_names->[$align->tid];
     my $start     = $align->pos+1;
     my $end       = $align->calend;
@@ -75,7 +75,7 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
      print $alignment->qname," aligns to $seqid:$start..$end\n";
  }
  my $header = $index->header;
- $index->fetch($bam,$header->parse_region('seq2'),$callback);
+ $index->fetch($hfile,$header->parse_region('seq2'),$callback);
 
 =head1 DESCRIPTION
 
@@ -329,7 +329,7 @@ file. You can manipulate the header using the low-level API.
 Return the path of the bam file used to create the sam object. This
 makes the sam object more portable.
 
-=item $bam    = $sam->bam
+=item $hts_file    = $sam->$hts_file
 
 Returns the low-level Bio::DB::HTS object associated with the opened
 file.
@@ -1004,7 +1004,7 @@ SAM. They usually have a .bam extension.
 
 =over 4
 
-=item $bam = Bio::DB::HTS->open('/path/to/file.bam' [,$mode])
+=item $hts_file = Bio::DB::HTSfile->open('/path/to/file.bam' [,$mode])
 
 Open up the BAM file at the indicated path. Mode, if present, must be
 one of the file stream open flags ("r", "w", "a", "r+", etc.). If
@@ -1022,54 +1022,33 @@ below) and all accesses will be performed on the remote BAM file.
 
 Example:
 
-   $bam = Bio::DB::HTS->open('http://some.site.com/nextgen/chr1_bowtie.bam');
+   $hfile = Bio::DB::HTSfile->open('http://some.site.com/nextgen/chr1_bowtie.bam');
 
-=item $header = $bam->header()
+=item $header = $hfile->header_read()
 
 Given an open BAM file, return a Bio::DB::HTS::Header object
 containing information about the reference sequence(s). Note that you
-must invoke header() at least once before calling read1().
+must invoke header_read() at least once before calling read1().
 
-=item $status_code = $bam->header_write($header)
+=item $status_code = $hfile->header_write($header)
 
 Given a Bio::DB::HTS::Header object and a BAM file opened in write
 mode, write the header to the file. If the write fails the process
 will be terminated at the C layer. The result code is (currently)
 always zero.
 
-=item $alignment = $bam->read1()
+=item $alignment = $hfile->read1()
 
 Read one alignment from the BAM file and return it as a
 Bio::DB::HTS::Alignment object. Note that you
 must invoke header() at least once before calling read1().
 
-=item $bytes = $bam->write1($alignment)
+=item $bytes = $hfile->write1($alignment)
 
 Given a BAM file that has been opened in write mode and a
 Bio::DB::HTS::Alignment object, write the alignment to the BAM file
 and return the number of bytes successfully written.
 
-=item Bio::DB::HTS->sort_core($by_qname,$path,$prefix,$max_mem)
-
-Attempt to sort a BAM file by chromosomal location or name and create a
-new sorted BAM file. Arguments are as follows:
-
- Argument      Description
- --------      -----------
-
- $by_qname     If true, sort by read name rather than chromosomal
-               location.
-
- $path         Path to the BAM file
-
- $prefix       Prefix to use for the new sorted file. For example,
-               passing "foo" will result in a BAM file named
-	       "foo.bam".
-
- $max_mem      Maximum core memory to use for the sort. If the sort
-               requires more than this amount of memory, intermediate
-               sort files will be written to disk. The default, if not
-               provided is 500M.
 
 =back
 
@@ -1112,7 +1091,7 @@ environment variable or the system-defined /tmp directory if not
 present. You may change the environment variable just before the call
 to change its behavior.
 
-=item $code = $index->fetch($bam,$tid,$start,$end,$callback [,$callback_data])
+=item $code = $index->fetch($hfile,$tid,$start,$end,$callback [,$callback_data])
 
 This is the low-level equivalent of the $sam->fetch() function
 described for the high-level API. Given a open BAM file object, the
@@ -1126,7 +1105,7 @@ Arguments:
  Argument      Description
  --------      -----------
 
- $bam          The Bio::DB::HTS object that corresponds to the
+ $hts_file     The Bio::DB::HTSfile object that corresponds to the
                index object.
 
  $tid          The target ID of the reference sequence. This can
@@ -1157,7 +1136,7 @@ the callback data (if any) passed to fetch().
 Fetch() returns an integer code, but its meaning is not described in
 the SAM/BAM C library documentation.
 
-=item $index->pileup($bam,$tid,$start,$end,$callback [,$callback_data])
+=item $index->pileup($htsfile,$tid,$start,$end,$callback [,$callback_data])
 
 This is the low-level version of the pileup() method, which allows you
 to invoke a coderef for every position in a BAM alignment. Arguments
@@ -1166,7 +1145,7 @@ are:
  Argument      Description
  --------      -----------
 
- $bam          The Bio::DB::HTS object that corresponds to the
+ $hts_file     The Bio::DB::HTSfile object that corresponds to the
                index object.
 
  $tid          The target ID of the reference sequence. This can
@@ -1202,7 +1181,7 @@ it is in the high-level API.
 The Bio::DB::HTS::Pileup object was described earlier in the
 description of the high-level pileup() method.
 
-=item $coverage = $index->coverage($bam,$tid,$start,$end [,$bins [,maxcnt]])
+=item $coverage = $index->coverage($hfile,$tid,$start,$end [,$bins [,maxcnt]])
 
 Calculate coverage for the region on the target sequence given by $tid
 between positions $start and $end (zero-based coordinates). This
