@@ -25,6 +25,7 @@
 
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 #include "hts.h"
 #include "sam.h"
 #include "khash.h"
@@ -223,6 +224,24 @@ void bam_view1(const bam_hdr_t *header, const bam1_t *b)
 
 
 
+int get_index_fmt_from_extension(const char * filename)
+{
+  char * ext = strrchr( filename, '.' ) ;
+  if( strcmp(filename, ".cram")==0 )
+  {
+    return HTS_FMT_CRAI ;
+  }
+  if( strcmp(filename, ".bam")==0 )
+  {
+    return HTS_FMT_BAI ;
+  }
+  if( strcmp(filename, ".sam")==0 )
+  {
+    return HTS_FMT_CSI ;  //check on this?
+  }
+  return -1 ;
+}
+
 
 
 
@@ -305,16 +324,20 @@ hts_index_build(packname, filename)
      RETVAL
 
 
+
 Bio::DB::HTS::Index
-hts_index_open(packname="Bio::DB::HTSfile", filename, fmt)
+hts_index_open(packname="Bio::DB::HTSfile", filename)
       char * packname
       char * filename
-      int  fmt
+    PREINIT:
+      int  fmt ;
     PROTOTYPE: $$
     CODE:
-    RETVAL = hts_idx_load(filename,fmt);
+      fmt = get_index_fmt_from_extension(filename) ;
+      RETVAL = hts_idx_load(filename,fmt);
     OUTPUT:
-    RETVAL
+      RETVAL
+
 
 
 Bio::DB::HTS::Header

@@ -2209,9 +2209,10 @@ sub index {
 
     return $self->index_open_in_safewd($path) if Bio::DB::HTS->is_remote($path);
 
-    if ($autoindex) {
-	$self->reindex($path) unless
-	    -e "${path}.bai" && mtime($path) <= mtime("${path}.bai");
+    if ($autoindex)
+    {
+      $self->reindex($path) unless
+        -e "${path}.bai" && mtime($path) <= mtime("${path}.bai");
     }
 
     croak "No index file for $path; try opening file with -autoindex" unless -e "${path}.bai";
