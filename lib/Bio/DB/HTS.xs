@@ -238,7 +238,7 @@ int get_index_fmt_from_extension(const char * filename)
   }
   if( strcmp(ext, ".sam")==0 )
   {
-    return HTS_FMT_CSI ;  //check on this?
+    return HTS_FMT_CSI ;  //TODO check on this
   }
   return -1 ;
 }

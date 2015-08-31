@@ -2068,9 +2068,16 @@ sub _segment_search {
     return;
 }
 
-sub bam_index {
+sub bam_index
+{
     my $self = shift;
-    return $self->{bai} ||= Bio::DB::HTSfile->index($self->{hts_path},$self->autoindex);
+    if( defined $self->{bai} )
+    {
+      return $self->{bai} ;
+    }
+    my $fpath = $self->{hts_path} ;
+    $self->{bai} = Bio::DB::HTSfile->index($fpath,$self->autoindex) ;
+    return $self->{bai} ;
 }
 
 sub _features_fh {
