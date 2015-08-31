@@ -227,15 +227,16 @@ void bam_view1(const bam_hdr_t *header, const bam1_t *b)
 int get_index_fmt_from_extension(const char * filename)
 {
   char * ext = strrchr( filename, '.' ) ;
-  if( strcmp(filename, ".cram")==0 )
+  printf( "Trying to match extension %s for %s\n", ext, filename ) ;
+  if( strcmp(ext, ".cram")==0 )
   {
     return HTS_FMT_CRAI ;
   }
-  if( strcmp(filename, ".bam")==0 )
+  if( strcmp(ext, ".bam")==0 )
   {
     return HTS_FMT_BAI ;
   }
-  if( strcmp(filename, ".sam")==0 )
+  if( strcmp(ext, ".sam")==0 )
   {
     return HTS_FMT_CSI ;  //check on this?
   }
@@ -334,6 +335,7 @@ hts_index_open(packname="Bio::DB::HTSfile", filename)
     PROTOTYPE: $$
     CODE:
       fmt = get_index_fmt_from_extension(filename) ;
+      printf( "hts_index_open:%s, %d\n", filename, fmt ) ;
       RETVAL = hts_idx_load(filename,fmt);
     OUTPUT:
       RETVAL
