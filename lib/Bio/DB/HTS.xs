@@ -29,6 +29,7 @@
 #include "sam.h"
 #include "khash.h"
 #include "faidx.h"
+#include "bgzf.h"
 
 /* stolen from bam_aux.c */
 #define MAX_REGION 1<<29
@@ -320,8 +321,16 @@ Bio::DB::HTS::Header
 hts_header_read(htsfile)
     Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
+    PREINIT:
+      bam_hdr_t *bh;
+      int64_t result ;
     CODE:
-      RETVAL = sam_hdr_read(htsfile);
+      if( htsfile->format.format == 4 )
+      {
+        result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
+      }
+      bh = sam_hdr_read(htsfile);
+      RETVAL = bh ;
     OUTPUT:
       RETVAL
 
