@@ -1,9 +1,7 @@
 TYPEMAP
-Bio::DB::HTS		T_PTROBJ
+Bio::DB::HTSfile		T_PTROBJ
 Bio::DB::HTS::Header	T_PTROBJ
 Bio::DB::HTS::Alignment	T_PTROBJ
 Bio::DB::HTS::Index	T_PTROBJ
 Bio::DB::HTS::Fai       T_PTROBJ
-Bio::DB::Bam::Pileup    T_PTROBJ
-
-
+Bio::DB::HTS::Pileup    T_PTROBJ

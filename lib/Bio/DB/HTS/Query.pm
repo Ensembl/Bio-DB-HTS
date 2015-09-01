@@ -8,7 +8,7 @@ Bio::DB::HTS::Query -- Object representing the query portion of a BAM/SAM alignm
 
 =head1 SYNOPSIS
 
-Given an alignment retrieved from a Bio::DB::Sam database,
+Given an alignment retrieved from a Bio::DB::HTS database,
 
  my $query = $alignment->query;
 
@@ -31,7 +31,7 @@ part of a SAM alignment.
 =cut
 
 use strict;
-use Bio::DB::Sam;
+use Bio::DB::HTS;
 use Bio::DB::HTS::Constants qw(CIGAR_SYMBOLS BAM_CREF_SKIP BAM_CSOFT_CLIP BAM_CHARD_CLIP);
 
 use constant CIGAR_SKIP      => {CIGAR_SYMBOLS->[BAM_CREF_SKIP]  => 1,
@@ -229,7 +229,7 @@ sub subseq {
 
 =head1 SEE ALSO
 
-L<Bio::Perl>, L<Bio::DB::Sam>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>
+L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>
 
 =head1 AUTHOR
 

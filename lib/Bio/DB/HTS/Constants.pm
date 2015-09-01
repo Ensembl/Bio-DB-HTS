@@ -1,14 +1,14 @@
-package Bio::DB::Sam::Constants;
+package Bio::DB::HTS::Constants;
 
 # $Id$
 
 =head1 NAME
 
-Bio::DB::Sam::Constants -- Constants for use with SAM/BAM
+Bio::DB::HTS::Constants -- Constants for use with SAM/BAM
 
 =head1 SYNOPSIS
 
- use Bio::DB::Sam::Constants;
+ use Bio::DB::HTS::Constants;
  my $pad_flag = BAM_CPAD;
 
 =head1 DESCRIPTION
@@ -46,7 +46,7 @@ The reverse of FLAGS:
 
 =head1 SEE ALSO
 
-L<Bio::Perl>, L<Bio::DB::Sam>, L<Bio::DB::Bam::Alignment>
+L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::Bam::Alignment>
 
 =head1 AUTHOR
 

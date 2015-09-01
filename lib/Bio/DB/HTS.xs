@@ -25,20 +25,22 @@
 
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 #include "hts.h"
 #include "sam.h"
 #include "khash.h"
 #include "faidx.h"
+#include "bgzf.h"
 
 /* stolen from bam_aux.c */
 #define MAX_REGION 1<<29
 
-typedef htsFile*        Bio__DB__HTS;
+typedef htsFile*        Bio__DB__HTSfile;
 typedef bam_hdr_t*      Bio__DB__HTS__Header;
 typedef bam1_t*         Bio__DB__HTS__Alignment;
 typedef hts_idx_t*      Bio__DB__HTS__Index;
 typedef faidx_t*        Bio__DB__HTS__Fai;
-typedef bam_pileup1_t*  Bio__DB__Bam__Pileup;
+typedef bam_pileup1_t*  Bio__DB__HTS__Pileup;
 
 typedef struct {
   SV* callback;
@@ -104,9 +106,9 @@ int bam_fetch_fun (const bam1_t *b, void *data) {
   return 1;
 }
 
-int invoke_pileup_callback_fun(uint32_t tid, 
-			       uint32_t pos, 
-			       int n, 
+int invoke_pileup_callback_fun(uint32_t tid,
+			       uint32_t pos,
+			       int n,
 			       const bam_pileup1_t *pl,
 			       void *data) {
   dSP;
@@ -128,11 +130,11 @@ int invoke_pileup_callback_fun(uint32_t tid,
   pileup = newAV();
   av_extend(pileup,n);
   for (i=0;i<n;i++) {
-    p = newSV(sizeof(bam_pileup1_t));	
-    sv_setref_pv(p,"Bio::DB::Bam::Pileup",(void*) &pl[i]);
+    p = newSV(sizeof(bam_pileup1_t));
+    sv_setref_pv(p,"Bio::DB::HTS::Pileup",(void*) &pl[i]);
     av_push(pileup,p);
-  } 
-  
+  }
+
   /* set up subroutine stack for the call */
   ENTER;
   SAVETMPS;
@@ -151,10 +153,10 @@ int invoke_pileup_callback_fun(uint32_t tid,
   LEAVE;
 }
 
-int coverage_from_pileup_fun (uint32_t tid, 
-			      uint32_t pos, 
-			      int n, 
-			      const bam_pileup1_t *pl, 
+int coverage_from_pileup_fun (uint32_t tid,
+			      uint32_t pos,
+			      int n,
+			      const bam_pileup1_t *pl,
 			      void *data) {
   coverage_graph_ptr  cgp;
   int                 bin;
@@ -177,6 +179,70 @@ int coverage_from_pileup_fun (uint32_t tid,
 
   return 0;
 }
+
+
+/**
+   From bam_aux.c in samtools. Needed to allow pileup function to work.
+*/
+int bam_parse_region(bam_hdr_t *header, const char *str, int *ref_id, int *beg, int *end)
+{
+    const char *name_lim = hts_parse_reg(str, beg, end);
+    if (name_lim) {
+        char *name = malloc(name_lim - str + 1);
+        memcpy(name, str, name_lim - str);
+        name[name_lim - str] = '\0';
+        *ref_id = bam_name2id(header, name);
+        free(name);
+    }
+    else {
+        // not parsable as a region, but possibly a sequence named "foo:a"
+        *ref_id = bam_name2id(header, str);
+        *beg = 0; *end = INT_MAX;
+    }
+    if (*ref_id == -1) return -1;
+    return *beg <= *end? 0 : -1;
+}
+
+/**
+   From bam.c in samtools
+*/
+char *bam_format1(const bam_hdr_t *header, const bam1_t *b)
+{
+    kstring_t str;
+    str.l = str.m = 0; str.s = NULL;
+    sam_format1(header, b, &str);
+    return str.s;
+}
+
+
+void bam_view1(const bam_hdr_t *header, const bam1_t *b)
+{
+        char *s = bam_format1(header, b);
+        puts(s);
+        free(s);
+}
+
+
+
+int get_index_fmt_from_extension(const char * filename)
+{
+  char * ext = strrchr( filename, '.' ) ;
+  printf( "Trying to match extension %s for %s\n", ext, filename ) ;
+  if( strcmp(ext, ".cram")==0 )
+  {
+    return HTS_FMT_CRAI ;
+  }
+  if( strcmp(ext, ".bam")==0 )
+  {
+    return HTS_FMT_BAI ;
+  }
+  if( strcmp(ext, ".sam")==0 )
+  {
+    return HTS_FMT_CSI ;  //check on this?
+  }
+  return -1 ;
+}
+
 
 
 
@@ -217,7 +283,7 @@ fai_fetch(fai,reg)
     RETVAL
 
 
-MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS PREFIX=hts_
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTSfile PREFIX=hts_
 
 int
 max_pileup_cnt(packname,...)
@@ -229,7 +295,7 @@ OUTPUT:
         RETVAL
 
 
-Bio::DB::HTS
+Bio::DB::HTSfile
 hts_open(packname, filename, mode="r")
       char * packname
       char * filename
@@ -243,7 +309,7 @@ hts_open(packname, filename, mode="r")
 
 void
 hts_close(htsfile)
-   Bio::DB::HTS htsfile
+   Bio::DB::HTSfile   htsfile
 PROTOTYPE: $
 CODE:
    hts_close(htsfile);
@@ -259,31 +325,44 @@ hts_index_build(packname, filename)
      RETVAL
 
 
+
 Bio::DB::HTS::Index
-hts_index_open(packname="Bio::DB::HTS", filename, fmt)
+hts_index_open(packname="Bio::DB::HTSfile", filename)
       char * packname
       char * filename
-      int  fmt
+    PREINIT:
+      int  fmt ;
     PROTOTYPE: $$
     CODE:
-    RETVAL = hts_idx_load(filename,fmt);
+      fmt = get_index_fmt_from_extension(filename) ;
+      printf( "hts_index_open:%s, %d\n", filename, fmt ) ;
+      RETVAL = hts_idx_load(filename,fmt);
     OUTPUT:
-    RETVAL
+      RETVAL
+
 
 
 Bio::DB::HTS::Header
 hts_header_read(htsfile)
-    Bio::DB::HTS            htsfile
+    Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
+    PREINIT:
+      bam_hdr_t *bh;
+      int64_t result ;
     CODE:
-      RETVAL = sam_hdr_read(htsfile);
+      if( htsfile->format.format == 4 )
+      {
+        result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
+      }
+      bh = sam_hdr_read(htsfile);
+      RETVAL = bh ;
     OUTPUT:
       RETVAL
 
 
 int
 hts_header_write(hts,header)
-    Bio::DB::HTS         hts
+    Bio::DB::HTSfile     hts
     Bio::DB::HTS::Header header
     PROTOTYPE: $$
     CODE:
@@ -292,13 +371,20 @@ hts_header_write(hts,header)
       RETVAL
 
 
-int
-hts_read1(htsfile,header,alignment)
-    Bio::DB::HTS            htsfile
+Bio::DB::HTS::Alignment
+hts_read1(htsfile,header)
+    Bio::DB::HTSfile        htsfile
     Bio::DB::HTS::Header    header
-    Bio::DB::HTS::Alignment alignment
+  PROTOTYPE: $$
+  PREINIT:
+    bam1_t *alignment;
     CODE:
-       RETVAL = sam_read1(htsfile,header,alignment);
+       alignment = bam_init1();
+       if (sam_read1(htsfile,header,alignment) >= 0) {
+         RETVAL = alignment ;
+       }
+       else
+         XSRETURN_EMPTY;
     OUTPUT:
        RETVAL
 
@@ -350,7 +436,7 @@ PROTOTYPE: $
 CODE:
    RETVAL=bam_endpos(b);
 OUTPUT:
-   RETVAL    
+   RETVAL
 
 int
 bama_cigar2qlen(b)
@@ -359,7 +445,7 @@ PROTOTYPE: $
 CODE:
    RETVAL=bam_cigar2qlen(b->core.n_cigar,bam_get_cigar(b));
 OUTPUT:
-   RETVAL    
+   RETVAL
 
 int
 bama_qual(b,...)
@@ -486,15 +572,15 @@ CODE:
 
    int left  = sizeof(str) - strlen(str);
    while (left > 0 && (s < b->data + b->l_data)) {
-        char* d   = str+strlen(str); 
+        char* d   = str+strlen(str);
 
-	key[0] = s[0]; 
+	key[0] = s[0];
 	key[1] = s[1];
  	left -= snprintf(d, left, "%c%c:", key[0], key[1]);
 
 	d    += 3;
 	s    += 2;
-	type = *s++; 
+	type = *s++;
 
 	if (left <= 0) continue;
 
@@ -507,7 +593,7 @@ CODE:
 	else if (type == 'i') { left -= snprintf(d, left, "i:%d", *(int32_t*)s); s += 4; }
 	else if (type == 'f') { left -= snprintf(d, left, "f:%g", *(float*)s);   s += 4; }
 	else if (type == 'd') { left -= snprintf(d, left, "d:%lg", *(double*)s); s += 8; }
-	else if (type == 'Z' || type == 'H') { left -= snprintf(d, left, "%c:", type); 
+	else if (type == 'Z' || type == 'H') { left -= snprintf(d, left, "%c:", type);
 	                                       strncat(d,s,left);
 					       while (*s++) {}
 					       left = sizeof(str) - strlen(str);
@@ -515,7 +601,7 @@ CODE:
 	if (left <= 0) continue;
 	strncat(d,"\t",left);
 	left--;
-   }	  
+   }
    str[strlen(str)-1] = '\0';
    RETVAL = str;
 OUTPUT:
@@ -581,7 +667,7 @@ PPCODE:
      s = bam_get_aux(b);  /* s is a khash macro */
      while (s < b->data + b->l_data) {
        XPUSHs(sv_2mortal(newSVpv(s,2)));
-       s   += 2; 
+       s   += 2;
        type = *s++;
        if      (type == 'A') { ++s; }
        else if (type == 'C') { ++s; }
@@ -709,7 +795,7 @@ CODE:
     c     = bam_get_cigar(b);
     for (i=0;i<b->core.n_cigar;i++)
       av_push(avref, newSViv(c[i]));
-    RETVAL = (SV*) newRV((SV*)avref); 
+    RETVAL = (SV*) newRV((SV*)avref);
 OUTPUT:
   RETVAL
 
@@ -743,7 +829,7 @@ bam_target_name(bamh)
     avref = (AV*) sv_2mortal((SV*)newAV());
     for (i=0;i<bamh->n_targets;i++)
       av_push(avref, newSVpv(bamh->target_name[i],0));
-    RETVAL = (SV*) newRV((SV*)avref); 
+    RETVAL = (SV*) newRV((SV*)avref);
   OUTPUT:
     RETVAL
 
@@ -758,7 +844,7 @@ bam_target_len(bamh)
     avref = (AV*) sv_2mortal((SV*)newAV());
     for (i=0;i<bamh->n_targets;i++)
        av_push(avref, newSViv(bamh->target_len[i]));
-    RETVAL = (SV*) newRV((SV*)avref); 
+    RETVAL = (SV*) newRV((SV*)avref);
   OUTPUT:
     RETVAL
 
@@ -780,6 +866,38 @@ bam_text(bamh, ...)
     RETVAL
 
 
+void
+bam_parse_region(bamh,region)
+    Bio::DB::HTS::Header bamh
+    char*            region
+    PROTOTYPE: $
+    PREINIT:
+       int seqid,start,end;
+    PPCODE:
+    {
+      bam_parse_region(bamh,
+		       region,
+		       &seqid,
+		       &start,
+		       &end);
+      if (seqid < 0)
+	XSRETURN_EMPTY;
+      else {
+	EXTEND(sp,3);
+	PUSHs(sv_2mortal(newSViv(seqid)));
+	PUSHs(sv_2mortal(newSViv(start)));
+	PUSHs(sv_2mortal(newSViv(end)));
+      }
+    }
+
+void
+bam_view1(bamh,alignment)
+     Bio::DB::HTS::Header     bamh
+     Bio::DB::HTS::Alignment  alignment
+     PROTOTYPE: $$
+     CODE:
+       bam_view1(bamh,alignment);
+
 
 void
 bam_DESTROY(bamh)
@@ -790,11 +908,11 @@ bam_DESTROY(bamh)
 
 
 
-MODULE = Bio::DB::HTS PACKAGE = Bio::DB::Bam::Pileup PREFIX=pl_
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Pileup PREFIX=pl_
 
 int
 pl_qpos(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->qpos;
   OUTPUT:
@@ -802,7 +920,7 @@ pl_qpos(pl)
 
 int
 pl_pos(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->qpos+1;
   OUTPUT:
@@ -810,7 +928,7 @@ pl_pos(pl)
 
 int
 pl_indel(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->indel;
   OUTPUT:
@@ -818,7 +936,7 @@ pl_indel(pl)
 
 int
 pl_level(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->level;
   OUTPUT:
@@ -826,7 +944,7 @@ pl_level(pl)
 
 int
 pl_is_del(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_del;
   OUTPUT:
@@ -834,7 +952,7 @@ pl_is_del(pl)
 
 int
 pl_is_refskip(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_refskip;
   OUTPUT:
@@ -842,7 +960,7 @@ pl_is_refskip(pl)
 
 int
 pl_is_head(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_head;
   OUTPUT:
@@ -850,7 +968,7 @@ pl_is_head(pl)
 
 int
 pl_is_tail(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = pl->is_tail;
   OUTPUT:
@@ -858,7 +976,7 @@ pl_is_tail(pl)
 
 Bio::DB::HTS::Alignment
 pl_b(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = bam_dup1(pl->b);
   OUTPUT:
@@ -866,11 +984,8 @@ pl_b(pl)
 
 Bio::DB::HTS::Alignment
 pl_alignment(pl)
-  Bio::DB::Bam::Pileup pl
+  Bio::DB::HTS::Pileup pl
   CODE:
     RETVAL = bam_dup1(pl->b);
   OUTPUT:
      RETVAL
-
-
-
