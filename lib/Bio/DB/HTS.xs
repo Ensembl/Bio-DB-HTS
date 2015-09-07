@@ -316,7 +316,7 @@ hts_index_build(packname, filename)
    char *      packname
    const char * filename
   CODE:
-     RETVAL = sam_index_build(filename,0); //TODO check the min_shift
+     RETVAL = sam_index_build(filename,0); //generate BAI for BAM files
   OUTPUT:
      RETVAL
 
