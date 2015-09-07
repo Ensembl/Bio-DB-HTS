@@ -323,12 +323,12 @@ hts_index_build(packname, filename)
 
 
 Bio::DB::HTS::Index
-hts_index_open(htsfile, index_filename)
+hts_index_load(htsfile)
     Bio::DB::HTSfile htsfile
-    char * index_filename
     PROTOTYPE: $$
     CODE:
-      RETVAL = sam_index_load(htsfile, index_filename) ;
+      printf( "rn6XSDebug: hts_index_load for %s\n", htsfile->fn ) ;
+      RETVAL = sam_index_load(htsfile, htsfile->fn) ;
     OUTPUT:
       RETVAL
 

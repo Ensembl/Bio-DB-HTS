@@ -2075,8 +2075,8 @@ sub bam_index
     {
       return $self->{bai} ;
     }
-    my $fpath = $self->{hts_path} ;
-    $self->{bai} = Bio::DB::HTSfile->index($fpath,$self->autoindex) ;
+    my $fh = $self->{hts_file} ;
+    $self->{bai} = $fh->index_load() ;
     return $self->{bai} ;
 }
 
@@ -2209,11 +2209,14 @@ use File::Spec;
 use Cwd;
 use Carp 'croak';
 
-sub index {
+sub index
+{
     my $self = shift;
-    my $path = shift;
+    my $fh = shift;
     my $autoindex = shift;
 
+    printf Carp::longmess("rn6DEBUG: HTS.pm: index call");
+    my $path = $fh->{hts_path} ;
     return $self->index_open_in_safewd($path) if Bio::DB::HTS->is_remote($path);
 
     if ($autoindex)
@@ -2223,7 +2226,7 @@ sub index {
     }
 
     croak "No index file for $path; try opening file with -autoindex" unless -e "${path}.bai";
-    return $self->index_open($path);
+    return $fh->index_load();
 }
 
 sub reindex {
