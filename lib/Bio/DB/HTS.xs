@@ -323,18 +323,22 @@ hts_index_build(packname, filename)
 
 
 Bio::DB::HTS::Index
-hts_index_open(packname="Bio::DB::HTSfile", filename)
-      char * packname
-      char * filename
-    PREINIT:
-      int  fmt ;
+hts_index_open(htsfile, index_filename)
+    Bio::DB::HTSfile htsfile
+    char * index_filename
     PROTOTYPE: $$
     CODE:
-      fmt = get_index_fmt_from_extension(filename) ;
-      printf( "hts_index_open:%s, %d\n", filename, fmt ) ;
-      RETVAL = hts_idx_load(filename,fmt);
+      RETVAL = sam_index_load(htsfile, index_filename) ;
     OUTPUT:
       RETVAL
+
+
+void
+hts_index_close(indexfile)
+           Bio::DB::HTS::Index indexfile
+    PROTOTYPE: $$
+    CODE:
+           hts_idx_destroy(indexfile) ;
 
 
 
