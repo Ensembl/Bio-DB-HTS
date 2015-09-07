@@ -234,11 +234,7 @@ int get_index_fmt_from_extension(const char * filename)
   }
   if( strcmp(ext, ".bam")==0 )
   {
-    return HTS_FMT_BAI ;
-  }
-  if( strcmp(ext, ".sam")==0 )
-  {
-    return HTS_FMT_CSI ;  //TODO check on this
+    return HTS_FMT_BAI ; //could also be HTS_FMT_CSI
   }
   return -1 ;
 }
