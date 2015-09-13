@@ -1365,7 +1365,6 @@ sub new {
 	    -e $hts_path or croak "$hts_path does not exist";
 	    -r _ or croak "is not readable";
     }
-
     my $hts_file = Bio::DB::HTSfile->open($hts_path) or croak "$hts_path open: $!";
 
     my $fai = $class->new_dna_accessor($fa_path) if $fa_path;
@@ -1381,12 +1380,14 @@ sub new {
       autoindex     => $autoindex,
       force_refseq  => $force_refseq,
     },ref $class || $class;
-  my $b = $self->{hts_file} ;
-  $self->header;  # catch it
-  return $self;
+    my $b = $self->{hts_file} ;
+    $self->header;  # catch it
+    return $self;
 }
 
 sub bam { shift->{hts_file} }
+
+sub hts_file { shift->{hts_file} }
 
 sub is_remote {
     my $self = shift;
@@ -2073,19 +2074,15 @@ sub _segment_search {
 sub bam_index
 {
     my $self = shift;
-    printf( "rn6DEBUG:bam_index called\n" ) ;
-    print Carp::longmess();
+    my $refType = ref($self);
+    print("rn6DEBUG-PM-bam_index:self type is ") ;
+    defined($refType) ? print "$refType\n" : print("Non-reference\n");
     if( defined $self->{bai} )
     {
       return $self->{bai} ;
     }
     my $fh = $self->{hts_file} ;
-    printf( "rn6DEBUG-PM:file_handle\n" ) ;
-    $self->{bai} = $fh->index_load() ;
-    if( !defined($self->{bai}) )
-    {
-      printf( "bai index object not defined\n" ) ;
-    }
+    $self->{bai} = Bio::DB::HTSfile->index($self) ;
     return $self->{bai} ;
 }
 
@@ -2221,19 +2218,21 @@ use Carp 'croak';
 sub index
 {
     my $self = shift;
-    my $fh = shift;
-    my $autoindex = shift;
+    my $fh = $self->{hts_file} ;
+    my $autoindex = $self->{autoindex};
 
     printf Carp::longmess("rn6DEBUG: HTS.pm: index call");
-    my $path = $fh->{hts_path} ;
+    my $path = $self->{hts_path} ;
     return $self->index_open_in_safewd($path) if Bio::DB::HTS->is_remote($path);
 
     if ($autoindex)
     {
+      #TODO: test will fail due to filenames
       $self->reindex($path) unless
         -e "${path}.bai" && mtime($path) <= mtime("${path}.bai");
     }
 
+    #TODO: needs to be able to work for CRAM as well as BAM
     croak "No index file for $path; try opening file with -autoindex" unless -e "${path}.bai";
     return $fh->index_load();
 }
