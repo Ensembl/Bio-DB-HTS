@@ -1535,7 +1535,9 @@ sub _fetch {
 
     return unless defined $seqid;
     my $index  = $self->bam_index;
-    $index->fetch($self->{hts_file},$seqid,$start,$end,$callback,$self);
+    $index->fetch(
+                  $self->{hts_file},
+                  $seqid, $start, $end, $callback, $self ) ;
 }
 
 sub fetch {
@@ -2071,12 +2073,19 @@ sub _segment_search {
 sub bam_index
 {
     my $self = shift;
+    printf( "rn6DEBUG:bam_index called\n" ) ;
+    print Carp::longmess();
     if( defined $self->{bai} )
     {
       return $self->{bai} ;
     }
     my $fh = $self->{hts_file} ;
+    printf( "rn6DEBUG-PM:file_handle\n" ) ;
     $self->{bai} = $fh->index_load() ;
+    if( !defined($self->{bai}) )
+    {
+      printf( "bai index object not defined\n" ) ;
+    }
     return $self->{bai} ;
 }
 

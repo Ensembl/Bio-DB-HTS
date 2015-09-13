@@ -327,7 +327,7 @@ hts_index_load(htsfile)
     Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
     CODE:
-      printf( "rn6XSDebug: hts_index_load for %s\n", htsfile->fn ) ;
+      printf( "rn6DEBUG-XS: hts_index_load for %s\n", htsfile->fn ) ;
       RETVAL = sam_index_load(htsfile, htsfile->fn) ;
     OUTPUT:
       RETVAL
