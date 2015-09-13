@@ -2218,6 +2218,10 @@ use Carp 'croak';
 sub index
 {
     my $self = shift;
+    my $refType = ref($self);
+    print("rn6DEBUG-PM-index:self=$self\n") ;
+    print("rn6DEBUG-PM-index:self type is ") ;
+    defined($refType) ? print "$refType\n" : print("Non-reference\n");
     my $fh = $self->{hts_file} ;
     my $autoindex = $self->{autoindex};
 
