@@ -239,6 +239,22 @@ int get_index_fmt_from_extension(const char * filename)
 }
 
 
+int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data, hts_readrec_func *func)
+{
+    int ret;
+    hts_itr_t iter = hts_itr_query(idx, tid, beg, end, func);
+    bam1_t *b = bam_init1();
+
+    while((ret = hts_itr_next(fp, iter, b)) >= 0)
+    {
+        func(b, data);
+    }
+    hts_itr_destroy(iter);
+    bam_destroy1(b);
+    return (ret == -1)? 0 : ret;
+}
+
+
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Fai PREFIX=fai_
@@ -348,7 +364,7 @@ hts_header_read(htsfile)
       bam_hdr_t *bh;
       int64_t result ;
     CODE:
-      if( htsfile->format.format == 4 )
+      if( htsfile->format.format == 4 ) //TODO put define value in
       {
         result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
       }
