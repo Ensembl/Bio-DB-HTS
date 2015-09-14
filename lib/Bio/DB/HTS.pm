@@ -2081,7 +2081,6 @@ sub bam_index
     {
       return $self->{bai} ;
     }
-    my $fh = $self->{hts_file} ;
     $self->{bai} = Bio::DB::HTSfile->index($self) ;
     return $self->{bai} ;
 }
@@ -2217,16 +2216,17 @@ use Carp 'croak';
 
 sub index
 {
-    my $self = shift;
-    my $refType = ref($self);
-    print("rn6DEBUG-PM-index:self=$self\n") ;
+    my $self = shift ;
+    my $hts_obj = shift ;
+    my $refType = ref($hts_obj);
+    print("rn6DEBUG-PM-index:self=$hts_obj\n") ;
     print("rn6DEBUG-PM-index:self type is ") ;
-    defined($refType) ? print "$refType\n" : print("Non-reference\n");
-    my $fh = $self->{hts_file} ;
-    my $autoindex = $self->{autoindex};
+    defined($refType) ? print "$refType.\n" : print("Non-reference.\n");
+    my $fh = $hts_obj->{hts_file} ;
+    my $autoindex = $hts_obj->{autoindex};
 
     printf Carp::longmess("rn6DEBUG: HTS.pm: index call");
-    my $path = $self->{hts_path} ;
+    my $path = $hts_obj->{hts_path} ;
     return $self->index_open_in_safewd($path) if Bio::DB::HTS->is_remote($path);
 
     if ($autoindex)
