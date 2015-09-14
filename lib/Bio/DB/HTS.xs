@@ -227,20 +227,31 @@ void bam_view1(const bam_hdr_t *header, const bam1_t *b)
 int get_index_fmt_from_extension(const char * filename)
 {
   char * ext = strrchr( filename, '.' ) ;
-  printf( "Trying to match extension %s for %s\n", ext, filename ) ;
   if( strcmp(ext, ".cram")==0 )
   {
     return HTS_FMT_CRAI ;
   }
   if( strcmp(ext, ".bam")==0 )
   {
-    return HTS_FMT_BAI ;
-  }
-  if( strcmp(ext, ".sam")==0 )
-  {
-    return HTS_FMT_CSI ;  //check on this?
+    return HTS_FMT_BAI ; //could also be HTS_FMT_CSI
   }
   return -1 ;
+}
+
+
+int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data, hts_readrec_func *func)
+{
+    int ret;
+    hts_itr_t iter = hts_itr_query(idx, tid, beg, end, func);
+    bam1_t *b = bam_init1();
+
+    while((ret = hts_itr_next(fp, iter, b)) >= 0)
+    {
+        func(b, data);
+    }
+    hts_itr_destroy(iter);
+    bam_destroy1(b);
+    return (ret == -1)? 0 : ret;
 }
 
 
@@ -320,25 +331,28 @@ hts_index_build(packname, filename)
    char *      packname
    const char * filename
   CODE:
-     RETVAL = sam_index_build(filename,0); //TODO check the min_shift
+     RETVAL = sam_index_build(filename,0); //generate BAI for BAM files
   OUTPUT:
      RETVAL
 
 
 
 Bio::DB::HTS::Index
-hts_index_open(packname="Bio::DB::HTSfile", filename)
-      char * packname
-      char * filename
-    PREINIT:
-      int  fmt ;
+hts_index_load(htsfile)
+    Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
     CODE:
-      fmt = get_index_fmt_from_extension(filename) ;
-      printf( "hts_index_open:%s, %d\n", filename, fmt ) ;
-      RETVAL = hts_idx_load(filename,fmt);
+      RETVAL = sam_index_load(htsfile, htsfile->fn) ;
     OUTPUT:
       RETVAL
+
+
+void
+hts_index_close(indexfile)
+           Bio::DB::HTS::Index indexfile
+    PROTOTYPE: $$
+    CODE:
+           hts_idx_destroy(indexfile) ;
 
 
 
@@ -350,7 +364,7 @@ hts_header_read(htsfile)
       bam_hdr_t *bh;
       int64_t result ;
     CODE:
-      if( htsfile->format.format == 4 )
+      if( htsfile->format.format == 4 ) //TODO put define value in
       {
         result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
       }
@@ -906,6 +920,135 @@ bam_DESTROY(bamh)
   CODE:
     bam_hdr_destroy(bamh);
 
+
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Index PREFIX=bami_
+
+int
+bami_fetch(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+  Bio::DB::HTS::Index bai
+  Bio::DB::HTSfile    bfp
+  int   ref
+  int   start
+  int   end
+  CV*   callback
+  SV*   callbackdata
+PREINIT:
+  fetch_callback_data fcd;
+CODE:
+  {
+    fcd.callback = (SV*) callback;
+    fcd.data     = callbackdata;
+    RETVAL = bam_fetch(bfp,bai,ref,start,end,&fcd,bam_fetch_fun);
+  }
+OUTPUT:
+    RETVAL
+
+void
+bami_lpileup(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+  Bio::DB::HTS::Index bai
+  Bio::DB::HTSfile    bfp
+  int   ref
+  int   start
+  int   end
+  CV*   callback
+  SV*   callbackdata
+PREINIT:
+  fetch_callback_data fcd;
+  bam_lplbuf_t        *pileup;
+CODE:
+  fcd.callback = (SV*) callback;
+  fcd.data     = callbackdata;
+  pileup       = bam_lplbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
+  bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
+  bam_lplbuf_push(NULL,pileup);
+  bam_lplbuf_destroy(pileup);
+
+void
+bami_pileup(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+  Bio::DB::HTS::Index bai
+  Bio::DB::HTSfile    bfp
+  int   ref
+  int   start
+  int   end
+  CV*   callback
+  SV*   callbackdata
+PREINIT:
+  fetch_callback_data fcd;
+  bam_plbuf_t        *pileup;
+CODE:
+  fcd.callback = (SV*) callback;
+  fcd.data     = callbackdata;
+  pileup       = bam_plbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
+  bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
+  bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+  bam_plbuf_push(NULL,pileup);
+  bam_plbuf_destroy(pileup);
+
+AV*
+bami_coverage(bai,bfp,ref,start,end,bins=0,maxcnt=8000)
+    Bio::DB::HTS::Index bai
+    Bio::DB::HTSfile    bfp
+    int             ref
+    int             start
+    int             end
+    int             bins
+    int             maxcnt
+PREINIT:
+    coverage_graph  cg;
+    bam_plbuf_t    *pileup;
+    AV*             array;
+    SV*             cov;
+    int             i;
+    bam_header_t   *bh;
+CODE:
+  {
+
+      if (end >= MAX_REGION) {
+          bgzf_seek(bfp,0,0);
+          bh  = bam_header_read(bfp);
+          end = bh->target_len[ref];
+          bam_header_destroy(bh);
+      }
+      if ((bins==0) || (bins > (end-start)))
+         bins = end-start;
+
+      /* coverage graph used to communicate to our callback
+	  the region we are sampling */
+      cg.start = start;
+      cg.end   = end;
+      cg.reads = 0;
+      cg.width = ((double)(end-start))/bins;
+      Newxz(cg.bin,bins+1,int);
+
+      /* accumulate coverage into the coverage graph */
+      pileup   = bam_plbuf_init(coverage_from_pileup_fun,(void*)&cg);
+      if (items >= 7)
+            bam_plp_set_maxcnt(pileup->iter,maxcnt);
+      else
+            bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
+      bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+      bam_plbuf_push(NULL,pileup);
+      bam_plbuf_destroy(pileup);
+
+      /* now normalize to coverage/bp and convert into an array */
+      array = newAV();
+      av_extend(array,bins);
+      for  (i=0;i<bins;i++)
+           av_store(array,i,newSVnv(((float)cg.bin[i])/cg.width));
+      Safefree(cg.bin);
+      RETVAL = array;
+      sv_2mortal((SV*)RETVAL);  /* this fixes a documented bug in perl typemap */
+  }
+OUTPUT:
+    RETVAL
+
+
+void
+bami_close(hts_idx)
+  Bio::DB::HTS::Index hts_idx
+  CODE:
+    hts_idx_destroy(bai) ;
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Pileup PREFIX=pl_

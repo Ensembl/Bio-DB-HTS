@@ -347,7 +347,7 @@ Unfortunately, the BAM library does not do great error recovery for
 this condition, and you may experience a core dump. This is not
 trappable via an eval {}.
 
-=item $bai    = $sam->bam_index
+=item $hts_idx    = $sam->hts_index
 
 Return the Bio::DB::HTS::Index object associated with the BAM file.
 
@@ -1365,7 +1365,6 @@ sub new {
 	    -e $hts_path or croak "$hts_path does not exist";
 	    -r _ or croak "is not readable";
     }
-
     my $hts_file = Bio::DB::HTSfile->open($hts_path) or croak "$hts_path open: $!";
 
     my $fai = $class->new_dna_accessor($fa_path) if $fa_path;
@@ -1381,12 +1380,14 @@ sub new {
       autoindex     => $autoindex,
       force_refseq  => $force_refseq,
     },ref $class || $class;
-  my $b = $self->{hts_file} ;
-  $self->header;  # catch it
-  return $self;
+    my $b = $self->{hts_file} ;
+    $self->header;  # catch it
+    return $self;
 }
 
 sub bam { shift->{hts_file} }
+
+sub hts_file { shift->{hts_file} }
 
 sub is_remote {
     my $self = shift;
@@ -1534,8 +1535,10 @@ sub _fetch {
     my ($seqid,$start,$end) = $header->parse_region($region);
 
     return unless defined $seqid;
-    my $index  = $self->bam_index;
-    $index->fetch($self->{hts_file},$seqid,$start,$end,$callback,$self);
+    my $index  = $self->hts_index;
+    $index->fetch(
+                  $self->{hts_file},
+                  $seqid, $start, $end, $callback, $self ) ;
 }
 
 sub fetch {
@@ -1570,7 +1573,7 @@ sub pileup {
 	$callback->($seqid,$pos+1,\@p);
     };
 
-    my $index  = $self->bam_index;
+    my $index  = $self->hts_index;
     if ($keep_level) {
 	$index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
     } else {
@@ -1595,7 +1598,7 @@ sub fast_pileup {
   $callback->($seqid,$pos+1,$pileup,$self);
     };
 
-    my $index  = $self->bam_index;
+    my $index  = $self->hts_index;
     if ($keep_level) {
   $index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
     } else {
@@ -1823,7 +1826,7 @@ sub coverage2BedGraph {
     $fh ||= \*STDOUT;
 
     my $header  = $self->header;
-    my $index   = $self->bam_index;
+    my $index   = $self->hts_index;
     my $seqids  = $header->target_name;
     my $lengths = $header->target_len;
     my $b       = $self->bam;
@@ -2036,7 +2039,7 @@ sub _coverage {
     $start = $s+1;
     $bins ||= $end-$start+1;
 
-    my $index      = $self->bam_index;
+    my $index      = $self->hts_index;
     my $coverage   = $index->coverage($self->{hts_file},
 				      $id,$s,$e,
 				      $bins);
@@ -2068,9 +2071,15 @@ sub _segment_search {
     return;
 }
 
-sub bam_index {
+sub hts_index
+{
     my $self = shift;
-    return $self->{bai} ||= Bio::DB::HTSfile->index($self->{hts_path},$self->autoindex);
+    if( defined $self->{hts_idx} )
+    {
+      return $self->{hts_idx} ;
+    }
+    $self->{hts_idx} = Bio::DB::HTSfile->index($self) ;
+    return $self->{hts_idx} ;
 }
 
 sub _features_fh {
@@ -2202,21 +2211,26 @@ use File::Spec;
 use Cwd;
 use Carp 'croak';
 
-sub index {
-    my $self = shift;
-    my $path = shift;
-    my $autoindex = shift;
+sub index
+{
+    my $self = shift ;
+    my $hts_obj = shift ;
+    my $fh = $hts_obj->{hts_file} ;
+    my $autoindex = $hts_obj->{autoindex};
+    my $path = $hts_obj->{hts_path} ;
 
     return $self->index_open_in_safewd($path) if Bio::DB::HTS->is_remote($path);
 
     if ($autoindex)
     {
+      #TODO: test will fail due to filenames
       $self->reindex($path) unless
         -e "${path}.bai" && mtime($path) <= mtime("${path}.bai");
     }
 
+    #TODO: needs to be able to work for CRAM as well as BAM
     croak "No index file for $path; try opening file with -autoindex" unless -e "${path}.bai";
-    return $self->index_open($path);
+    return $fh->index_load();
 }
 
 sub reindex {
@@ -2225,7 +2239,7 @@ sub reindex {
 
     # if bam file is not sorted, then index_build will exit.
     # we spawn a shell to intercept this eventuality
-    print STDERR "[bam_index_build] creating index for $path\n" if -t STDOUT;
+    print STDERR "[hts_index_build] creating index for $path\n" if -t STDOUT;
 
     my $result = open my $fh,"-|";
     die "Couldn't fork $!" unless defined $result;
@@ -2241,7 +2255,7 @@ sub reindex {
     $mesg  ||= '';
     close $fh;
     if ($mesg =~ /not sorted/i) {
-	print STDERR "[bam_index_build] sorting by coordinate...\n" if -t STDOUT;
+	print STDERR "[hts_index_build] sorting by coordinate...\n" if -t STDOUT;
 	$self->sort_core(0,$path,"$path.sorted");
 	rename "$path.sorted.bam",$path;
 	$self->index_build($path);
