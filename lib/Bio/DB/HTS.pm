@@ -2074,7 +2074,6 @@ sub _segment_search {
 sub bam_index
 {
     my $self = shift;
-    my $refType = ref($self);
     if( defined $self->{bai} )
     {
       return $self->{bai} ;

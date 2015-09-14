@@ -227,7 +227,6 @@ void bam_view1(const bam_hdr_t *header, const bam1_t *b)
 int get_index_fmt_from_extension(const char * filename)
 {
   char * ext = strrchr( filename, '.' ) ;
-  printf( "Trying to match extension %s for %s\n", ext, filename ) ;
   if( strcmp(ext, ".cram")==0 )
   {
     return HTS_FMT_CRAI ;
@@ -327,7 +326,6 @@ hts_index_load(htsfile)
     Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
     CODE:
-      printf( "rn6DEBUG-XS: hts_index_load for %s\n", htsfile->fn ) ;
       RETVAL = sam_index_load(htsfile, htsfile->fn) ;
     OUTPUT:
       RETVAL
