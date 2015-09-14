@@ -1023,16 +1023,16 @@ CODE:
       Safefree(cg.bin);
       RETVAL = array;
       sv_2mortal((SV*)RETVAL);  /* this fixes a documented bug in perl typemap */
-
   }
 OUTPUT:
     RETVAL
 
+
 void
-bami_DESTROY(bai)
-  Bio::DB::HTS::Index bai
+bami_close(hts_idx)
+  Bio::DB::HTS::Index hts_idx
   CODE:
-    bam_index_destroy(bai);
+    hts_idx_destroy(bai) ;
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Pileup PREFIX=pl_
