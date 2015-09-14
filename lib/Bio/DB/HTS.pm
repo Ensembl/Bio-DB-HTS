@@ -347,7 +347,7 @@ Unfortunately, the BAM library does not do great error recovery for
 this condition, and you may experience a core dump. This is not
 trappable via an eval {}.
 
-=item $bai    = $sam->bam_index
+=item $bai    = $sam->hts_index
 
 Return the Bio::DB::HTS::Index object associated with the BAM file.
 
@@ -1535,7 +1535,7 @@ sub _fetch {
     my ($seqid,$start,$end) = $header->parse_region($region);
 
     return unless defined $seqid;
-    my $index  = $self->bam_index;
+    my $index  = $self->hts_index;
     $index->fetch(
                   $self->{hts_file},
                   $seqid, $start, $end, $callback, $self ) ;
@@ -1573,7 +1573,7 @@ sub pileup {
 	$callback->($seqid,$pos+1,\@p);
     };
 
-    my $index  = $self->bam_index;
+    my $index  = $self->hts_index;
     if ($keep_level) {
 	$index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
     } else {
@@ -1598,7 +1598,7 @@ sub fast_pileup {
   $callback->($seqid,$pos+1,$pileup,$self);
     };
 
-    my $index  = $self->bam_index;
+    my $index  = $self->hts_index;
     if ($keep_level) {
   $index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
     } else {
@@ -1826,7 +1826,7 @@ sub coverage2BedGraph {
     $fh ||= \*STDOUT;
 
     my $header  = $self->header;
-    my $index   = $self->bam_index;
+    my $index   = $self->hts_index;
     my $seqids  = $header->target_name;
     my $lengths = $header->target_len;
     my $b       = $self->bam;
@@ -2039,7 +2039,7 @@ sub _coverage {
     $start = $s+1;
     $bins ||= $end-$start+1;
 
-    my $index      = $self->bam_index;
+    my $index      = $self->hts_index;
     my $coverage   = $index->coverage($self->{hts_file},
 				      $id,$s,$e,
 				      $bins);
@@ -2071,7 +2071,7 @@ sub _segment_search {
     return;
 }
 
-sub bam_index
+sub hts_index
 {
     my $self = shift;
     if( defined $self->{bai} )
@@ -2239,7 +2239,7 @@ sub reindex {
 
     # if bam file is not sorted, then index_build will exit.
     # we spawn a shell to intercept this eventuality
-    print STDERR "[bam_index_build] creating index for $path\n" if -t STDOUT;
+    print STDERR "[hts_index_build] creating index for $path\n" if -t STDOUT;
 
     my $result = open my $fh,"-|";
     die "Couldn't fork $!" unless defined $result;
@@ -2255,7 +2255,7 @@ sub reindex {
     $mesg  ||= '';
     close $fh;
     if ($mesg =~ /not sorted/i) {
-	print STDERR "[bam_index_build] sorting by coordinate...\n" if -t STDOUT;
+	print STDERR "[hts_index_build] sorting by coordinate...\n" if -t STDOUT;
 	$self->sort_core(0,$path,"$path.sorted");
 	rename "$path.sorted.bam",$path;
 	$self->index_build($path);
