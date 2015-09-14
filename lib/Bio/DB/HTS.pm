@@ -347,7 +347,7 @@ Unfortunately, the BAM library does not do great error recovery for
 this condition, and you may experience a core dump. This is not
 trappable via an eval {}.
 
-=item $bai    = $sam->hts_index
+=item $hts_idx    = $sam->hts_index
 
 Return the Bio::DB::HTS::Index object associated with the BAM file.
 
@@ -2074,12 +2074,12 @@ sub _segment_search {
 sub hts_index
 {
     my $self = shift;
-    if( defined $self->{bai} )
+    if( defined $self->{hts_idx} )
     {
-      return $self->{bai} ;
+      return $self->{hts_idx} ;
     }
-    $self->{bai} = Bio::DB::HTSfile->index($self) ;
-    return $self->{bai} ;
+    $self->{hts_idx} = Bio::DB::HTSfile->index($self) ;
+    return $self->{hts_idx} ;
 }
 
 sub _features_fh {
