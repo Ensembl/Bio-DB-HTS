@@ -1065,7 +1065,8 @@ void
 bami_close(hts_idx)
   Bio::DB::HTS::Index hts_idx
   CODE:
-    hts_idx_destroy(bai) ;
+    hts_idx_destroy(hts_idx) ;
+
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Pileup PREFIX=pl_
