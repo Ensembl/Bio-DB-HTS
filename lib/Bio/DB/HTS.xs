@@ -161,6 +161,18 @@ int invoke_pileup_callback_fun(uint32_t tid,
   LEAVE;
 }
 
+int add_pileup_line (const bam1_t *b, void *data) {
+  bam_plbuf_t *pileup = (bam_plbuf_t*) data;
+  bam_plbuf_push(b,pileup);
+  return 0;
+}
+
+int add_lpileup_line (const bam1_t *b, void *data) {
+  bam_lplbuf_t *pileup = (bam_lplbuf_t*) data;
+  bam_lplbuf_push(b,pileup);
+  return 0;
+}
+
 int coverage_from_pileup_fun (uint32_t tid,
 			      uint32_t pos,
 			      int n,
