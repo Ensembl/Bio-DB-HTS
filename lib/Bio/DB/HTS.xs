@@ -58,6 +58,14 @@ typedef coverage_graph *coverage_graph_ptr;
 
 static int MaxPileupCnt=8000;
 
+/*! @typedef
+  @abstract      Type of function to be called by hts_fetch().
+  @param  b     the alignment
+  @param  data  user provided data
+ */
+
+typedef int (*bam_fetch_f)(const bam1_t *b, void *data);
+
 void XS_pack_charPtrPtr( SV * arg, char ** array, int count) {
   int i;
   AV * avref;
@@ -204,7 +212,7 @@ int bam_parse_region(bam_hdr_t *header, const char *str, int *ref_id, int *beg, 
 }
 
 /**
-   From bam.c in samtools
+   From bam.c in samtools - these are wrappers that can be used OK here.
 */
 char *bam_format1(const bam_hdr_t *header, const bam1_t *b)
 {
@@ -223,7 +231,9 @@ void bam_view1(const bam_hdr_t *header, const bam1_t *b)
 }
 
 
-
+/**
+   Get the file extension for a filename
+*/
 int get_index_fmt_from_extension(const char * filename)
 {
   char * ext = strrchr( filename, '.' ) ;
@@ -238,16 +248,22 @@ int get_index_fmt_from_extension(const char * filename)
   return -1 ;
 }
 
-
-int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data, hts_readrec_func *func)
+/**
+   fetch function
+*/
+int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data,
+              bam_fetch_f func)
 {
     int ret;
-    hts_itr_t iter = hts_itr_query(idx, tid, beg, end, func);
-    bam1_t *b = bam_init1();
+    hts_itr_t *iter ;
+    bam1_t *b ;
 
-    while((ret = hts_itr_next(fp, iter, b)) >= 0)
+    iter = sam_itr_queryi(idx, tid, beg, end);
+    b = bam_init1();
+
+    while((ret = sam_itr_next(fp, iter, b)) >= 0)
     {
-        func(b, data);
+        func(data,b);
     }
     hts_itr_destroy(iter);
     bam_destroy1(b);
@@ -939,7 +955,7 @@ CODE:
   {
     fcd.callback = (SV*) callback;
     fcd.data     = callbackdata;
-    RETVAL = bam_fetch(bfp,bai,ref,start,end,&fcd,bam_fetch_fun);
+    RETVAL = hts_fetch(bfp,bai,ref,start,end,&fcd,bam_fetch_fun);
   }
 OUTPUT:
     RETVAL
@@ -960,7 +976,7 @@ CODE:
   fcd.callback = (SV*) callback;
   fcd.data     = callbackdata;
   pileup       = bam_lplbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
-  bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
+  hts_fetch(bfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
   bam_lplbuf_push(NULL,pileup);
   bam_lplbuf_destroy(pileup);
 
@@ -981,7 +997,7 @@ CODE:
   fcd.data     = callbackdata;
   pileup       = bam_plbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
   bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
-  bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+  hts_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
   bam_plbuf_push(NULL,pileup);
   bam_plbuf_destroy(pileup);
 
@@ -1000,11 +1016,12 @@ PREINIT:
     AV*             array;
     SV*             cov;
     int             i;
-    bam_header_t   *bh;
+    bam_hdr_t      *bh;
 CODE:
   {
-
-      if (end >= MAX_REGION) {
+     /* TODO make this general */
+      if (end >= MAX_REGION)
+      {
           bgzf_seek(bfp,0,0);
           bh  = bam_header_read(bfp);
           end = bh->target_len[ref];
@@ -1027,7 +1044,7 @@ CODE:
             bam_plp_set_maxcnt(pileup->iter,maxcnt);
       else
             bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
-      bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+      hts_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
       bam_plbuf_push(NULL,pileup);
       bam_plbuf_destroy(pileup);
 
