@@ -154,14 +154,14 @@ int invoke_pileup_callback_fun(uint32_t tid,
   LEAVE;
 }
 
-int add_pileup_line (void *data, const bam1_t *b)
+int add_pileup_line (void *data, bam1_t *b)
 {
   bam_plbuf_t *pileup = (bam_plbuf_t*) data;
   bam_plbuf_push(b,pileup);
   return 0;
 }
 
-int add_lpileup_line (void *data, const bam1_t *b)
+int add_lpileup_line (void *data, bam1_t *b)
 {
   bam_lplbuf_t *pileup = (bam_lplbuf_t*) data;
   bam_lplbuf_push(b,pileup);
