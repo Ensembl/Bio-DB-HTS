@@ -58,14 +58,6 @@ typedef coverage_graph *coverage_graph_ptr;
 
 static int MaxPileupCnt=8000;
 
-/*! @typedef
-  @abstract      Type of function to be called by hts_fetch().
-  @param  b     the alignment
-  @param  data  user provided data
- */
-
-typedef int (*bam_fetch_f)(const bam1_t *b, void *data);
-
 void XS_pack_charPtrPtr( SV * arg, char ** array, int count) {
   int i;
   AV * avref;
@@ -76,7 +68,8 @@ void XS_pack_charPtrPtr( SV * arg, char ** array, int count) {
   SvSetSV( arg, newRV((SV*)avref));
 }
 
-int bam_fetch_fun (const bam1_t *b, void *data) {
+int hts_fetch_fun (void *data, bam1_t *b)
+{
   dSP;
   int count;
 
@@ -161,13 +154,15 @@ int invoke_pileup_callback_fun(uint32_t tid,
   LEAVE;
 }
 
-int add_pileup_line (const bam1_t *b, void *data) {
+int add_pileup_line (void *data, const bam1_t *b)
+{
   bam_plbuf_t *pileup = (bam_plbuf_t*) data;
   bam_plbuf_push(b,pileup);
   return 0;
 }
 
-int add_lpileup_line (const bam1_t *b, void *data) {
+int add_lpileup_line (void *data, const bam1_t *b)
+{
   bam_lplbuf_t *pileup = (bam_lplbuf_t*) data;
   bam_lplbuf_push(b,pileup);
   return 0;
@@ -263,8 +258,7 @@ int get_index_fmt_from_extension(const char * filename)
 /**
    fetch function
 */
-int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data,
-              bam_fetch_f func)
+int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data, bam_plp_auto_f func)
 {
     int ret;
     hts_itr_t *iter ;
@@ -967,7 +961,7 @@ CODE:
   {
     fcd.callback = (SV*) callback;
     fcd.data     = callbackdata;
-    RETVAL = hts_fetch(bfp,bai,ref,start,end,&fcd,bam_fetch_fun);
+    RETVAL = hts_fetch(bfp,bai,ref,start,end,&fcd,hts_fetch_fun);
   }
 OUTPUT:
     RETVAL
