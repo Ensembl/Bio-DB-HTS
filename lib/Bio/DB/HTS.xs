@@ -154,6 +154,45 @@ int invoke_pileup_callback_fun(uint32_t tid,
   LEAVE;
 }
 
+/*
+   Declarations to allow add_pileup_line to work
+   Ported from samtoosl v1 setup.
+*/
+
+/* start pileup support copy from bam.h in samtools */
+
+    typedef struct {
+        bam_plp_t iter;
+        bam_pileup_f func;
+        void *data;
+    } bam_plbuf_t;
+
+    void bam_plbuf_reset(bam_plbuf_t *buf);
+    bam_plbuf_t *bam_plbuf_init(bam_pileup_f func, void *data);
+    void bam_plbuf_destroy(bam_plbuf_t *buf);
+    int bam_plbuf_push(const bam1_t *b, bam_plbuf_t *buf);
+
+    int bam_pileup_file(bamFile fp, int mask, bam_pileup_f func, void *func_data);
+
+    struct __bam_lplbuf_t;
+    typedef struct __bam_lplbuf_t bam_lplbuf_t;
+
+    void bam_lplbuf_reset(bam_lplbuf_t *buf);
+
+    /*! @abstract  bam_plbuf_init() equivalent with level calculated. */
+    bam_lplbuf_t *bam_lplbuf_init(bam_pileup_f func, void *data);
+
+    /*! @abstract  bam_plbuf_destroy() equivalent with level calculated. */
+    void bam_lplbuf_destroy(bam_lplbuf_t *tv);
+
+    /*! @abstract  bam_plbuf_push() equivalent with level calculated. */
+    int bam_lplbuf_push(const bam1_t *b, bam_lplbuf_t *buf);
+
+/* end pileup support copy from bam.h in samtools */
+
+/**
+   pileup support functions
+*/
 int add_pileup_line (void *data, bam1_t *b)
 {
   bam_plbuf_t *pileup = (bam_plbuf_t*) data;
