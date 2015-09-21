@@ -1020,10 +1020,10 @@ PREINIT:
 CODE:
   fcd.callback = (SV*) callback;
   fcd.data     = callbackdata;
-  pileup       = bam_lplbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
+  pileup       = hts_lplbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
   hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
-  bam_lplbuf_push(NULL,pileup);
-  bam_lplbuf_destroy(pileup);
+  hts_lplbuf_push(NULL,pileup);
+  hts_lplbuf_destroy(pileup);
 
 void
 bami_pileup(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
@@ -1043,8 +1043,8 @@ CODE:
   pileup       = bam_plbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
   bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
   hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
-  bam_plbuf_push(NULL,pileup);
-  bam_plbuf_destroy(pileup);
+  hts_plbuf_push(NULL,pileup);
+  hts_plbuf_destroy(pileup);
 
 AV*
 bami_coverage(bai,hfp,ref,start,end,bins=0,maxcnt=8000)
@@ -1057,7 +1057,7 @@ bami_coverage(bai,hfp,ref,start,end,bins=0,maxcnt=8000)
     int             maxcnt
 PREINIT:
     coverage_graph  cg;
-    bam_plbuf_t    *pileup;
+    hts_plbuf_t    *pileup;
     AV*             array;
     SV*             cov;
     int             i;
