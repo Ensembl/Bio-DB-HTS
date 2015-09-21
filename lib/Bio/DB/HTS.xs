@@ -947,9 +947,9 @@ bam_DESTROY(bamh)
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Index PREFIX=bami_
 
 int
-bami_fetch(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+bami_fetch(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
   Bio::DB::HTS::Index bai
-  Bio::DB::HTSfile    bfp
+  Bio::DB::HTSfile    hfp
   int   ref
   int   start
   int   end
@@ -961,15 +961,15 @@ CODE:
   {
     fcd.callback = (SV*) callback;
     fcd.data     = callbackdata;
-    RETVAL = hts_fetch(bfp,bai,ref,start,end,&fcd,hts_fetch_fun);
+    RETVAL = hts_fetch(hfp,bai,ref,start,end,&fcd,hts_fetch_fun);
   }
 OUTPUT:
     RETVAL
 
 void
-bami_lpileup(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+bami_lpileup(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
   Bio::DB::HTS::Index bai
-  Bio::DB::HTSfile    bfp
+  Bio::DB::HTSfile    hfp
   int   ref
   int   start
   int   end
@@ -982,14 +982,14 @@ CODE:
   fcd.callback = (SV*) callback;
   fcd.data     = callbackdata;
   pileup       = bam_lplbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
-  hts_fetch(bfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
+  hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
   bam_lplbuf_push(NULL,pileup);
   bam_lplbuf_destroy(pileup);
 
 void
-bami_pileup(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+bami_pileup(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
   Bio::DB::HTS::Index bai
-  Bio::DB::HTSfile    bfp
+  Bio::DB::HTSfile    hfp
   int   ref
   int   start
   int   end
@@ -1003,14 +1003,14 @@ CODE:
   fcd.data     = callbackdata;
   pileup       = bam_plbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
   bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
-  hts_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+  hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
   bam_plbuf_push(NULL,pileup);
   bam_plbuf_destroy(pileup);
 
 AV*
-bami_coverage(bai,bfp,ref,start,end,bins=0,maxcnt=8000)
+bami_coverage(bai,hfp,ref,start,end,bins=0,maxcnt=8000)
     Bio::DB::HTS::Index bai
-    Bio::DB::HTSfile    bfp
+    Bio::DB::HTSfile    hfp
     int             ref
     int             start
     int             end
@@ -1025,7 +1025,7 @@ PREINIT:
     bam_hdr_t      *bh;
 CODE:
   {
-     /* TODO make this general */
+     /* TODO make this general across file formats*/
       if (end >= MAX_REGION)
       {
           bgzf_seek(bfp,0,0);
@@ -1050,7 +1050,7 @@ CODE:
             bam_plp_set_maxcnt(pileup->iter,maxcnt);
       else
             bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
-      hts_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+      hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
       bam_plbuf_push(NULL,pileup);
       bam_plbuf_destroy(pileup);
 
