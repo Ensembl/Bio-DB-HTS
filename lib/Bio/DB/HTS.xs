@@ -174,20 +174,6 @@ int invoke_pileup_callback_fun(uint32_t tid,
     void hts_plbuf_destroy(hts_plbuf_t *buf);
     int hts_plbuf_push(const bam1_t *b, hts_plbuf_t *buf);
 
-    struct __hts_lplbuf_t;
-    typedef struct __hts_lplbuf_t hts_lplbuf_t;
-
-    void hts_lplbuf_reset(hts_lplbuf_t *buf);
-
-    /*! @abstract  bam_plbuf_init() equivalent with level calculated. */
-    hts_lplbuf_t *hts_lplbuf_init(bam_plp_auto_f func, void *data);
-
-    /*! @abstract  bam_plbuf_destroy() equivalent with level calculated. */
-    void hts_lplbuf_destroy(hts_lplbuf_t *tv);
-
-    /*! @abstract  bam_plbuf_push() equivalent with level calculated. */
-    int hts_lplbuf_push(const bam1_t *b, hts_lplbuf_t *buf);
-
 /* end pileup support copy from bam.h in samtools */
 
 /**
@@ -200,12 +186,7 @@ int add_pileup_line (void *data, bam1_t *b)
   return 0;
 }
 
-int add_lpileup_line (void *data, bam1_t *b)
-{
-  hts_lplbuf_t *pileup = (hts_lplbuf_t*) data;
-  hts_lplbuf_push(b,pileup);
-  return 0;
-}
+
 
 int coverage_from_pileup_fun (uint32_t tid,
 			      uint32_t pos,
@@ -1005,25 +986,6 @@ CODE:
 OUTPUT:
     RETVAL
 
-void
-bami_lpileup(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
-  Bio::DB::HTS::Index bai
-  Bio::DB::HTSfile    hfp
-  int   ref
-  int   start
-  int   end
-  CV*   callback
-  SV*   callbackdata
-PREINIT:
-  fetch_callback_data fcd;
-  bam_lplbuf_t        *pileup;
-CODE:
-  fcd.callback = (SV*) callback;
-  fcd.data     = callbackdata;
-  pileup       = hts_lplbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
-  hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
-  hts_lplbuf_push(NULL,pileup);
-  hts_lplbuf_destroy(pileup);
 
 void
 bami_pileup(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
