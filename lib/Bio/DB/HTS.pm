@@ -1555,7 +1555,7 @@ sub fetch {
 
 sub pileup {
     my $self   = shift;
-    my ($region,$callback,$keep_level) = @_;
+    my ($region,$callback) = @_;
 
     my $header   = $self->header;
     $region      =~ s/\.\.|,/-/;
@@ -1574,11 +1574,7 @@ sub pileup {
     };
 
     my $index  = $self->hts_index;
-    if ($keep_level) {
-	$index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
-    } else {
-	$index->pileup($self->{hts_file},$seqid,$start,$end,$code);
-    }
+	  $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
 }
 
 sub fast_pileup {
@@ -1599,11 +1595,7 @@ sub fast_pileup {
     };
 
     my $index  = $self->hts_index;
-    if ($keep_level) {
-  $index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
-    } else {
-  $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
-    }
+    $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
 }
 
 # segment returns a segment across the reference
