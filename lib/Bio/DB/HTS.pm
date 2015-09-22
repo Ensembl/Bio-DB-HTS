@@ -828,11 +828,6 @@ that are outside of the requested region. Also be aware that the
 reference sequence position uses 1-based coordinates, which is
 different from the low-level interface, which use 0-based coordinates.
 
-The optional $keep_level argument, if true, asks the BAM library to
-keep track of the level of the read in the multiple alignment, an
-operation that generates some overhead. This is mostly useful for text
-alignment viewers, and so is off by default.
-
 The size of the $pileup array reference indicates the read coverage
 at that position. Here is a simple average coverage calculator:
 
@@ -862,7 +857,8 @@ methods:
 
  $pileup->level  The level of the read in the multiple alignment
                  view. Note that this field is only valid when
-                 $keep_level is true.
+                 $keep_level is true, so it may not be relevant post
+                 htslib move.
 
  $pileup->indel  Length of the indel at this position: 0 for no indel, positive
                  for an insertion (relative to the reference), negative for a

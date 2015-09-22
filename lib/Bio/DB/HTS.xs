@@ -162,17 +162,41 @@ int invoke_pileup_callback_fun(uint32_t tid,
 /* start pileup support copy from bam.h in samtools */
 /* but pileup functions are offered as bam_plp_auto_f in htslib */
 
-    typedef struct
-    {
-        bam_plp_t iter;
-        bam_plp_auto_f func;
-        void *data;
-    } hts_plbuf_t;
+typedef struct
+{
+  bam_plp_t iter;
+  bam_plp_auto_f func;
+  void *data;
+} hts_plbuf_t;
 
-    void hts_plbuf_reset(hts_plbuf_t *buf);
-    hts_plbuf_t *hts_plbuf_init(bam_plp_auto_f func, void *data);
-    void hts_plbuf_destroy(hts_plbuf_t *buf);
-    int hts_plbuf_push(const bam1_t *b, hts_plbuf_t *buf);
+
+hts_plbuf_t *hts_plbuf_init(bam_plp_auto_f func, void *data)
+{
+    hts_plbuf_t *buf;
+    buf = calloc(1, sizeof(hts_plbuf_t));
+    buf->iter = bam_plp_init(0, 0);
+    buf->func = func;
+    buf->data = data;
+    return buf;
+}
+
+void hts_plbuf_destroy(hts_plbuf_t *buf)
+{
+    bam_plp_destroy(buf->iter);
+    free(buf);
+}
+
+int hts_plbuf_push(const bam1_t *b, hts_plbuf_t *buf)
+{
+    int ret, n_plp, tid, pos;
+    const bam_pileup1_t *plp;
+    ret = bam_plp_push(buf->iter, b);
+    if (ret < 0) return ret;
+    while ((plp = bam_plp_next(buf->iter, &tid, &pos, &n_plp)) != 0)
+        buf->func(tid, pos, n_plp, plp, buf->data);
+    return 0;
+}
+
 
 /* end pileup support copy from bam.h in samtools */
 
@@ -389,7 +413,6 @@ hts_index_load(htsfile)
       RETVAL
 
 
-void
 hts_index_close(indexfile)
            Bio::DB::HTS::Index indexfile
     PROTOTYPE: $$
