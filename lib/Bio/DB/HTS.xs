@@ -33,7 +33,7 @@
 #include "bgzf.h"
 
 /* stolen from bam_aux.c */
-#define MAX_REGION 1<<29
+#define BAM_MAX_REGION 1<<29
 
 typedef htsFile*        Bio__DB__HTSfile;
 typedef bam_hdr_t*      Bio__DB__HTS__Header;
@@ -431,7 +431,7 @@ hts_header_read(htsfile)
       bam_hdr_t *bh;
       int64_t result ;
     CODE:
-      if( htsfile->format.format == 4 ) //TODO put define value in
+      if( htsfile->format.format == bam ) //enum value from htsExactFormat from hts.h
       {
         result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
       }
@@ -1051,13 +1051,15 @@ PREINIT:
     bam_hdr_t      *bh;
 CODE:
   {
-     /* TODO make this general across file formats*/
-      if (end >= MAX_REGION)
+      if (end >= BAM_MAX_REGION)
       {
-          bgzf_seek(bfp,0,0);
-          bh  = bam_header_read(bfp);
+        if( hfp->format.format == bam ) //enum value from htsExactFormat from hts.h
+        {
+          bgzf_seek(hfp->fp.bgzf,0,0);
+          bh = sam_hdr_read(hfp);
           end = bh->target_len[ref];
-          bam_header_destroy(bh);
+          bam_hdr_destroy(bh);
+        }
       }
       if ((bins==0) || (bins > (end-start)))
          bins = end-start;
