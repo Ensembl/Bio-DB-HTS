@@ -162,15 +162,17 @@ int invoke_pileup_callback_fun(uint32_t tid,
 /* start pileup support copy from bam.h in samtools */
 /* but pileup functions are offered as bam_plp_auto_f in htslib */
 
+typedef int (*bam_pileup_f)(uint32_t tid, uint32_t pos, int n, const bam_pileup1_t *pl, void *data);
+
 typedef struct
 {
   bam_plp_t iter;
-  bam_plp_auto_f func;
+  bam_pileup_f func;
   void *data;
 } hts_plbuf_t;
 
 
-hts_plbuf_t *hts_plbuf_init(bam_plp_auto_f func, void *data)
+hts_plbuf_t *hts_plbuf_init(bam_pileup_f func, void *data)
 {
     hts_plbuf_t *buf;
     buf = calloc(1, sizeof(hts_plbuf_t));
@@ -412,7 +414,7 @@ hts_index_load(htsfile)
     OUTPUT:
       RETVAL
 
-
+void
 hts_index_close(indexfile)
            Bio::DB::HTS::Index indexfile
     PROTOTYPE: $$
