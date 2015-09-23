@@ -1051,6 +1051,7 @@ PREINIT:
     bam_hdr_t      *bh;
 CODE:
   {
+      /* TODO:can we do away with this check by a move to CSI as the standard for BAM indices */
       if (end >= BAM_MAX_REGION)
       {
         if( hfp->format.format == bam ) //enum value from htsExactFormat from hts.h
