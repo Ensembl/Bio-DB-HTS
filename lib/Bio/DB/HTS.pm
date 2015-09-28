@@ -1792,6 +1792,7 @@ sub features
         # otherwise aggregate mate pairs into two-level features
         elsif ($t =~ /^read_pair/)
         {
+          print("rn6DEBUG-HTS-pm-read_pair features being hunted\n") ;
           $self->_build_mates($features,\@result);
         }
         next;
@@ -2218,8 +2219,8 @@ sub index
         -e "${path}.bai" && mtime($path) <= mtime("${path}.bai");
     }
 
-    #TODO: needs to be able to work for CRAM as well as BAM
-    croak "No index file for $path; try opening file with -autoindex" unless -e "${path}.bai";
+    croak "No index file for $path; try opening file with -autoindex"
+      unless -e "${path}.bai" or -e "${path}.crai" ;
     return $fh->index_load();
 }
 
