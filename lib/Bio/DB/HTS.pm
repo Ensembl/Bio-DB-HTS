@@ -2214,9 +2214,14 @@ sub index
 
     if ($autoindex)
     {
-      #TODO: test will fail due to filenames
-      $self->reindex($path) unless
-        -e "${path}.bai" && mtime($path) <= mtime("${path}.bai");
+      if( -e "${path}.bai" && mtime($path) > mtime("${path}.bai") )
+      {
+        $self->reindex($path) ;
+      }
+      elsif( -e "${path}.crai" && mtime($path) > mtime("${path}.crai") )
+      {
+        $self->reindex($path) ;
+      }
     }
 
     croak "No index file for $path; try opening file with -autoindex"
