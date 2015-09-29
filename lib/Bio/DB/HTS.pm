@@ -11,12 +11,12 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  use Bio::DB::HTS;
 
  # high level API
- my $sam = Bio::DB::HTS->new(-bam  =>"data/ex1.bam",
+ my $hts = Bio::DB::HTS->new(-bam  =>"data/ex1.bam",
                              -fasta=>"data/ex1.fa",
 			     );
 
- my @targets    = $sam->seq_ids;
- my @alignments = $sam->get_features_by_location(-seq_id => 'seq2',
+ my @targets    = $hts->seq_ids;
+ my @alignments = $hts->get_features_by_location(-seq_id => 'seq2',
                                                  -start  => 500,
                                                  -end    => 800);
  for my $a (@alignments) {
@@ -40,12 +40,13 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
     my $match_qual= $a->qual;       # quality of the match
  }
 
- my @pairs = $sam->get_features_by_location(-type   => 'read_pair',
+ my @pairs = $hts->get_features_by_location(-type   => 'read_pair',
                                             -seq_id => 'seq2',
                                             -start  => 500,
                                             -end    => 800);
 
- for my $pair (@pairs) {
+ for my $pair (@pairs)
+ {
     my $length                    = $pair->length;   # insert length
     my ($first_mate,$second_mate) = $pair->get_SeqFeatures;
     my $f_start = $first_mate->start;
@@ -53,11 +54,12 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  }
 
  # low level API
- my $hfile          = Bio::DB::HTSfile->open('/path/to/bamfile');
+ my $hfile        = Bio::DB::HTSfile->open('/path/to/bamfile');
  my $header       = $hfile->header;
  my $target_count = $header->n_targets;
  my $target_names = $header->target_name;
- while (my $align = $hfile->read1) {
+ while (my $align = $hfile->read1)
+ {
     my $seqid     = $target_names->[$align->tid];
     my $start     = $align->pos+1;
     my $end       = $align->calend;
@@ -266,7 +268,7 @@ follows:
 
 An example of a typical new() constructor invocation is:
 
-  $sam = Bio::DB::HTS->new(-fasta => '/home/projects/genomes/hu17.fa',
+  $hts = Bio::DB::HTS->new(-fasta => '/home/projects/genomes/hu17.fa',
                            -bam   => '/home/projects/alignments/ej88.bam',
                            -expand_flags  => 1,
                            -split_splices => 1);
@@ -291,7 +293,7 @@ manipulation. For example, if you have both paired reads and spliced
 alignments in the BAM file, the following code shows the subpart
 relationships:
 
-  $pair        = $sam->get_feature_by_name('E113:01:01:23');
+  $pair        = $hts->get_feature_by_name('E113:01:01:23');
   @mates       = $pair->get_SeqFeatures;
   @mate1_parts = $mates[0]->get_SeqFeatures;
   @mate2_parts = $mates[1]->get_SeqFeatures;
@@ -307,34 +309,34 @@ URL. Note that incorrect URLs may lead to a core dump.
 It is not currently possible to refer to a remote FASTA file. These
 will have to be downloaded locally and indexed before using.
 
-=item $flag = $sam->expand_flags([$new_value])
+=item $flag = $hts->expand_flags([$new_value])
 
 Get or set the expand_flags option. This can be done after object
 creation and will have an immediate effect on all alignments fetched
 from the BAM file.
 
-=item $flag = $sam->split_splices([$new_value])
+=item $flag = $hts->split_splices([$new_value])
 
 Get or set the split_splices option. This can be done after object
 creation and will affect all alignments fetched from the BAM file
 B<subsequently.>
 
-=item $header = $sam->header
+=item $header = $hts->header
 
 Return the Bio::DB::HTS::Header object associated with the BAM
 file. You can manipulate the header using the low-level API.
 
-=item $hts_path = $sam->hts_path
+=item $hts_path = $hts->hts_path
 
 Return the path of the bam file used to create the sam object. This
 makes the sam object more portable.
 
-=item $hts_file    = $sam->$hts_file
+=item $hts_file    = $hts->$hts_file
 
 Returns the low-level Bio::DB::HTS object associated with the opened
 file.
 
-=item $fai    = $sam->fai
+=item $fai    = $hts->fai
 
 Returns the Bio::DB::HTS::Fai object associated with the Fasta
 file. You can then manipuate this object with the low-level API.
@@ -347,7 +349,7 @@ Unfortunately, the BAM library does not do great error recovery for
 this condition, and you may experience a core dump. This is not
 trappable via an eval {}.
 
-=item $hts_idx    = $sam->hts_index
+=item $hts_idx    = $hts->hts_index
 
 Return the Bio::DB::HTS::Index object associated with the BAM file.
 
@@ -360,7 +362,7 @@ file resides in order for this to work.> In case of a permissions
 problem, the Perl library will catch the error and die. You can trap
 it with an eval {}.
 
-=item $sam->clone
+=item $hts->clone
 
 Bio::DB::SAM objects are not stable across fork() operations. If you
 fork, you must call clone() either in the parent or the child process
@@ -376,31 +378,31 @@ associated Fasta file.
 
 =over 4
 
-=item @seq_ids = $sam->seq_ids
+=item @seq_ids = $hts->seq_ids
 
 Returns an unsorted list of the IDs of the reference sequences (known
 elsewhere in this document as seq_ids). This is the same as the
 identifier following the ">" sign in the Fasta file (e.g. "chr1").
 
-=item $num_targets = $sam->n_targets
+=item $num_targets = $hts->n_targets
 
 Return the number of reference sequences.
 
-=item $length = $sam->length('seqid')
+=item $length = $hts->length('seqid')
 
 Returns the length of the reference sequence named "seqid".
 
-=item $seq_id = $sam->target_name($tid)
+=item $seq_id = $hts->target_name($tid)
 
 Translates a numeric target ID (TID) returned by the low-level API
 into a seq_id used by the high-level API.
 
-=item $length = $sam->target_len($tid)
+=item $length = $hts->target_len($tid)
 
 Translates a numeric target ID (TID) from the low-level API to a
 sequence length.
 
-=item $dna    = $sam->seq($seqid,$start,$end)
+=item $dna    = $hts->seq($seqid,$start,$end)
 
 Returns the DNA across the region from start to end on reference
 seqid. Note that this is a string, not a Bio::PrimarySeq object. If
@@ -417,9 +419,9 @@ as well as alignments that overlap with the region.
 
 =over 4
 
-=item $segment = $sam->segment($seqid,$start,$end);
+=item $segment = $hts->segment($seqid,$start,$end);
 
-=item $segment = $sam->segment(-seq_id=>'chr1',-start=>5000,-end=>6000);
+=item $segment = $hts->segment(-seq_id=>'chr1',-start=>5000,-end=>6000);
 
 Segments are created using the Bio:DB::HTS->segment() method. It can
 be called using one to three positional arguments corresponding to the
@@ -529,13 +531,13 @@ list of features, or a filehandle opened on a pseudo-TAM file.
 
 =over 4
 
-=item @features   = $sam->features(%options)
+=item @features   = $hts->features(%options)
 
-=item $iterator   = $sam->features(-iterator=>1,%more_options)
+=item $iterator   = $hts->features(-iterator=>1,%more_options)
 
-=item $filehandle = $sam->features(-fh=>1,%more_options)
+=item $filehandle = $hts->features(-fh=>1,%more_options)
 
-=item @features   = $sam->features('type1','type2'...)
+=item @features   = $hts->features('type1','type2'...)
 
 This is the all-purpose interface for fetching alignments and other
 types of features from the database. Arguments are a -name=>value
@@ -603,7 +605,7 @@ Bio::DB::HTS::AlignWrapper subparts.
 
 Call get_SeqFeatures() to get the two individual reads. Example:
 
- my @pairs    = $sam->features(-type=>'read_pair');
+ my @pairs    = $hts->features(-type=>'read_pair');
  my $p        = $pairs[0];
  my $i_length = $p->length;
  my @ends     = $p->get_SeqFeatures;
@@ -620,7 +622,7 @@ object's coverage() method to obtain an array (list context) or
 arrayref (scalar context) of coverage counts across the region of
 interest:
 
- my ($coverage) = $sam->features(-type=>'coverage',-seq_id=>'seq1');
+ my ($coverage) = $hts->features(-type=>'coverage',-seq_id=>'seq1');
  my @data       = $coverage->coverage;
  my $total;
  for (@data) { $total += $_ }
@@ -639,19 +641,19 @@ interchangeable. They ask the sam interface to construct
 Bio::DB::HTS::Segment representing the reference sequences. These two
 calls give similar results:
 
- my $segment = $sam->segment('seq2',1=>500);
- my ($seg)   = $sam->features(-type=>'chromosome',
+ my $segment = $hts->segment('seq2',1=>500);
+ my ($seg)   = $hts->features(-type=>'chromosome',
 		              -seq_id=>'seq2',-start=>1,-end=>500);
 
 Due to an unresolved bug, you cannot fetch chromosome features in the
 same call with matches and other feature types call. Specifically,
 this works as expected:
 
- my @chromosomes = $sam->features (-type=>'chromosome');
+ my @chromosomes = $hts->features (-type=>'chromosome');
 
 But this doesn't (as of 18 June 2009):
 
- my @chromosomes_and_matches = $sam->features(-type=>['match','chromosome']);
+ my @chromosomes_and_matches = $hts->features(-type=>['match','chromosome']);
 
 If no -type argument is provided, then features() defaults to finding
 features of type "match."
@@ -660,7 +662,7 @@ You may call features() with a plain list of strings (positional
 arguments, not -type=>value arguments). This will be interpreted as a
 list of feature types to return:
 
- my ($coverage) = $sam->features('coverage')
+ my ($coverage) = $hts->features('coverage')
 
 For a description of the methods available in the features returned
 from this call, please see L<Bio::SeqfeatureI> and
@@ -691,14 +693,14 @@ once for each potential feature. Return true to keep the feature, or
 false to discard it. Here is an example of how to find all matches
 whose alignment quality scores are greater than 80.
 
- @features = $sam->features(-filter=>sub {shift->qual > 80} );
+ @features = $hts->features(-filter=>sub {shift->qual > 80} );
 
 By default, features() returns a list of all matching features. You
 may instead request an iterator across the results list by passing
 -iterator=>1. This will give you an object that has a single method,
 next_seq():
 
-  my $high_qual  = $sam->features(-filter  => sub {shift->qual > 80},
+  my $high_qual  = $hts->features(-filter  => sub {shift->qual > 80},
                                   -iterator=> 1 );
   while (my $feature = $high_qual->next_seq) {
     # do something with the alignment
@@ -708,56 +710,56 @@ Similarly, by passing a true value to the argument B<-fh>, you can
 obtain a filehandle to a virtual TAM file. This only works with the
 "match" feature type:
 
-  my $high_qual  = $sam->features(-filter  => sub {shift->qual > 80},
+  my $high_qual  = $hts->features(-filter  => sub {shift->qual > 80},
                                   -fh      => 1 );
   while (my $tam_line = <$high_qual>) {
     chomp($tam_line);
     # do something with it
   }
 
-=item @features   = $sam->get_features_by_name($name)
+=item @features   = $hts->get_features_by_name($name)
 
-Convenience method. The same as calling $sam->features(-name=>$name);
+Convenience method. The same as calling $hts->features(-name=>$name);
 
-=item $feature    = $sam->get_feature_by_name($name)
+=item $feature    = $hts->get_feature_by_name($name)
 
-Convenience method. The same as ($sam->features(-name=>$name))[0].
+Convenience method. The same as ($hts->features(-name=>$name))[0].
 
-=item @features   = $sam->get_features_by_location($seqid,$start,$end)
-
-Convenience method. The same as calling
-$sam->features(-seq_id=>$seqid,-start=>$start,-end=>$end).
-
-=item @features   = $sam->get_features_by_flag(%flags)
+=item @features   = $hts->get_features_by_location($seqid,$start,$end)
 
 Convenience method. The same as calling
-$sam->features(-flags=>\%flags). This method is also called
+$hts->features(-seq_id=>$seqid,-start=>$start,-end=>$end).
+
+=item @features   = $hts->get_features_by_flag(%flags)
+
+Convenience method. The same as calling
+$hts->features(-flags=>\%flags). This method is also called
 get_features_by_attribute() and get_features_by_tag(). Example:
 
- @features = $sam->get_features_by_flag(H0=>1)
+ @features = $hts->get_features_by_flag(H0=>1)
 
-=item $feature    = $sam->get_feature_by_id($id)
+=item $feature    = $hts->get_feature_by_id($id)
 
 The high-level API assigns each feature a unique ID composed of its
 read name, position and strand and returns it when you call the
 feature's primary_id() method. Given that ID, this method returns the
 feature.
 
-=item $iterator   = $sam->get_seq_stream(%options)
+=item $iterator   = $hts->get_seq_stream(%options)
 
 Convenience method. This is the same as calling
-$sam->features(%options,-iterator=>1).
+$hts->features(%options,-iterator=>1).
 
-=item $fh         = $sam->get_seq_fh(%options)
+=item $fh         = $hts->get_seq_fh(%options)
 
 Convenience method. This is the same as calling
-$sam->features(%options,-fh=>1).
+$hts->features(%options,-fh=>1).
 
-=item $fh         = $sam->tam_fh
+=item $fh         = $hts->tam_fh
 
-Convenience method. It is the same as calling $sam->features(-fh=>1).
+Convenience method. It is the same as calling $hts->features(-fh=>1).
 
-=item @types      = $sam->types
+=item @types      = $hts->types
 
 This method returns the list of feature types (e.g. "read_pair")
 returned by the current version of the interface.
@@ -771,7 +773,7 @@ indexed BAM databases.
 
 =over 4
 
-=item $sam->fetch($region,$callback)
+=item $hts->fetch($region,$callback)
 
 This method, which is named after the native bam_fetch() function in
 the C interface, traverses the indicated region and invokes a callback
@@ -786,7 +788,7 @@ Bio::DB::HTS::AlignWrapper on the argument list.
 
 Example:
 
-  $sam->fetch('seq1:600-700',
+  $hts->fetch('seq1:600-700',
               sub {
                 my $a = shift;
                 print $a->display_name,' ',$a->cigar_str,"\n";
@@ -797,7 +799,7 @@ indicated region. Therefore the callback may be called for reads that
 align to the reference at positions that start before or end after the
 indicated region.
 
-=item $sam->pileup($region,$callback [,$keep_level])
+=item $hts->pileup($region,$callback [,$keep_level])
 
 This method, which is named after the native bam_lpileupfile()
 function in the C interfaces, traverses the indicated region and
@@ -828,11 +830,6 @@ that are outside of the requested region. Also be aware that the
 reference sequence position uses 1-based coordinates, which is
 different from the low-level interface, which use 0-based coordinates.
 
-The optional $keep_level argument, if true, asks the BAM library to
-keep track of the level of the read in the multiple alignment, an
-operation that generates some overhead. This is mostly useful for text
-alignment viewers, and so is off by default.
-
 The size of the $pileup array reference indicates the read coverage
 at that position. Here is a simple average coverage calculator:
 
@@ -844,7 +841,7 @@ at that position. Here is a simple average coverage calculator:
          $positions++;
          $depth += @$pileup;
  }
- $sam->pileup('seq1:501-600',$callback);
+ $hts->pileup('seq1:501-600',$callback);
  print "coverage = ",$depth/$positions;
 
 Each Bio::DB::HTS::Pileup object describes the position of a read in
@@ -862,7 +859,8 @@ methods:
 
  $pileup->level  The level of the read in the multiple alignment
                  view. Note that this field is only valid when
-                 $keep_level is true.
+                 $keep_level is true, so it may not be relevant post
+                 htslib move.
 
  $pileup->indel  Length of the indel at this position: 0 for no indel, positive
                  for an insertion (relative to the reference), negative for a
@@ -878,7 +876,7 @@ methods:
 
 See L</Examples> for a very simple SNP caller.
 
-=item $sam->fast_pileup($region,$callback [,$keep_level])
+=item $hts->fast_pileup($region,$callback [,$keep_level])
 
 This is identical to pileup() except that the pileup object returns
 low-level Bio::DB::HTS::Alignment objects rather than the higher-level
@@ -889,17 +887,17 @@ argument corresponding to the Bio::DB::HTS object. You can use this to
 create AlignWrapper objects on an as needed basis:
 
  my $callback = sub {
-    my($seqid,$pos,$pileup,$sam) = @_;
+    my($seqid,$pos,$pileup,$hts) = @_;
     for my $p (@$pileup) {
        my $alignment = $p->alignment;
-       my $wrapper   = Bio::DB::HTS::AlignWrapper->new($alignment,$sam);
+       my $wrapper   = Bio::DB::HTS::AlignWrapper->new($alignment,$hts);
        my $has_mate  = $wrapper->get_tag_values('PAIRED');
     }
   };
 
 =item Bio::DB::HTS->max_pileup_cnt([$new_cnt])
 
-=item $sam->max_pileup_cnt([$new_cnt])
+=item $hts->max_pileup_cnt([$new_cnt])
 
 The Samtools library caps pileups at a set level, defaulting to
 8000. The callback will not be invoked on a single position more than
@@ -910,7 +908,7 @@ specify an unlimited cap.
 
 This method can be called as an instance method or a class method.
 
-=item $sam->coverage2BedGraph([$fh])
+=item $hts->coverage2BedGraph([$fh])
 
 This special-purpose method will compute a four-column BED graph of
 the coverage across the entire SAM/BAM file and print it to STDOUT.
@@ -1093,7 +1091,7 @@ to change its behavior.
 
 =item $code = $index->fetch($hfile,$tid,$start,$end,$callback [,$callback_data])
 
-This is the low-level equivalent of the $sam->fetch() function
+This is the low-level equivalent of the $hts->fetch() function
 described for the high-level API. Given a open BAM file object, the
 numeric ID of the reference sequence, start and end ranges on the
 reference, and a coderef, this function will traverse the region and
@@ -1555,7 +1553,7 @@ sub fetch {
 
 sub pileup {
     my $self   = shift;
-    my ($region,$callback,$keep_level) = @_;
+    my ($region,$callback) = @_;
 
     my $header   = $self->header;
     $region      =~ s/\.\.|,/-/;
@@ -1574,11 +1572,7 @@ sub pileup {
     };
 
     my $index  = $self->hts_index;
-    if ($keep_level) {
-	$index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
-    } else {
-	$index->pileup($self->{hts_file},$seqid,$start,$end,$code);
-    }
+	  $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
 }
 
 sub fast_pileup {
@@ -1599,11 +1593,7 @@ sub fast_pileup {
     };
 
     my $index  = $self->hts_index;
-    if ($keep_level) {
-  $index->lpileup($self->{hts_file},$seqid,$start,$end,$code);
-    } else {
-  $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
-    }
+    $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
 }
 
 # segment returns a segment across the reference
@@ -1802,6 +1792,7 @@ sub features
         # otherwise aggregate mate pairs into two-level features
         elsif ($t =~ /^read_pair/)
         {
+          print("rn6DEBUG-HTS-pm-read_pair features being hunted\n") ;
           $self->_build_mates($features,\@result);
         }
         next;
@@ -2223,13 +2214,18 @@ sub index
 
     if ($autoindex)
     {
-      #TODO: test will fail due to filenames
-      $self->reindex($path) unless
-        -e "${path}.bai" && mtime($path) <= mtime("${path}.bai");
+      if( -e "${path}.bai" && mtime($path) > mtime("${path}.bai") )
+      {
+        $self->reindex($path) ;
+      }
+      elsif( -e "${path}.crai" && mtime($path) > mtime("${path}.crai") )
+      {
+        $self->reindex($path) ;
+      }
     }
 
-    #TODO: needs to be able to work for CRAM as well as BAM
-    croak "No index file for $path; try opening file with -autoindex" unless -e "${path}.bai";
+    croak "No index file for $path; try opening file with -autoindex"
+      unless -e "${path}.bai" or -e "${path}.crai" ;
     return $fh->index_load();
 }
 
@@ -2297,7 +2293,7 @@ are a non-reference base.
  my @SNPs;  # this will be list of SNPs
  my $snp_caller = sub {
 	my ($seqid,$pos,$p) = @_;
-	my $refbase = $sam->segment($seqid,$pos,$pos)->dna;
+	my $refbase = $hts->segment($seqid,$pos,$pos)->dna;
         my ($total,$different);
 	for my $pileup (@$p) {
 	    my $b     = $pileup->alignment;
@@ -2317,7 +2313,7 @@ are a non-reference base.
         }
     };
 
- $sam->pileup('seq1',$snp_caller);
+ $hts->pileup('seq1',$snp_caller);
  print "Found SNPs: @SNPs\n";
 
 =head1 GBrowse Compatibility

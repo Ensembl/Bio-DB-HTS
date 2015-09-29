@@ -33,7 +33,7 @@
 #include "bgzf.h"
 
 /* stolen from bam_aux.c */
-#define MAX_REGION 1<<29
+#define BAM_MAX_REGION 1<<29
 
 typedef htsFile*        Bio__DB__HTSfile;
 typedef bam_hdr_t*      Bio__DB__HTS__Header;
@@ -68,7 +68,8 @@ void XS_pack_charPtrPtr( SV * arg, char ** array, int count) {
   SvSetSV( arg, newRV((SV*)avref));
 }
 
-int bam_fetch_fun (const bam1_t *b, void *data) {
+int hts_fetch_fun (void *data, bam1_t *b)
+{
   dSP;
   int count;
 
@@ -153,6 +154,66 @@ int invoke_pileup_callback_fun(uint32_t tid,
   LEAVE;
 }
 
+/*
+   Declarations to allow add_pileup_line to work
+   Ported from samtoosl v1 setup.
+*/
+
+/* start pileup support copy from bam.h in samtools */
+/* but pileup functions are offered as bam_plp_auto_f in htslib */
+
+typedef int (*bam_pileup_f)(uint32_t tid, uint32_t pos, int n, const bam_pileup1_t *pl, void *data);
+
+typedef struct
+{
+  bam_plp_t iter;
+  bam_pileup_f func;
+  void *data;
+} hts_plbuf_t;
+
+
+hts_plbuf_t *hts_plbuf_init(bam_pileup_f func, void *data)
+{
+    hts_plbuf_t *buf;
+    buf = calloc(1, sizeof(hts_plbuf_t));
+    buf->iter = bam_plp_init(0, 0);
+    buf->func = func;
+    buf->data = data;
+    return buf;
+}
+
+void hts_plbuf_destroy(hts_plbuf_t *buf)
+{
+    bam_plp_destroy(buf->iter);
+    free(buf);
+}
+
+int hts_plbuf_push(const bam1_t *b, hts_plbuf_t *buf)
+{
+    int ret, n_plp, tid, pos;
+    const bam_pileup1_t *plp;
+    ret = bam_plp_push(buf->iter, b);
+    if (ret < 0) return ret;
+    while ((plp = bam_plp_next(buf->iter, &tid, &pos, &n_plp)) != 0)
+        buf->func(tid, pos, n_plp, plp, buf->data);
+    return 0;
+}
+
+
+/* end pileup support copy from bam.h in samtools */
+
+/**
+   pileup support functions
+*/
+int add_pileup_line (void *data, bam1_t *b)
+{
+  hts_plbuf_t *pileup = (hts_plbuf_t*) data;
+  hts_plbuf_push(b,pileup);
+  return 0;
+}
+
+
+
 int coverage_from_pileup_fun (uint32_t tid,
 			      uint32_t pos,
 			      int n,
@@ -204,7 +265,7 @@ int bam_parse_region(bam_hdr_t *header, const char *str, int *ref_id, int *beg, 
 }
 
 /**
-   From bam.c in samtools
+   From bam.c in samtools - these are wrappers that can be used OK here.
 */
 char *bam_format1(const bam_hdr_t *header, const bam1_t *b)
 {
@@ -223,7 +284,9 @@ void bam_view1(const bam_hdr_t *header, const bam1_t *b)
 }
 
 
-
+/**
+   Get the file extension for a filename
+*/
 int get_index_fmt_from_extension(const char * filename)
 {
   char * ext = strrchr( filename, '.' ) ;
@@ -238,16 +301,21 @@ int get_index_fmt_from_extension(const char * filename)
   return -1 ;
 }
 
-
-int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data, hts_readrec_func *func)
+/**
+   fetch function
+*/
+int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void *data, bam_plp_auto_f func)
 {
     int ret;
-    hts_itr_t iter = hts_itr_query(idx, tid, beg, end, func);
-    bam1_t *b = bam_init1();
+    hts_itr_t *iter ;
+    bam1_t *b ;
 
-    while((ret = hts_itr_next(fp, iter, b)) >= 0)
+    iter = sam_itr_queryi(idx, tid, beg, end);
+    b = bam_init1();
+
+    while((ret = sam_itr_next(fp, iter, b)) >= 0)
     {
-        func(b, data);
+        func(data,b);
     }
     hts_itr_destroy(iter);
     bam_destroy1(b);
@@ -346,7 +414,6 @@ hts_index_load(htsfile)
     OUTPUT:
       RETVAL
 
-
 void
 hts_index_close(indexfile)
            Bio::DB::HTS::Index indexfile
@@ -364,7 +431,7 @@ hts_header_read(htsfile)
       bam_hdr_t *bh;
       int64_t result ;
     CODE:
-      if( htsfile->format.format == 4 ) //TODO put define value in
+      if( htsfile->format.format == bam ) //enum value from htsExactFormat from hts.h
       {
         result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
       }
@@ -925,9 +992,9 @@ bam_DESTROY(bamh)
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Index PREFIX=bami_
 
 int
-bami_fetch(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+bami_fetch(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
   Bio::DB::HTS::Index bai
-  Bio::DB::HTSfile    bfp
+  Bio::DB::HTSfile    hfp
   int   ref
   int   start
   int   end
@@ -939,35 +1006,16 @@ CODE:
   {
     fcd.callback = (SV*) callback;
     fcd.data     = callbackdata;
-    RETVAL = bam_fetch(bfp,bai,ref,start,end,&fcd,bam_fetch_fun);
+    RETVAL = hts_fetch(hfp,bai,ref,start,end,&fcd,hts_fetch_fun);
   }
 OUTPUT:
     RETVAL
 
-void
-bami_lpileup(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
-  Bio::DB::HTS::Index bai
-  Bio::DB::HTSfile    bfp
-  int   ref
-  int   start
-  int   end
-  CV*   callback
-  SV*   callbackdata
-PREINIT:
-  fetch_callback_data fcd;
-  bam_lplbuf_t        *pileup;
-CODE:
-  fcd.callback = (SV*) callback;
-  fcd.data     = callbackdata;
-  pileup       = bam_lplbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
-  bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_lpileup_line);
-  bam_lplbuf_push(NULL,pileup);
-  bam_lplbuf_destroy(pileup);
 
 void
-bami_pileup(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
+bami_pileup(bai,hfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
   Bio::DB::HTS::Index bai
-  Bio::DB::HTSfile    bfp
+  Bio::DB::HTSfile    hfp
   int   ref
   int   start
   int   end
@@ -975,20 +1023,20 @@ bami_pileup(bai,bfp,ref,start,end,callback,callbackdata=&PL_sv_undef)
   SV*   callbackdata
 PREINIT:
   fetch_callback_data fcd;
-  bam_plbuf_t        *pileup;
+  hts_plbuf_t        *pileup;
 CODE:
   fcd.callback = (SV*) callback;
   fcd.data     = callbackdata;
-  pileup       = bam_plbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
+  pileup       = hts_plbuf_init(invoke_pileup_callback_fun,(void*)&fcd);
   bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
-  bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
-  bam_plbuf_push(NULL,pileup);
-  bam_plbuf_destroy(pileup);
+  hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+  hts_plbuf_push(NULL,pileup);
+  hts_plbuf_destroy(pileup);
 
 AV*
-bami_coverage(bai,bfp,ref,start,end,bins=0,maxcnt=8000)
+bami_coverage(bai,hfp,ref,start,end,bins=0,maxcnt=8000)
     Bio::DB::HTS::Index bai
-    Bio::DB::HTSfile    bfp
+    Bio::DB::HTSfile    hfp
     int             ref
     int             start
     int             end
@@ -996,19 +1044,23 @@ bami_coverage(bai,bfp,ref,start,end,bins=0,maxcnt=8000)
     int             maxcnt
 PREINIT:
     coverage_graph  cg;
-    bam_plbuf_t    *pileup;
+    hts_plbuf_t    *pileup;
     AV*             array;
     SV*             cov;
     int             i;
-    bam_header_t   *bh;
+    bam_hdr_t      *bh;
 CODE:
   {
-
-      if (end >= MAX_REGION) {
-          bgzf_seek(bfp,0,0);
-          bh  = bam_header_read(bfp);
+      /* TODO:can we do away with this check by a move to CSI as the standard for BAM indices */
+      if (end >= BAM_MAX_REGION)
+      {
+        if( hfp->format.format == bam ) //enum value from htsExactFormat from hts.h
+        {
+          bgzf_seek(hfp->fp.bgzf,0,0);
+          bh = sam_hdr_read(hfp);
           end = bh->target_len[ref];
-          bam_header_destroy(bh);
+          bam_hdr_destroy(bh);
+        }
       }
       if ((bins==0) || (bins > (end-start)))
          bins = end-start;
@@ -1022,14 +1074,14 @@ CODE:
       Newxz(cg.bin,bins+1,int);
 
       /* accumulate coverage into the coverage graph */
-      pileup   = bam_plbuf_init(coverage_from_pileup_fun,(void*)&cg);
+      pileup   = hts_plbuf_init(coverage_from_pileup_fun,(void*)&cg);
       if (items >= 7)
             bam_plp_set_maxcnt(pileup->iter,maxcnt);
       else
             bam_plp_set_maxcnt(pileup->iter,MaxPileupCnt);
-      bam_fetch(bfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
-      bam_plbuf_push(NULL,pileup);
-      bam_plbuf_destroy(pileup);
+      hts_fetch(hfp,bai,ref,start,end,(void*)pileup,add_pileup_line);
+      hts_plbuf_push(NULL,pileup);
+      hts_plbuf_destroy(pileup);
 
       /* now normalize to coverage/bp and convert into an array */
       array = newAV();
@@ -1048,7 +1100,8 @@ void
 bami_close(hts_idx)
   Bio::DB::HTS::Index hts_idx
   CODE:
-    hts_idx_destroy(bai) ;
+    hts_idx_destroy(hts_idx) ;
+
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Pileup PREFIX=pl_
