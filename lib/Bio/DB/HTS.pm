@@ -2214,7 +2214,11 @@ sub index
 
     if ($autoindex)
     {
-      if( -e "${path}.bai" && mtime($path) > mtime("${path}.bai") )
+      if( !(-e "${path}.bai" or -e "${path}.crai") )
+      {
+        $self->reindex($path) ;
+      }
+      elsif( -e "${path}.bai" && mtime($path) > mtime("${path}.bai") )
       {
         $self->reindex($path) ;
       }
