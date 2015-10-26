@@ -967,23 +967,7 @@ compressed with gzip if desired.
 
 Create and return a Bio::DB::HTS::Header object from the information
 contained within @SQ header lines of the Sam file. If there are no @SQ
-lines, then the header will not be useful, and you should call
-header_read2() to generate the missing information from the
-appropriate indexed Fasta file. Here is some code to illustrate the
-suggested logic:
-
- my $header = $tam->header_read;
- unless ($header->n_targets > 0) {
-    $header = $tam->header_read2('/path/to/file.fa.fai');
- }
-
-=item $header = $tam->header_read2('/path/to/file.fa.fai')
-
-Create and return a Bio::DB::HTS::Header object from the information
-contained within the indexed Fasta file of the reference
-sequences. Note that you have to pass the path to the .fai file, and
-not the .fa file. The header object contains information on the
-reference sequence names and lengths.
+lines, then the header will not be useful.
 
 =item $bytes = $tam->read1($header,$alignment)
 
