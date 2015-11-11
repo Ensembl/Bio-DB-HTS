@@ -66,7 +66,7 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
     my $cigar     = $align->cigar_str;
  }
 
- my $index = Bio::DB::HTS->index_open('/path/to/bamfile');
+ my $index = Bio::DB::HTS->index_load('/path/to/bamfile');
  my $index = Bio::DB::HTS->index_open_in_safewd('/path/to/bamfile');
 
  my $callback = sub {
@@ -1074,7 +1074,7 @@ respect to the BAM file (by checking modification dates), then attempt
 to rebuild the index. Will throw an exception if the index does not
 exist or if attempting to rebuild the index was unsuccessful.
 
-=item $index = Bio::DB::HTS->index_open('/path/to/file.bam')
+=item $index = Bio::DB::HTS->index_load('/path/to/file.bam')
 
 Attempt to open the index file for a BAM file, returning a
 Bio::DB::HTS::Index object. The filename path to use is the .bam file,
@@ -1329,6 +1329,7 @@ use warnings;
 
 #rn6debug aids
 use Scalar::Util qw(reftype);
+use Data::Dumper;
 
 use Carp 'croak';
 use Carp 'longmess';
@@ -2201,11 +2202,15 @@ package Bio::DB::HTSfile;
 use File::Spec;
 use Cwd;
 use Carp 'croak';
+use Carp qw( confess );
+$SIG{__DIE__} =  \&confess;
+$SIG{__WARN__} = \&confess;
 
 sub index
 {
     my $self = shift ;
     my $hts_obj = shift ;
+    warn "rn6DEBUG:HTS.pm:".$hts_obj."\n" ;    
     my $fh = $hts_obj->{hts_file} ;
     my $autoindex = $hts_obj->{autoindex};
     my $path = $hts_obj->{hts_path} ;
@@ -2272,7 +2277,7 @@ sub index_open_in_safewd {
     my $dir    = getcwd;
     my $tmpdir = File::Spec->tmpdir;
     chdir($tmpdir);
-    my $result = $self->index_open(@_);
+    my $result = $self->index_load(@_);
     chdir $dir;
     $result;
 }
