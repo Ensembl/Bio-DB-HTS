@@ -3,12 +3,12 @@
 use strict;
 use File::Temp 'tempdir';
 
-prompt_yn("This will install Bio::DB::Sam and its dependencies. Continue?") or exit 0;
+prompt_yn("This will install Bio::DB::HTS and its dependencies. Continue?") or exit 0;
 
 # STEP 0: various dependencies
 my $git = `which git`;
 $git or die <<END;
-'git' command not in path. Please install git and try again. 
+'git' command not in path. Please install git and try again.
 On Debian/Ubuntu systems you can do this with the command:
 
   apt-get install git
@@ -16,21 +16,21 @@ END
 
 
 `which cc` or die <<END;
-'cc' command not in path. Please install it and try again. 
+'cc' command not in path. Please install it and try again.
 On Debian/Ubuntu systems you can do this with the command:
 
   apt-get install build-essential
 END
 
 `which make` or die <<END;
-'make' command not in path. Please install it and try again. 
+'make' command not in path. Please install it and try again.
 On Debian/Ubuntu systems you can do this with the command:
 
   apt-get install build-essential
 END
 
 -e '/usr/include/zlib.h' or die <<END;
-zlib.h library header not found in /usr/include. Please install it and try again. 
+zlib.h library header not found in /usr/include. Please install it and try again.
 On Debian/Ubuntu systems you can do this with the command:
 
   apt-get install zlib1g-dev
@@ -52,25 +52,19 @@ END
 # STEP 1: Create a clean directory for building
 my $install_dir = tempdir(CLEANUP => 1);
 info("Performing build in $install_dir");
+info( 'Stage 1 Completed' ) ;
 
-
-# STEP 2: Check out samtools
+# STEP 2: Check out htslib
 info("Checking out htslib");
 chdir $install_dir;
 system "git clone https://github.com/samtools/htslib.git";
 -d './htslib' or die "git clone seems to have failed. Could not find $install_dir/htslib directory";
 chdir './htslib';
 system "git checkout master";
+info( 'Stage 2 Completed' ) ;
 
-# STEP 3: Check out Bio-SamTools
-info("Checking out Bio-SamTools");
-chdir $install_dir;
-system "git clone https://github.com/rishidev/GBrowse-Adaptors.git";
--d './GBrowse-Adaptors' or die "git clone seems to have failed. Could not find $install_dir/GBrowse-Adaptors directory";
-chdir "./GBrowse-Adaptors/Bio-SamTools";
-system "git checkout htslib";
 
-# Step 4: Build libhts.a
+# Step 3: Build libhts.a
 info("Building htslib");
 chdir "$install_dir/htslib";
 # patch makefile
@@ -91,26 +85,25 @@ close $out;
 rename 'Makefile.new','Makefile' or die "Couldn't rename Makefile.new to Makefile: $!";
 system "make";
 -e 'libhts.a' or die "Compile didn't complete. No libhts.a library file found";
+info( 'Stage 3 Completed' ) ;
 
-info( 'rn6DEBUG:build successful until end of stage 4' ) ;
 
-# Step 5: Build Bio::DB::Sam
-info("Building Bio::DB::Sam");
-chdir "$install_dir/GBrowse-Adaptors/Bio-SamTools";
+# Step 4: Build Bio::DB::HTS
+# currently this fails
+info("Building Bio::DB::HTS");
+system "https://github.com/rishidev/Bio-HTS.git";
+chdir "$install_dir/Bio-HTS" ;
 system "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
--e "./Build" or die "Build.PL didn't execute properly: no Build file found";
-system "./Build";
-`./Build test` =~ /Result: PASS/ or die "Build test failed. Not continuing";
+info( 'Stage 4 Not Completed' ) ;
+info( 'Please build htslib and then call perl Build.PL manually' ) ;
 
-info( 'rn6DEBUG:build successful until end of stage 5' ) ;
-
-# Step 6: Install
+# Step 5: Install
 #info("Installing Bio::DB::Sam using sudo. You will be asked for your password.");
 #info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
 #system "sudo ./Build install";
 
-# Step 7: Yay!
-#info("Bio::DB::Sam is now installed.");
+# Step 6: Yay!
+#info("Bio::DB::HTS is now installed.");
 chdir '/';
 
 exit 0;
