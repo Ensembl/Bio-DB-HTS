@@ -1,9 +1,4 @@
-This is a Perl interface to the SAMtools sequence alignment
-interface. It ONLY works on versions of Samtools up to 0.1.19. It does
-not work on version 1.0 or higher due to major changes in the library
-structure. 
-
-See http://samtools.sourceforge.net/ for samtools documentation.
+This is a Perl interface to the HTS Library. See http://htslib.org
 
 * ONE-STEP INSTALLATION
 
