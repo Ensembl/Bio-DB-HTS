@@ -2215,7 +2215,7 @@ sub index
     my $autoindex = $hts_obj->{autoindex};
     my $path = $hts_obj->{hts_path} ;
 
-    return $self->index_open_in_safewd($path) if Bio::DB::HTS->is_remote($path);
+    return $self->index_open_in_safewd($fh) if Bio::DB::HTS->is_remote($path);
 
     if ($autoindex)
     {
@@ -2274,10 +2274,11 @@ sub reindex {
 # locations.
 sub index_open_in_safewd {
     my $self = shift;
+    my $fh = shift;
     my $dir    = getcwd;
     my $tmpdir = File::Spec->tmpdir;
     chdir($tmpdir);
-    my $result = $self->index_load(@_);
+    my $result = $self->index_load($fh);
     chdir $dir;
     $result;
 }

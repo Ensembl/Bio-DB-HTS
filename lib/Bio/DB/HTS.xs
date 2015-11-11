@@ -406,7 +406,8 @@ hts_index_build(packname, filename)
 
 
 Bio::DB::HTS::Index
-hts_index_load(htsfile)
+hts_index_load(packname, htsfile)
+    char *      packname
     Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
     CODE:
