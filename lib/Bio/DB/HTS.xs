@@ -1007,6 +1007,7 @@ CODE:
   {
     fcd.callback = (SV*) callback;
     fcd.data     = callbackdata;
+    fprintf( stderr, "hts_fetch to be called\n" ) ;
     RETVAL = hts_fetch(hfp,bai,ref,start,end,&fcd,hts_fetch_fun);
   }
 OUTPUT:

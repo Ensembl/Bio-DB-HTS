@@ -2262,6 +2262,7 @@ sub index_open_in_safewd {
     my $dir    = getcwd;
     my $tmpdir = File::Spec->tmpdir;
     chdir($tmpdir);
+    warn "rn6DEBUG: index file being generated in ".$tmpdir ;
     my $result = $self->index_load($fh);
     chdir $dir;
     $result;
