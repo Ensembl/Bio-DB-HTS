@@ -2194,7 +2194,7 @@ sub index
 {
     my $self = shift ;
     my $hts_obj = shift ;
-    warn "rn6DEBUG:HTS.pm:".$hts_obj."\n" ;    
+    warn "rn6DEBUG:HTS.pm:HTSfile index():".$hts_obj."\n" ;
     my $fh = $hts_obj->{hts_file} ;
     my $autoindex = $hts_obj->{autoindex};
     my $path = $hts_obj->{hts_path} ;
