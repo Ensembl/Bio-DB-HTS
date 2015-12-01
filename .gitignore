@@ -3,3 +3,4 @@ _build/
 blib/
 lib/Bio/DB/HTS.c
 lib/Bio/DB/HTS.o
+t/data/*ai
