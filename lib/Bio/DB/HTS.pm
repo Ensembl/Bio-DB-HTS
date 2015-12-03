@@ -2215,7 +2215,7 @@ sub index
 
     croak "No index file for $path; try opening file with -autoindex"
       unless -e "${path}.bai" or -e "${path}.crai" ;
-    return $fh->index_load();
+    return $self->index_load($fh);
 }
 
 sub reindex {
