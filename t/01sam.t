@@ -23,8 +23,8 @@ BEGIN {
   plan test => TEST_COUNT;
 }
 
-use Bio::DB::Sam;
-use Bio::DB::Bam::AlignWrapper;
+use Bio::DB::HTS;
+use Bio::DB::HTS::AlignWrapper;
 
 {
   ## Tests by keiranmraine@gmail.com (kr2@sanger.ac.uk) for fixing alignments with hard + soft clips
@@ -72,19 +72,20 @@ use Bio::DB::Bam::AlignWrapper;
       'ACATGAGATT----------GCTTTACTGTCATAACTATGGAAGAGACTATTGCCAGATGATGTCCATGT'],
   );
 
-  my $sam     = Bio::DB::Sam->new(  -bam => "$Bin/data/ex2.bam",
+  my $sam     = Bio::DB::HTS->new(  -bam => "$Bin/data/ex2.bam",
                                     -fasta => "$Bin/data/ex1.fa",
                                   );
-  my $bam = $sam->bam;
+  my $bam = $sam->hts_file ;
   my $record=0;
-  while(my $a = $bam->read1) {
+  while(my $a = $bam->read1)
+  {
     ok($a->query->start, $read_pos[$record]->[0], "Check query start $record");
     ok($a->query->end, $read_pos[$record]->[1], "Check query end $record");
 
     ok($a->start, $ref_pos[$record]->[0], "Check ref pos start $record");
     ok($a->start, $ref_pos[$record]->[0], "Check ref pos end $record");
 
-    my $aw = Bio::DB::Bam::AlignWrapper->new($a, $sam);
+    my $aw = Bio::DB::HTS::AlignWrapper->new($a, $sam);
     my ($ref, $match, $query) = $aw->padded_alignment;
     ok($ref, $read_padded[$record]->[0], "Check padded_alignment ref $record");
     ok($match, $read_padded[$record]->[1], "Check padded_alignment match $record");
@@ -139,7 +140,7 @@ use Bio::DB::Bam::AlignWrapper;
       'ACATGAGATT----------GCTTTACTGTCATAACTATGGAAGAGACTATTGCCAGATGATGTCCATGT'],
   );
 
-  my $sam     = Bio::DB::Sam->new(  -bam => "$Bin/data/ex2.bam",
+  my $sam     = Bio::DB::HTS->new(  -bam => "$Bin/data/ex2.bam",
                                     -fasta => "$Bin/data/ex1.fa",
                                     -force_refseq => 1,
                                   );
@@ -152,7 +153,7 @@ use Bio::DB::Bam::AlignWrapper;
     ok($a->start, $ref_pos[$record]->[0], "Check ref pos start $record");
     ok($a->start, $ref_pos[$record]->[0], "Check ref pos end $record");
 
-    my $aw = Bio::DB::Bam::AlignWrapper->new($a, $sam);
+    my $aw = Bio::DB::HTS::AlignWrapper->new($a, $sam);
     my ($ref, $match, $query) = $aw->padded_alignment;
     ok($ref, $read_padded[$record]->[0], "Check padded_alignment ref $record");
     ok($match, $read_padded[$record]->[1], "Check padded_alignment match $record");
@@ -167,7 +168,7 @@ use Bio::DB::Bam::AlignWrapper;
   ## processing of multi-gaps"
   ## (https://sourceforge.net/tracker/?func=detail&aid=3083769&group_id=27707&atid=391291)
   my $bamfile = "$Bin/data/dm3_3R_4766911_4767130.sam.sorted.bam";
-  my $sam     = Bio::DB::Sam->new( -bam => $bamfile,
+  my $sam     = Bio::DB::HTS->new( -bam => $bamfile,
 				   -split_splices => 1,
 				   -autoindex => 1,
 				 );
@@ -203,7 +204,7 @@ use Bio::DB::Bam::AlignWrapper;
 # low level tests (defined in lib/Bio/DB/Sam.xs)
 {
     my $bamfile = "$Bin/data/ex1.bam";
-    my $bam     = Bio::DB::Bam->open($bamfile);
+    my $bam     = Bio::DB::HTSfile->open($bamfile);
     ok($bam);
 
     my $header  = $bam->header;
@@ -227,7 +228,7 @@ use Bio::DB::Bam::AlignWrapper;
     $header->text($c);
     ok($header->text,$c);
 
-    my $fai  = Bio::DB::Sam::Fai->open("$Bin/data/ex1.fa");
+    my $fai  = Bio::DB::HTS::Fai->open("$Bin/data/ex1.fa");
     my $seq  = $fai->fetch('seq2:51-1000');
     ok(length $seq,950);
 
@@ -243,7 +244,7 @@ use Bio::DB::Bam::AlignWrapper;
     @result    = $header->parse_region('seq_invalid:51-1000');
     ok(scalar @result,0);
 
-    my $index = Bio::DB::Bam->index($bamfile,1);
+    my $index = Bio::DB::HTSfile->index($bamfile,1);
     ok($index);
 
     my @a;
@@ -286,42 +287,8 @@ use Bio::DB::Bam::AlignWrapper;
     ok($c[0]  >= 0);
     ok($c[-1] < 1000);
 
-    # try reading from a TAM (text sam) file
-    my $sam = Bio::DB::Tam->open("$Bin/data/ex1.sam.gz");
-    ok($sam);
-    my $align = Bio::DB::Bam::Alignment->new();
-    ok($align);
-
-    # quench annoying stderr message from library here
-    open my $saverr,">&STDERR";
-    open STDERR,">/dev/null";
-    my $head  = Bio::DB::Tam->header_read2("$Bin/data/ex1.fa.fai");
-    open STDERR,">&",$saverr;
-    ok($head);
-
-    my $result = $sam->read1($head,$align);
-    ok($result>0);
-    ok($align->qseq,'CACTAGTGGCTCATTGTAAATGTGTGGTTTAACTCG');
-    ok($align->start,1);
-    ok($sam->read1($head,$align)>0);
-    ok($align->start,3);
-    ok($header->target_name->[$align->tid],'seq1');
-
-    # test ability to write a BAM file
-    my (undef,$filename) = tempfile('BAM_TEST_XXXXXXX',UNLINK=>1);
-    $sam = Bio::DB::Tam->open("$Bin/data/ex1.sam.gz");
-    $bam = Bio::DB::Bam->open($filename,'w');
-    ok($bam);
-    ok($bam->header_write($head),0);
-    $count = 0;
-    while ($sam->read1($head,$align) > 0) {
-	$count++;
-	$bam->write1($align);
-    }
-    ok($count,3307);
     undef $bam;
-
-    $bam     = Bio::DB::Bam->open($filename);
+    $bam     = Bio::DB::HTSfile->open($filename);
     ok($bam);
 
     $header  = $bam->header;
@@ -340,19 +307,14 @@ use Bio::DB::Bam::AlignWrapper;
 
     # try removing and regenerating index
     unlink "$Bin/data/ex1.bam.bai";
-    ok(Bio::DB::Bam->index($bamfile,1));
+    ok(Bio::DB::HTSfile->index($bamfile,1));
     ok(-e "$Bin/data/ex1.bam.bai");
 
-    Bio::DB::Bam->sort_core(1,"$Bin/data/ex1.bam","$Bin/data/ex1.sorted");
-    ok(-e "$Bin/data/ex1.sorted.bam");
-    ok(Bio::DB::Bam->index("$Bin/data/ex1.sorted.bam",1));
-    ok(-e "$Bin/data/ex1.sorted.bam.bai");
-    unlink ("$Bin/data/ex1.sorted.bam","$Bin/data/ex1.sorted.bam.bai");
 }
 
 # high level tests (defined in lib/Bio/DB/Sam.pm)
 for my $use_fasta (0,1) {
-    my $sam = Bio::DB::Sam->new(-fasta=>"$Bin/data/ex1.fa",
+    my $sam = Bio::DB::HTS->new(-fasta=>"$Bin/data/ex1.fa",
 			        -bam  =>"$Bin/data/ex1.bam",
 				-expand_flags => 1,
 				-autoindex => 1,
@@ -383,7 +345,7 @@ for my $use_fasta (0,1) {
     chomp($samline);
     ok($f->tam_line,$samline);
 
-    my $dummy = eval {Bio::DB::Sam->new(-fasta=>"invalid_path.txt",
+    my $dummy = eval {Bio::DB::HTS->new(-fasta=>"invalid_path.txt",
 					-bam  =>"invalid_path.txt")};
     ok($dummy,undef);
     ok($@ =~ /does not exist/);
