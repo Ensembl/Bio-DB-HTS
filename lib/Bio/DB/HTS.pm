@@ -1434,11 +1434,6 @@ sub force_refseq {
     $d;
 }
 
-sub reset_read {
-    my $self = shift;
-    $self->{hts_file}->header_read;
-}
-
 sub n_targets {
     shift->header->n_targets;
 }
@@ -1719,10 +1714,10 @@ sub features
       # then we directly iterate through the database using read1()
       if ($iterator && !$use_index)
       {
-        $self->reset_read;
+        my $header = $self->{hts_file}->header_read ;
         my $code = eval "sub {my \$a=shift;$filter;1}";
         die $@ if $@;
-        return Bio::DB::HTS::ReadIterator->new($self,$self->{hts_file},$code);
+        return Bio::DB::HTS::ReadIterator->new($self,$self->{hts_file},$code,$header);
       }
       # TAM filehandle retrieval is requested
       elsif ($fh)
@@ -1885,7 +1880,7 @@ sub last_feature_count { shift->{_result_count}||0 }
 sub _features
 {
     my $self = shift;
-    my ($seqid,$start,$end,$callback,$header) = @_;
+    my ($seqid,$start,$end,$callback) = @_;
     if (defined $seqid)
     {
       my $region = $seqid;
@@ -1898,7 +1893,7 @@ sub _features
     }
     else
     {
-      $self->reset_read;
+      my $header = $self->{hts_file}->header_read ;
       while (my $b = $self->{hts_file}->read1($header))
       {
         $callback->($b);
@@ -1976,7 +1971,7 @@ sub _coverage {
 	$region   .= "-$end"   if defined $end;
     }
 
-    my $header     = $self->{hts_file}->header;
+    my $header     = $self->{hts_file}->header_read;
     my ($id,$s,$e) = $header->parse_region($region);
     return unless defined $id;
 

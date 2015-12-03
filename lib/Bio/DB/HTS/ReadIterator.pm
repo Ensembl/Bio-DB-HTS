@@ -2,18 +2,25 @@ package Bio::DB::HTS::ReadIterator;
 
 use strict;
 
-sub new {
+sub new
+{
     my $self = shift;
-    my ($sam,$bam,$filter) = @_;
-    return bless {sam   => $sam,
-		  bam   => $bam,
-		  filter=> $filter},ref $self || $self;
+    my ($sam,$hts_file,$filter,$header) = @_;
+    return bless {sam => $sam,
+		  hts_file => $hts_file,
+		  filter => $filter,
+      header =>$header,
+     },ref $self || $self;
 }
-sub next_seq {
+
+sub next_seq
+{
     my $self = shift;
-    while (my $b = $self->{bam}->read1) {
-	return Bio::DB::HTS::AlignWrapper->new($b,$self->{sam})
-	    if $self->{filter}->($b);
+    my $header = $self->{header} ;
+    while (my $b = $self->{hts_file}->read1($header))
+    {
+      return Bio::DB::HTS::AlignWrapper->new($b,$self->{sam})
+        if $self->{filter}->($b);
     }
     return;
 }
