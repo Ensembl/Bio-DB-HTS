@@ -19,8 +19,6 @@ lib/Bio/DB/Sam/SamToGBrowse.pm
 lib/Bio/DB/HTS/Segment.pm
 LICENSE
 MANIFEST			This list of files
-META.json
-META.yml
 README
 t/01sam.t
 t/data/00README.txt
