@@ -76,8 +76,9 @@ use Bio::DB::HTS::AlignWrapper;
                                     -fasta => "$Bin/data/ex1.fa",
                                   );
   my $bam = $sam->hts_file ;
+  my $header = $bam->header_read() ;
   my $record=0;
-  while(my $a = $bam->read1)
+  while(my $a = $bam->read1($header))
   {
     ok($a->query->start, $read_pos[$record]->[0], "Check query start $record");
     ok($a->query->end, $read_pos[$record]->[1], "Check query end $record");
@@ -145,8 +146,9 @@ use Bio::DB::HTS::AlignWrapper;
                                     -force_refseq => 1,
                                   );
   my $bam = $sam->bam;
+  my $header = $bam->header_read() ;
   my $record=0;
-  while(my $a = $bam->read1) {
+  while(my $a = $bam->read1($header)) {
     ok($a->query->start, $read_pos[$record]->[0], "Check query start $record");
     ok($a->query->end, $read_pos[$record]->[1], "Check query end $record");
 
@@ -207,7 +209,7 @@ use Bio::DB::HTS::AlignWrapper;
     my $bam     = Bio::DB::HTSfile->open($bamfile);
     ok($bam);
 
-    my $header  = $bam->header;
+    my $header = $bam->header_read() ;
     my $targets = $header->n_targets;
     ok($targets,2);
 
@@ -233,8 +235,9 @@ use Bio::DB::HTS::AlignWrapper;
     ok(length $seq,950);
 
     my $count;
-    while (my $b = $bam->read1) {
-	$count++;
+    while (my $b = $bam->read1($header))
+    {
+      $count++;
     }
     ok($count,3307);
 
@@ -244,7 +247,7 @@ use Bio::DB::HTS::AlignWrapper;
     @result    = $header->parse_region('seq_invalid:51-1000');
     ok(scalar @result,0);
 
-    my $index = Bio::DB::HTSfile->index($bamfile,1);
+    my $index = Bio::DB::HTSfile->index_load($bam);
     ok($index);
 
     my @a;
@@ -287,39 +290,17 @@ use Bio::DB::HTS::AlignWrapper;
     ok($c[0]  >= 0);
     ok($c[-1] < 1000);
 
-    undef $bam;
-    $bam     = Bio::DB::HTSfile->open($filename);
-    ok($bam);
-
-    $header  = $bam->header;
-    $targets = $header->n_targets;
-    ok($targets,2);
-
-    $target_names = $header->target_name;
-    ok($target_names);
-    ok(scalar @$target_names,2);
-    ok($target_names->[0],'seq1');
-
-    $target_lens = $header->target_len;
-    ok($target_lens);
-    ok(scalar @$target_lens,2);
-    ok($target_lens->[0],1575);
-
-    # try removing and regenerating index
-    unlink "$Bin/data/ex1.bam.bai";
-    ok(Bio::DB::HTSfile->index($bamfile,1));
-    ok(-e "$Bin/data/ex1.bam.bai");
-
 }
 
 # high level tests (defined in lib/Bio/DB/Sam.pm)
-for my $use_fasta (0,1) {
+for my $use_fasta (0,1)
+{
     my $sam = Bio::DB::HTS->new(-fasta=>"$Bin/data/ex1.fa",
 			        -bam  =>"$Bin/data/ex1.bam",
 				-expand_flags => 1,
 				-autoindex => 1,
 				-force_refseq => $use_fasta,
-	);
+	  );
     ok($sam);
     ok($sam->n_targets,2);
 
@@ -333,29 +314,17 @@ for my $use_fasta (0,1) {
     ok($seq->isa('Bio::PrimarySeq'));
     ok(length $seq->seq,1575);
 
-    my $fh = $sam->tam_fh;
-    ok($fh);
-    my $samline = <$fh>;
-    ok($samline =~ /^B7_591:4:96:693:509/);
-    $fh->close;
-
-    my ($readname) = $samline =~ /^(\S+)/;
-    my ($f) = $sam->get_features_by_name($readname);
-    ok($f);
-    chomp($samline);
-    ok($f->tam_line,$samline);
-
     my $dummy = eval {Bio::DB::HTS->new(-fasta=>"invalid_path.txt",
 					-bam  =>"invalid_path.txt")};
     ok($dummy,undef);
     ok($@ =~ /does not exist/);
 
     my @alignments =
-	$sam->get_features_by_location(
+      $sam->get_features_by_location(
 	    -seq_id => 'seq2',
 	    -start  => 500,
 	    -end    => 800
-	);
+	  );
     ok(scalar @alignments,442);
     ok($alignments[0]->seq_id,'seq2');
 
@@ -433,11 +402,11 @@ for my $use_fasta (0,1) {
     ok($count,442);
 
     # try tam fh retrieval
-    $fh = $sam->get_seq_fh(
-	-seq_id => 'seq2',
-	-start  => 500,
-	-end    => 800,
-	);
+    my $fh = $sam->get_seq_fh(
+          -seq_id => 'seq2',
+	        -start  => 500,
+	        -end    => 800,
+	  );
     $count = 0;
     $count++ while <$fh>;
     ok($count,442);
