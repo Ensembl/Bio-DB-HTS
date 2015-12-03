@@ -76,8 +76,9 @@ use Bio::DB::HTS::AlignWrapper;
                                     -fasta => "$Bin/data/ex1.fa",
                                   );
   my $bam = $sam->hts_file ;
+  my $header = $bam->header_read() ;
   my $record=0;
-  while(my $a = $bam->read1)
+  while(my $a = $bam->read1($header))
   {
     ok($a->query->start, $read_pos[$record]->[0], "Check query start $record");
     ok($a->query->end, $read_pos[$record]->[1], "Check query end $record");
@@ -145,8 +146,9 @@ use Bio::DB::HTS::AlignWrapper;
                                     -force_refseq => 1,
                                   );
   my $bam = $sam->bam;
+  my $header = $bam->header_read() ;
   my $record=0;
-  while(my $a = $bam->read1) {
+  while(my $a = $bam->read1($header)) {
     ok($a->query->start, $read_pos[$record]->[0], "Check query start $record");
     ok($a->query->end, $read_pos[$record]->[1], "Check query end $record");
 
@@ -207,7 +209,7 @@ use Bio::DB::HTS::AlignWrapper;
     my $bam     = Bio::DB::HTSfile->open($bamfile);
     ok($bam);
 
-    my $header  = $bam->header;
+    my $header = $bam->header_read() ;
     my $targets = $header->n_targets;
     ok($targets,2);
 
@@ -233,8 +235,9 @@ use Bio::DB::HTS::AlignWrapper;
     ok(length $seq,950);
 
     my $count;
-    while (my $b = $bam->read1) {
-	$count++;
+    while (my $b = $bam->read1($header))
+    {
+      $count++;
     }
     ok($count,3307);
 
@@ -286,29 +289,6 @@ use Bio::DB::HTS::AlignWrapper;
     my @c = sort {$a<=>$b} @$coverage;
     ok($c[0]  >= 0);
     ok($c[-1] < 1000);
-
-    undef $bam;
-    $bam     = Bio::DB::HTSfile->open($filename);
-    ok($bam);
-
-    $header  = $bam->header;
-    $targets = $header->n_targets;
-    ok($targets,2);
-
-    $target_names = $header->target_name;
-    ok($target_names);
-    ok(scalar @$target_names,2);
-    ok($target_names->[0],'seq1');
-
-    $target_lens = $header->target_len;
-    ok($target_lens);
-    ok(scalar @$target_lens,2);
-    ok($target_lens->[0],1575);
-
-    # try removing and regenerating index
-    unlink "$Bin/data/ex1.bam.bai";
-    ok(Bio::DB::HTSfile->index($bamfile,1));
-    ok(-e "$Bin/data/ex1.bam.bai");
 
 }
 

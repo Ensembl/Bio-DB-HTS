@@ -1,3 +1,2 @@
 Version 0.9
-   * Apply patch from Hongwen Qiu to fix memory allocation error in
-   bam header generation.
+   * htslib port from Bio::DB::Sam
