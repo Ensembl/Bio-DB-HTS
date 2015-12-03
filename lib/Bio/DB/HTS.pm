@@ -1,6 +1,6 @@
 package Bio::DB::HTS;
 
-our $VERSION = '1.41';
+our $VERSION = '0.9';
 
 =head1 NAME
 
@@ -1316,7 +1316,6 @@ use Scalar::Util qw(reftype);
 use Data::Dumper;
 
 use Carp 'croak';
-use Carp 'longmess';
 use Bio::SeqFeature::Lite;
 use Bio::PrimarySeq;
 
