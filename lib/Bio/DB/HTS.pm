@@ -55,10 +55,10 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
 
  # low level API
  my $hfile        = Bio::DB::HTSfile->open('/path/to/bamfile');
- my $header       = $hfile->header;
+ my $header       = $hfile->header_read;
  my $target_count = $header->n_targets;
  my $target_names = $header->target_name;
- while (my $align = $hfile->read1)
+ while (my $align = $hfile->read1($header))
  {
     my $seqid     = $target_names->[$align->tid];
     my $start     = $align->pos+1;
@@ -951,34 +951,6 @@ returns it as a string.
 
 =back
 
-=head2 TAM Files
-
-These methods provide interfaces to the "TAM" text version of SAM
-files; they often have a .sam extension.
-
-=over 4
-
-=item $tam = Bio::DB::Tam->open('/path/to/file.sam')
-
-Given the path to a SAM file, opens it for reading. The file can be
-compressed with gzip if desired.
-
-=item $header = $tam->header_read()
-
-Create and return a Bio::DB::HTS::Header object from the information
-contained within @SQ header lines of the Sam file. If there are no @SQ
-lines, then the header will not be useful.
-
-=item $bytes = $tam->read1($header,$alignment)
-
-Given a Bio::DB::HTS::Header object, such as the one created by
-header_read2(), and a Bio::DB::HTS::Alignment object created by
-Bio::DB::HTS::Alignment->new(), reads one line of alignment information
-into the alignment object from the TAM file and returns a status
-code. The result code will be the number of bytes read.
-
-=back
-
 =head2 BAM Files
 
 These methods provide interfaces to the "BAM" binary version of
@@ -1019,7 +991,7 @@ mode, write the header to the file. If the write fails the process
 will be terminated at the C layer. The result code is (currently)
 always zero.
 
-=item $alignment = $hfile->read1()
+=item $alignment = $hfile->read1($header)
 
 Read one alignment from the BAM file and return it as a
 Bio::DB::HTS::Alignment object. Note that you
@@ -1464,7 +1436,7 @@ sub force_refseq {
 
 sub reset_read {
     my $self = shift;
-    $self->{hts_file}->header;
+    $self->{hts_file}->header_read;
 }
 
 sub n_targets {
@@ -1835,7 +1807,8 @@ sub coverage2BedGraph {
     }
 }
 
-sub _filter_features {
+sub _filter_features
+{
     my $self = shift;
     my ($seqid,$start,$end,$filter,$do_tam_fh,$max_features) = @_;
 
@@ -1912,7 +1885,7 @@ sub last_feature_count { shift->{_result_count}||0 }
 sub _features
 {
     my $self = shift;
-    my ($seqid,$start,$end,$callback) = @_;
+    my ($seqid,$start,$end,$callback,$header) = @_;
     if (defined $seqid)
     {
       my $region = $seqid;
@@ -1926,7 +1899,7 @@ sub _features
     else
     {
       $self->reset_read;
-      while (my $b = $self->{hts_file}->read1)
+      while (my $b = $self->{hts_file}->read1($header))
       {
         $callback->($b);
       }
@@ -2380,10 +2353,10 @@ L<Bio::Perl>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>
 
 =head1 AUTHOR
 
-Lincoln Stein E<lt>lincoln.stein@oicr.on.caE<gt>.
-E<lt>lincoln.stein@bmail.comE<gt>
+Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>.
 
-Copyright (c) 2009 Ontario Institute for Cancer Research.
+
+Copyright (c) 2015 Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
 This package and its accompanying libraries is free software; you can
 redistribute it and/or modify it under the terms of the GPL (either
