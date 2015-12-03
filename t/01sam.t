@@ -293,13 +293,14 @@ use Bio::DB::HTS::AlignWrapper;
 }
 
 # high level tests (defined in lib/Bio/DB/Sam.pm)
-for my $use_fasta (0,1) {
+for my $use_fasta (0,1)
+{
     my $sam = Bio::DB::HTS->new(-fasta=>"$Bin/data/ex1.fa",
 			        -bam  =>"$Bin/data/ex1.bam",
 				-expand_flags => 1,
 				-autoindex => 1,
 				-force_refseq => $use_fasta,
-	);
+	  );
     ok($sam);
     ok($sam->n_targets,2);
 
@@ -313,29 +314,17 @@ for my $use_fasta (0,1) {
     ok($seq->isa('Bio::PrimarySeq'));
     ok(length $seq->seq,1575);
 
-    my $fh = $sam->tam_fh;
-    ok($fh);
-    my $samline = <$fh>;
-    ok($samline =~ /^B7_591:4:96:693:509/);
-    $fh->close;
-
-    my ($readname) = $samline =~ /^(\S+)/;
-    my ($f) = $sam->get_features_by_name($readname);
-    ok($f);
-    chomp($samline);
-    ok($f->tam_line,$samline);
-
     my $dummy = eval {Bio::DB::HTS->new(-fasta=>"invalid_path.txt",
 					-bam  =>"invalid_path.txt")};
     ok($dummy,undef);
     ok($@ =~ /does not exist/);
 
     my @alignments =
-	$sam->get_features_by_location(
+      $sam->get_features_by_location(
 	    -seq_id => 'seq2',
 	    -start  => 500,
 	    -end    => 800
-	);
+	  );
     ok(scalar @alignments,442);
     ok($alignments[0]->seq_id,'seq2');
 
@@ -413,11 +402,11 @@ for my $use_fasta (0,1) {
     ok($count,442);
 
     # try tam fh retrieval
-    $fh = $sam->get_seq_fh(
-	-seq_id => 'seq2',
-	-start  => 500,
-	-end    => 800,
-	);
+    my $fh = $sam->get_seq_fh(
+          -seq_id => 'seq2',
+	        -start  => 500,
+	        -end    => 800,
+	  );
     $count = 0;
     $count++ while <$fh>;
     ok($count,442);
