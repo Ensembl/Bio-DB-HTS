@@ -1311,7 +1311,6 @@ Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 use strict;
 use warnings;
 
-#rn6debug aids
 use Scalar::Util qw(reftype);
 use Data::Dumper;
 
@@ -1776,7 +1775,6 @@ sub features
         # otherwise aggregate mate pairs into two-level features
         elsif ($t =~ /^read_pair/)
         {
-          print("rn6DEBUG-HTS-pm-read_pair features being hunted\n") ;
           $self->_build_mates($features,\@result);
         }
         next;
