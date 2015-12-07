@@ -2151,9 +2151,7 @@ package Bio::DB::HTSfile;
 use File::Spec;
 use Cwd;
 use Carp 'croak';
-use Carp qw( confess );
-$SIG{__DIE__} =  \&confess;
-$SIG{__WARN__} = \&confess;
+
 
 sub index
 {
