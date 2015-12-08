@@ -1,6 +1,18 @@
 package Bio::DB::HTS::Alignment;
 
-# $Id$
+=head1 LICENSE
+
+Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+
+Licensed under the "Artistic License 2.0", (the "License"); you may not use this file except in compliance with the License.
+
+You may obtain a copy of the License at https://opensource.org/licenses/Artistic-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 =head1 NAME
 
@@ -27,7 +39,7 @@ Bio::DB::HTS::Alignment -- The HTS alignment object
     my $query_end    = $a->query->end;
     my $query_strand = $a->query->strand;
     my $query_dna    = $a->query->dna;
-   
+
     my $cigar     = $a->cigar_str;
     my @scores    = $a->qscore;     # per-base quality scores
     my $score     = $a->qstring;    # TAM-style quality string
@@ -100,12 +112,12 @@ For paired reads, return the end position of the mate's alignment in
 =item $mlen = $align->mate_len
 
 For mate-pairs, retrieve the length of the mate's alignment on the
-reference sequence. 
+reference sequence.
 
 =item $strand = $align->strand
 
 Return the strand of the alignment as -1 for reversed, +1 for
-forward. 
+forward.
 
 NOTE: In versions 1.00-1.06, this method always returned +1. As of
 version 1.07, this behavior is fixed.
@@ -113,7 +125,7 @@ version 1.07, this behavior is fixed.
 =item $mstrand = $align->mstrand
 
 If the read has a mate pair, return the strand of the mate in the
-format -1 or +1. 
+format -1 or +1.
 
 =item $ref_dna        = $align->dna
 
@@ -235,11 +247,11 @@ sequence (the target) and the query. It will look like this:
 
  $ref     AGTGCCTTTGTTCA-----ACCCCCTTGCAACAACC
  $matches ||||||||||||||     |||||||||||||||||
- $query   AGTGCCTTTGTTCACATAGACCCCCTTGCAACAACC 
+ $query   AGTGCCTTTGTTCACATAGACCCCCTTGCAACAACC
 
 =item $str = $align->aux
 
-Returns the text version of the SAM tags, e.g. 
+Returns the text version of the SAM tags, e.g.
 "XT:A:M NM:i:2 SM:i:37 AM:i:37 XM:i:1 XO:i:1 XG:i:1 MD:Z:6^C0A47"
 
 =item $str = $align->tam_line
@@ -450,7 +462,7 @@ sub get_tag_values {
     defined $tag or return;
     if (my $mask = RFLAGS->{uc $tag}) {  # special tag
 	# to avoid warnings when making numeric comps
-	return ($self->flag & $mask) == 0 ? 0 : 1; 
+	return ($self->flag & $mask) == 0 ? 0 : 1;
     } elsif ($tag eq 'FLAGS') {
 	$self->flag_str;
     } else {
@@ -644,4 +656,3 @@ License 2.0.  Refer to LICENSE for the full license text. In addition,
 please see DISCLAIMER.txt for disclaimers of warranty.
 
 =cut
-
