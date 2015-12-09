@@ -2358,10 +2358,4 @@ reference genome. In this case, modify the db_args line to read:
 
 L<Bio::Perl>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>
 
-=head1 AUTHOR
-
-Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>.
-
-
-
 =cut

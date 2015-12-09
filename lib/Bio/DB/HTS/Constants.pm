@@ -64,12 +64,6 @@ The reverse of FLAGS:
 
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::Bam::Alignment>
 
-=head1 AUTHOR
-
-Lincoln Stein E<lt>lincoln.stein@oicr.on.caE<gt>.
-E<lt>lincoln.stein@bmail.comE<gt>
-
-
 =cut
 
 

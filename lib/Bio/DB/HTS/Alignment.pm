@@ -644,17 +644,4 @@ sub hit { shift->target(@_); }
 
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
-=head1 AUTHOR
-
-Lincoln Stein E<lt>lincoln.stein@oicr.on.caE<gt>.
-E<lt>lincoln.stein@bmail.comE<gt>
-
-Copyright (c) 2009 Ontario Institute for Cancer Research.
-
-This package and its accompanying libraries is free software; you can
-redistribute it and/or modify it under the terms of the GPL (either
-version 1, or at your option, any later version) or the Artistic
-License 2.0.  Refer to LICENSE for the full license text. In addition,
-please see DISCLAIMER.txt for disclaimers of warranty.
-
 =cut

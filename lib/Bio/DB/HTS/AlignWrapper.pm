@@ -49,13 +49,6 @@ L<Bio::DB::HTS::Alignment/High-level Bio::DB::HTS::Alignment methods>.
 
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
-=head1 AUTHOR
-
-Lincoln Stein E<lt>lincoln.stein@oicr.on.caE<gt>.
-E<lt>lincoln.stein@bmail.comE<gt>
-
-Copyright (c) 2009 Ontario Institute for Cancer Research.
-
 =cut
 
 
