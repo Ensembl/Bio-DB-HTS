@@ -12,7 +12,6 @@ lib/Bio/DB/HTS/Target.pm
 lib/Bio/DB/HTS.pm
 lib/Bio/DB/HTS.xs
 lib/Bio/DB/HTS/Constants.pm
-lib/Bio/DB/Sam/SamToGBrowse.pm
 lib/Bio/DB/HTS/Segment.pm
 LICENSE
 MANIFEST			This list of files
