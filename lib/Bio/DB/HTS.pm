@@ -1292,7 +1292,7 @@ Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
 =cut
 package Bio::DB::HTS;
-our $VERSION = '0.9';
+our $VERSION = '1.0';
 
 use strict;
 use warnings;
