@@ -1,5 +1,3 @@
-package Bio::DB::HTS::PileupWrapper;
-
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -36,6 +34,7 @@ than Bio::DB::HTS::Alignment.
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
 =cut
+package Bio::DB::HTS::PileupWrapper;
 
 use strict;
 use Bio::DB::HTS::AlignWrapper;

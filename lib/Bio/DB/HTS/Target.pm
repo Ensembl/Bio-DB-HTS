@@ -27,6 +27,7 @@ aligned.
 
 =cut
 package Bio::DB::HTS::Target;
+
 use strict;
 
 use base 'Bio::DB::HTS::Query';

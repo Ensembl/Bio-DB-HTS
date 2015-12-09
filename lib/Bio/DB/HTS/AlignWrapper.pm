@@ -1,5 +1,3 @@
-package Bio::DB::HTS::AlignWrapper;
-
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -50,7 +48,7 @@ L<Bio::DB::HTS::Alignment/High-level Bio::DB::HTS::Alignment methods>.
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
 =cut
-
+package Bio::DB::HTS::AlignWrapper;
 
 use strict;
 use Bio::DB::HTS::Constants;

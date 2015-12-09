@@ -1,5 +1,3 @@
-package Bio::DB::HTS::Alignment;
-
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -448,6 +446,7 @@ operations:
 =back
 
 =cut
+package Bio::DB::HTS::Alignment;
 
 use strict;
 use warnings;

@@ -1,5 +1,3 @@
-package Bio::DB::HTS::Constants;
-
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -65,7 +63,7 @@ The reverse of FLAGS:
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::Bam::Alignment>
 
 =cut
-
+package Bio::DB::HTS::Constants;
 
 use strict;
 
