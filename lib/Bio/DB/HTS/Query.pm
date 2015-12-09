@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -41,21 +42,22 @@ part of a SAM alignment.
 =over 4
 
 =cut
+
 package Bio::DB::HTS::Query;
 
 use strict;
 use Bio::DB::HTS;
-use Bio::DB::HTS::Constants qw(CIGAR_SYMBOLS BAM_CREF_SKIP BAM_CSOFT_CLIP BAM_CHARD_CLIP);
+use Bio::DB::HTS::Constants
+  qw(CIGAR_SYMBOLS BAM_CREF_SKIP BAM_CSOFT_CLIP BAM_CHARD_CLIP);
 
-use constant CIGAR_SKIP      => {CIGAR_SYMBOLS->[BAM_CREF_SKIP]  => 1,
- 				 CIGAR_SYMBOLS->[BAM_CSOFT_CLIP] => 1,
- 				 CIGAR_SYMBOLS->[BAM_CHARD_CLIP] => 1};
-
+use constant CIGAR_SKIP => { CIGAR_SYMBOLS->[BAM_CREF_SKIP]  => 1,
+                             CIGAR_SYMBOLS->[BAM_CSOFT_CLIP] => 1,
+                             CIGAR_SYMBOLS->[BAM_CHARD_CLIP] => 1 };
 
 sub new {
     my $self      = shift;
     my $alignment = shift;
-    bless \$alignment,ref $self || $self;
+    bless \$alignment, ref $self || $self;
 }
 
 =item $seqid = $query->seq_id
@@ -86,7 +88,7 @@ The read display_name (same as seq_id in this case).
 
 =cut
 
-sub display_name {shift->name}
+sub display_name { shift->name }
 
 =item $tag = $query->primary_tag
 
@@ -94,8 +96,7 @@ The string "match".
 
 =cut
 
-sub primary_tag { ${shift()}->primary_tag }
-
+sub primary_tag { ${ shift() }->primary_tag }
 
 =item $tag = $query->source_tag
 
@@ -103,7 +104,7 @@ The string "sam/bam".
 
 =cut
 
-sub source_tag  { ${shift()}->source_tag  }
+sub source_tag { ${ shift() }->source_tag }
 
 =item $start = $query->start
 
@@ -132,24 +133,24 @@ sub low {
     my $cigar_arry = $$self->cigar_array;
     my $start      = 1;
     for my $c (@$cigar_arry) {
-      next if CIGAR_SYMBOLS->[BAM_CHARD_CLIP] eq $c->[0];
-      last unless CIGAR_SKIP->{$c->[0]};
-      $start += $c->[1];
+        next if CIGAR_SYMBOLS->[BAM_CHARD_CLIP] eq $c->[0];
+        last unless CIGAR_SKIP->{ $c->[0] };
+        $start += $c->[1];
     }
     $start;
 }
 
 sub high {
-    my $self      = shift;
-    my $len       = $$self->cigar2qlen;
+    my $self       = shift;
+    my $len        = $$self->cigar2qlen;
     my $cigar_arry = $$self->cigar_array;
 
     # alignment stops at first non-clip CIGAR position
     my $i = $len - 1;
-    for my $c (reverse @$cigar_arry) {
-      next if CIGAR_SYMBOLS->[BAM_CHARD_CLIP] eq $c->[0];
-      last unless CIGAR_SKIP->{$c->[0]};
-      $len -= $c->[1];
+    for my $c ( reverse @$cigar_arry ) {
+        next if CIGAR_SYMBOLS->[BAM_CHARD_CLIP] eq $c->[0];
+        last unless CIGAR_SKIP->{ $c->[0] };
+        $len -= $c->[1];
     }
     return $len;
 }
@@ -162,8 +163,8 @@ The length of the read.
 
 sub length {
     my $self = shift;
-    $self->high-$self->low+1;
-#    $$self->cigar2qlen;
+    $self->high - $self->low + 1;
+    #    $$self->cigar2qlen;
 }
 
 =item $seq = $query->seq
@@ -176,8 +177,7 @@ orientation.
 sub seq {
     my $self = shift;
     my $dna  = $self->dna;
-    return Bio::PrimarySeq->new(-seq => $dna,
-				-id  => $$self->qname);
+    return Bio::PrimarySeq->new( -seq => $dna, -id => $$self->qname );
 }
 
 =item $scores = $query->qscore
@@ -189,7 +189,7 @@ ref. The qscores are in REFERENCE sequence orientation.
 =cut
 
 sub qscore {
-    my $self = shift;
+    my $self   = shift;
     my @qscore = $$self->qscore;
     return wantarray ? @qscore : \@qscore;
 }
@@ -202,7 +202,7 @@ The DNA string in reference sequence orientation.
 
 sub dna {
     my $self = shift;
-    return $$self->qseq || ('N' x $self->length);
+    return $$self->qseq || ( 'N' x $self->length );
 }
 
 =item $strand = $query->strand
@@ -225,16 +225,13 @@ on the read.
 
 sub subseq {
     my $self = shift;
-    my ($start,$end) = @_;
-    $start = 1 if $start < 1;
+    my ( $start, $end ) = @_;
+    $start = 1           if $start < 1;
     $end   = $self->high if $end > $self->high;
-    ($end,$start) = ($start,$end) if $start > $end;
-    return Bio::PrimarySeq->new(-seq=>substr($self->dna,
-					     $start-1,
-					     $end-$start+1)
-				);
+    ( $end, $start ) = ( $start, $end ) if $start > $end;
+    return Bio::PrimarySeq->new(
+                  -seq => substr( $self->dna, $start - 1, $end - $start + 1 ) );
 }
-
 
 1;
 

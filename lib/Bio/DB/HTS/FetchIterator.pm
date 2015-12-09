@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -15,22 +16,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 =cut
+
 package Bio::DB::HTS::FetchIterator;
 
 use strict;
 
 sub new {
-    my $self = shift;
-    my $list = shift;
-    my $total= shift;
+    my $self  = shift;
+    my $list  = shift;
+    my $total = shift;
     $total ||= @$list;
-    return bless {list=>$list,
-		  total=>$total},ref $self || $self;
+    return bless { list => $list, total => $total }, ref $self || $self;
 }
 
 sub next_seq {
     my $self = shift;
-    return shift @{$self->{list}};
+    return shift @{ $self->{list} };
 }
 
 sub total {

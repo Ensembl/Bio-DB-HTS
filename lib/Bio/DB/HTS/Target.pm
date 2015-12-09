@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -26,12 +27,12 @@ the read was sequenced, not in the oreintation in which it was
 aligned.
 
 =cut
+
 package Bio::DB::HTS::Target;
 
 use strict;
 
 use base 'Bio::DB::HTS::Query';
-
 
 sub dna {
     my $self = shift;
@@ -40,12 +41,11 @@ sub dna {
 }
 
 sub qscore {
-    my $self = shift;
+    my $self   = shift;
     my @qscore = $$self->qscore;
-    @qscore    = reverse @qscore if $$self->strand < 0;
+    @qscore = reverse @qscore if $$self->strand < 0;
     return wantarray ? @qscore : \@qscore;
 }
-
 
 sub start {
     my $self = shift;

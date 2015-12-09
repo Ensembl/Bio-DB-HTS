@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -1291,6 +1292,7 @@ Please see L<Bio::DB::HTS::Alignment> for documentation of the
 Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
 =cut
+
 package Bio::DB::HTS;
 our $VERSION = '1.0';
 
@@ -1318,8 +1320,8 @@ use constant DUMP_INTERVAL => 1_000_000;
 
 sub new {
     my $class         = shift;
-    my %args          = $_[0] =~ /^-/ ? @_ : (-bam=>shift);
-    my $hts_path      = $args{-bam}   or croak "-bam argument required";
+    my %args          = $_[0] =~ /^-/ ? @_ : ( -bam => shift );
+    my $hts_path      = $args{-bam} or croak "-bam argument required";
     my $fa_path       = $args{-fasta};
     my $expand_flags  = $args{-expand_flags};
     my $split_splices = $args{-split} || $args{-split_splices};
@@ -1327,30 +1329,28 @@ sub new {
     my $force_refseq  = $args{-force_refseq};
 
     # file existence checks
-    unless ($class->is_remote($hts_path))
-    {
-	    -e $hts_path or croak "$hts_path does not exist";
-	    -r _ or croak "is not readable";
+    unless ( $class->is_remote($hts_path) ) {
+        -e $hts_path or croak "$hts_path does not exist";
+        -r _ or croak "is not readable";
     }
-    my $hts_file = Bio::DB::HTSfile->open($hts_path) or croak "$hts_path open: $!";
+    my $hts_file = Bio::DB::HTSfile->open($hts_path) or
+      croak "$hts_path open: $!";
 
     my $fai = $class->new_dna_accessor($fa_path) if $fa_path;
 
-    my $self =  bless
-    {
-	    fai           => $fai,
-      hts_file      => $hts_file,
-      hts_path      => $hts_path,
-      fa_path       => $fa_path,
-      expand_flags  => $expand_flags,
-      split_splices => $split_splices,
-      autoindex     => $autoindex,
-      force_refseq  => $force_refseq,
-    },ref $class || $class;
-    my $b = $self->{hts_file} ;
-    $self->header;  # catch it
+    my $self = bless { fai           => $fai,
+                       hts_file      => $hts_file,
+                       hts_path      => $hts_path,
+                       fa_path       => $fa_path,
+                       expand_flags  => $expand_flags,
+                       split_splices => $split_splices,
+                       autoindex     => $autoindex,
+                       force_refseq  => $force_refseq, },
+      ref $class || $class;
+    my $b = $self->{hts_file};
+    $self->header;    # catch it
     return $self;
-}
+} ## end sub new
 
 sub bam { shift->{hts_file} }
 
@@ -1364,14 +1364,15 @@ sub is_remote {
 
 sub clone {
     my $self = shift;
-    $self->{hts_file} = Bio::DB::HTSfile->open($self->{hts_path}) if $self->{hts_path};
-    $self->{fai} = $self->new_dna_accessor($self->{fa_path}) if $self->{fa_path};
+    $self->{hts_file} = Bio::DB::HTSfile->open( $self->{hts_path} )
+      if $self->{hts_path};
+    $self->{fai} = $self->new_dna_accessor( $self->{fa_path} )
+      if $self->{fa_path};
 }
 
-sub header
-{
+sub header {
     my $self = shift;
-    my $b = $self->{hts_file} ;
+    my $b    = $self->{hts_file};
     return $self->{header} ||= $b->header_read();
 }
 
@@ -1384,19 +1385,20 @@ sub fai { shift->{fai} }
 
 sub new_dna_accessor {
     my $self     = shift;
-    my $accessor  = shift;
+    my $accessor = shift;
 
     return unless $accessor;
 
-    if (-e $accessor) {  # a file, assume it is a fasta file
-	-r _  or croak "$accessor is not readable";
-	my $a = Bio::DB::HTS::Fai->open($accessor)  or croak "$accessor open: $!"
-	    or croak "Can't open FASTA file $accessor: $!";
-	return $a;
+    if ( -e $accessor ) {    # a file, assume it is a fasta file
+        -r _ or croak "$accessor is not readable";
+        my $a = Bio::DB::HTS::Fai->open($accessor) or
+          croak "$accessor open: $!" or
+          croak "Can't open FASTA file $accessor: $!";
+        return $a;
     }
 
-    if (ref $accessor && $self->can_do_seq($accessor)) {
-	return $accessor;  # already built
+    if ( ref $accessor && $self->can_do_seq($accessor) ) {
+        return $accessor;    # already built
     }
 
     return;
@@ -1405,19 +1407,19 @@ sub new_dna_accessor {
 sub can_do_seq {
     my $self = shift;
     my $obj  = shift;
-    return
-	UNIVERSAL::can($obj,'seq') ||
-	UNIVERSAL::can($obj,'fetch_sequence');
+    return UNIVERSAL::can( $obj, 'seq' ) ||
+      UNIVERSAL::can( $obj, 'fetch_sequence' );
 }
-
 
 sub seq {
     my $self = shift;
-    my ($seqid,$start,$end) = @_;
-    my $fai = $self->fai or return 'N' x ($end-$start+1);
-    return $fai->can('seq')            ? $fai->seq($seqid,$start,$end)
-	  :$fai->can('fetch_sequence') ? $fai->fetch_sequence($seqid,$start,$end)
-	  :'N' x ($end-$start+1);
+    my ( $seqid, $start, $end ) = @_;
+    my $fai = $self->fai or return 'N' x ( $end - $start + 1 );
+    return
+      $fai->can('seq') ? $fai->seq( $seqid, $start, $end ) :
+      $fai->can('fetch_sequence') ?
+      $fai->fetch_sequence( $seqid, $start, $end ) :
+      'N' x ( $end - $start + 1 );
 }
 
 sub expand_flags {
@@ -1467,40 +1469,38 @@ sub target_len {
 }
 
 sub seq_ids {
-    my $self    = shift;
-    return @{$self->header->target_name};
+    my $self = shift;
+    return @{ $self->header->target_name };
 }
 
 sub _cache_targets {
     my $self = shift;
     return $self->{targets} if exists $self->{targets};
-    my @targets = map {lc $_} @{$self->header->target_name};
-    my @lengths =             @{$self->header->target_len};
+    my @targets = map { lc $_ } @{ $self->header->target_name };
+    my @lengths = @{ $self->header->target_len };
     my %targets;
-    @targets{@targets}      = @lengths;  # just you try to figure out what this is doing!
+    @targets{@targets} =
+      @lengths;    # just you try to figure out what this is doing!
     return $self->{targets} = \%targets;
 }
-
 
 sub length {
     my $self        = shift;
     my $target_name = shift;
-    return $self->_cache_targets->{lc $target_name};
+    return $self->_cache_targets->{ lc $target_name };
 }
 
 sub _fetch {
     my $self     = shift;
     my $region   = shift;
     my $callback = shift;
-    my $header              = $self->{hts_file}->header_read;
-    $region                 =~ s/\.\.|,/-/;
-    my ($seqid,$start,$end) = $header->parse_region($region);
+    my $header   = $self->{hts_file}->header_read;
+    $region =~ s/\.\.|,/-/;
+    my ( $seqid, $start, $end ) = $header->parse_region($region);
 
     return unless defined $seqid;
-    my $index  = $self->hts_index;
-    $index->fetch(
-                  $self->{hts_file},
-                  $seqid, $start, $end, $callback, $self ) ;
+    my $index = $self->hts_index;
+    $index->fetch( $self->{hts_file}, $seqid, $start, $end, $callback, $self );
 }
 
 sub fetch {
@@ -1508,107 +1508,103 @@ sub fetch {
     my $region   = shift;
     my $callback = shift;
 
-    my $code     = sub {
-	my ($align,$self) = @_;
-	$callback->(Bio::DB::HTS::AlignWrapper->new($align,$self));
+    my $code = sub {
+        my ( $align, $self ) = @_;
+        $callback->( Bio::DB::HTS::AlignWrapper->new( $align, $self ) );
     };
-    $self->_fetch($region,$code);
+    $self->_fetch( $region, $code );
 }
 
 sub pileup {
-    my $self   = shift;
-    my ($region,$callback) = @_;
+    my $self = shift;
+    my ( $region, $callback ) = @_;
 
-    my $header   = $self->header;
-    $region      =~ s/\.\.|,/-/;
-    my ($seqid,$start,$end) = $header->parse_region($region);
+    my $header = $self->header;
+    $region =~ s/\.\.|,/-/;
+    my ( $seqid, $start, $end ) = $header->parse_region($region);
     return unless defined $seqid;
 
     my $refnames = $self->header->target_name;
 
     my $code = sub {
-	my ($tid,$pos,$pileup) = @_;
-	my $seqid = $refnames->[$tid];
-	my @p = map {
-	      Bio::DB::HTS::PileupWrapper->new($_,$self)
-	      } @$pileup;
-	$callback->($seqid,$pos+1,\@p);
+        my ( $tid, $pos, $pileup ) = @_;
+        my $seqid = $refnames->[$tid];
+        my @p = map { Bio::DB::HTS::PileupWrapper->new( $_, $self ) } @$pileup;
+        $callback->( $seqid, $pos + 1, \@p );
     };
 
-    my $index  = $self->hts_index;
-	  $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
+    my $index = $self->hts_index;
+    $index->pileup( $self->{hts_file}, $seqid, $start, $end, $code );
 }
 
 sub fast_pileup {
-    my $self   = shift;
-    my ($region,$callback,$keep_level) = @_;
+    my $self = shift;
+    my ( $region, $callback, $keep_level ) = @_;
 
-    my $header   = $self->header;
-    $region      =~ s/\.\.|,/-/;
-    my ($seqid,$start,$end) = $header->parse_region($region);
+    my $header = $self->header;
+    $region =~ s/\.\.|,/-/;
+    my ( $seqid, $start, $end ) = $header->parse_region($region);
     return unless defined $seqid;
 
     my $refnames = $self->header->target_name;
 
     my $code = sub {
-  my ($tid,$pos,$pileup) = @_;
-  my $seqid = $refnames->[$tid];
-  $callback->($seqid,$pos+1,$pileup,$self);
+        my ( $tid, $pos, $pileup ) = @_;
+        my $seqid = $refnames->[$tid];
+        $callback->( $seqid, $pos + 1, $pileup, $self );
     };
 
-    my $index  = $self->hts_index;
-    $index->pileup($self->{hts_file},$seqid,$start,$end,$code);
+    my $index = $self->hts_index;
+    $index->pileup( $self->{hts_file}, $seqid, $start, $end, $code );
 }
 
 # segment returns a segment across the reference
 # it will not work on a arbitrary aligned feature
 sub segment {
     my $self = shift;
-    my ($seqid,$start,$end) = @_;
+    my ( $seqid, $start, $end ) = @_;
 
-    if ($_[0] =~ /^-/) {
-  my %args = @_;
-  $seqid = $args{-seq_id} || $args{-name};
-  $start = $args{-start};
-  $end   = $args{-stop}    || $args{-end};
-    } else {
-  ($seqid,$start,$end) = @_;
+    if ( $_[0] =~ /^-/ ) {
+        my %args = @_;
+        $seqid = $args{-seq_id} || $args{-name};
+        $start = $args{-start};
+        $end   = $args{-stop} || $args{-end};
+    }
+    else {
+        ( $seqid, $start, $end ) = @_;
     }
 
     my $targets = $self->_cache_targets;
-    return unless exists $targets->{lc $seqid};
+    return unless exists $targets->{ lc $seqid };
 
-    $start = 1                     unless defined $start;
-    $end   = $targets->{lc $seqid} unless defined $end;
+    $start = 1 unless defined $start;
+    $end = $targets->{ lc $seqid } unless defined $end;
     $start = 1 if $start < 1;
-    $end   = $targets->{lc $seqid} if $end > $targets->{lc $seqid};
+    $end = $targets->{ lc $seqid } if $end > $targets->{ lc $seqid };
 
-    return Bio::DB::HTS::Segment->new($self,$seqid,$start,$end);
+    return Bio::DB::HTS::Segment->new( $self, $seqid, $start, $end );
 }
 
-sub get_features_by_location
-{
-  my $self = shift;
-  my %args;
+sub get_features_by_location {
+    my $self = shift;
+    my %args;
 
-  if ($_[0] =~ /^-/)
-  { # named args
-    %args = @_;
-  }
-  else
-  {
-    # positional args
-    $args{-seq_id} = shift;
-    $args{-start}  = shift;
-    $args{-end}    = shift;
-  }
-  $self->features(%args);
+    if ( $_[0] =~ /^-/ ) {    # named args
+        %args = @_;
+    }
+    else {
+        # positional args
+        $args{-seq_id} = shift;
+        $args{-start}  = shift;
+        $args{-end}    = shift;
+    }
+    $self->features(%args);
 }
 
 sub get_features_by_attribute {
-  my $self       = shift;
-  my %attributes = ref($_[0]) ? %{$_[0]} : @_;
-  $self->features(-attributes=>\%attributes);
+    my $self = shift;
+    my %attributes = ref( $_[0] ) ? %{ $_[0] } : @_;
+    $self->features( -attributes => \%attributes );
 }
 
 sub get_features_by_tag {
@@ -1622,10 +1618,11 @@ sub get_features_by_flag {
 sub get_feature_by_name {
     my $self = shift;
     my %args;
-    if ($_[0] =~ /^-/) {
-  %args = @_;
-    } else {
-  $args{-name} = shift;
+    if ( $_[0] =~ /^-/ ) {
+        %args = @_;
+    }
+    else {
+        $args{-name} = shift;
     }
     $self->features(%args);
 }
@@ -1635,144 +1632,138 @@ sub get_features_by_name { shift->get_feature_by_name(@_) }
 sub get_feature_by_id {
     my $self = shift;
     my $id   = shift;
-    my ($name,$tid,$start,$end,$strand,$type) = map {s/%3B/;/ig;$_} split ';',$id;
+    my ( $name, $tid, $start, $end, $strand, $type ) =
+      map { s/%3B/;/ig; $_ } split ';', $id;
     return unless $name && defined $tid;
     $type ||= 'match';
     my $seqid = $self->target_name($tid);
-    my @features = $self->features(-name=>$name,
-           -type  => $type,
-           -seq_id=>$seqid,
-           -start=>$start,
-           -end=>$end,
-           -strand=>$strand);
+    my @features = $self->features( -name   => $name,
+                                    -type   => $type,
+                                    -seq_id => $seqid,
+                                    -start  => $start,
+                                    -end    => $end,
+                                    -strand => $strand );
     return unless @features;
     return $features[0];
 }
 
-
 sub get_seq_stream {
     my $self = shift;
-    $self->features(@_,-iterator=>1);
+    $self->features( @_, -iterator => 1 );
 }
 
 sub get_seq_fh {
     my $self = shift;
-    $self->features(@_,-fh=>1);
+    $self->features( @_, -fh => 1 );
 }
 
 sub types {
     return qw(match read_pair coverage region chromosome);
 }
 
-sub features
-{
+sub features {
     my $self = shift;
     my %args;
-    if (defined $_[0] && $_[0] !~ /^-/)
-    {
-      $args{-type} = \@_;
+    if ( defined $_[0] && $_[0] !~ /^-/ ) {
+        $args{-type} = \@_;
     }
-    else
-    {
-      %args = @_;
+    else {
+        %args = @_;
     }
 
-    my $seqid     = $args{-seq_id} || $args{-seqid};
-    my $start     = $args{-start};
-    my $end       = $args{-end}  || $args{-stop};
-    my $types     = $args{-type} || $args{-types} || [];
-    my $attributes= $args{-attributes} || $args{-tags} || $args{-flags};
-    my $iterator  = $args{-iterator};
-    my $fh        = $args{-fh};
-    my $filter    = $args{-filter};
-    my $max       = $args{-max_features};
+    my $seqid      = $args{-seq_id} || $args{-seqid};
+    my $start      = $args{-start};
+    my $end        = $args{-end} || $args{-stop};
+    my $types      = $args{-type} || $args{-types} || [];
+    my $attributes = $args{-attributes} || $args{-tags} || $args{-flags};
+    my $iterator   = $args{-iterator};
+    my $fh         = $args{-fh};
+    my $filter     = $args{-filter};
+    my $max        = $args{-max_features};
 
-    $types        = [$types] unless ref $types;
-    $types        = [$args{-class}] if !@$types && defined $args{-class};
+    $types = [$types] unless ref $types;
+    $types = [ $args{-class} ] if !@$types && defined $args{-class};
     my $use_index = defined $seqid;
 
     # we do some special casing to retrieve target (reference) sequences
     # if they are requested
-    if (defined($args{-name})
-        && (!@$types || $types->[0]=~/region|chromosome/)
-        && !defined $seqid)
+    if ( defined( $args{-name} ) &&
+         ( !@$types || $types->[0] =~ /region|chromosome/ ) &&
+         !defined $seqid )
     {
-      my @results = $self->_segment_search(lc $args{-name});
-      return @results if @results;
+        my @results = $self->_segment_search( lc $args{-name} );
+        return @results if @results;
     }
-    elsif (@$types && $types->[0] =~ /region|chromosome/)
-    {
-      return map {$self->segment($_)} $self->seq_ids;
+    elsif ( @$types && $types->[0] =~ /region|chromosome/ ) {
+        return map { $self->segment($_) } $self->seq_ids;
     }
 
     my %seenit;
-    my @types = grep {!$seenit{$_}++} ref $types ? @$types : $types;
-    @types    = 'match' unless @types;
+    my @types = grep { !$seenit{$_}++ } ref $types ? @$types : $types;
+    @types = 'match' unless @types;
 
     # the filter is intended to be inserted into a closure
     # it will return undef from the closure unless the filter
     # criteria are satisfied
-    if (!$filter)
-    {
-      $filter = '';
-      $filter   .= $self->_filter_by_name(lc $args{-name})
-        if defined $args{-name};
-      $filter   .= $self->_filter_by_attribute($attributes)
-        if defined $attributes;
+    if ( !$filter ) {
+        $filter = '';
+        $filter .= $self->_filter_by_name( lc $args{-name} )
+          if defined $args{-name};
+        $filter .= $self->_filter_by_attribute($attributes)
+          if defined $attributes;
     }
 
     # Special cases for unmunged data
-    if (@types == 1 && $types[0] =~ /^match/)
-    {
-      # if iterator is requested, and no indexing is possible,
-      # then we directly iterate through the database using read1()
-      if ($iterator && !$use_index)
-      {
-        my $header = $self->{hts_file}->header_read ;
-        my $code = eval "sub {my \$a=shift;$filter;1}";
-        die $@ if $@;
-        return Bio::DB::HTS::ReadIterator->new($self,$self->{hts_file},$code,$header);
-      }
-      # TAM filehandle retrieval is requested
-      elsif ($fh)
-      {
-        return $self->_features_fh($seqid,$start,$end,$filter);
-      }
+    if ( @types == 1 && $types[0] =~ /^match/ ) {
+        # if iterator is requested, and no indexing is possible,
+        # then we directly iterate through the database using read1()
+        if ( $iterator && !$use_index ) {
+            my $header = $self->{hts_file}->header_read;
+            my $code   = eval "sub {my \$a=shift;$filter;1}";
+            die $@ if $@;
+            return
+              Bio::DB::HTS::ReadIterator->new( $self, $self->{hts_file}, $code,
+                                               $header );
+        }
+        # TAM filehandle retrieval is requested
+        elsif ($fh) {
+            return $self->_features_fh( $seqid, $start, $end, $filter );
+        }
     }
 
     # otherwise we're going to do a little magic
-    my ($features,@result);
-    for my $t (@types)
-    {
-      if ($t =~ /^(match|read_pair)/)
-      {
-        # fetch the features if type is 'match' or 'read_pair'
-        $features = $self->_filter_features($seqid,$start,$end,$filter,undef,$max);
-        # for "match" just return the alignments
-        if ($t =~ /^(match)/)
-        {
-          push @result,@$features;
+    my ( $features, @result );
+    for my $t (@types) {
+        if ( $t =~ /^(match|read_pair)/ ) {
+            # fetch the features if type is 'match' or 'read_pair'
+            $features =
+              $self->_filter_features( $seqid,  $start, $end,
+                                       $filter, undef,  $max );
+            # for "match" just return the alignments
+            if ( $t =~ /^(match)/ ) {
+                push @result, @$features;
+            }
+            # otherwise aggregate mate pairs into two-level features
+            elsif ( $t =~ /^read_pair/ ) {
+                $self->_build_mates( $features, \@result );
+            }
+            next;
         }
-        # otherwise aggregate mate pairs into two-level features
-        elsif ($t =~ /^read_pair/)
-        {
-          $self->_build_mates($features,\@result);
-        }
-        next;
-      }
 
-      # create a coverage graph if type is 'coverage'
-      # specify coverage:N, to create a map of N bins
-      # units are coverage per bp
-      # resulting array will be stored in the "coverage" attribute
-      if ($t =~ /^coverage:?(\d*)/)
-      {
-        my $bins = $1;
-        push @result,$self->_coverage($seqid,$start,$end,$bins,$filter);
-      }
-    }
-    return $iterator ? Bio::DB::HTS::FetchIterator->new(\@result,$self->last_feature_count) : @result;
-}
+        # create a coverage graph if type is 'coverage'
+        # specify coverage:N, to create a map of N bins
+        # units are coverage per bp
+        # resulting array will be stored in the "coverage" attribute
+        if ( $t =~ /^coverage:?(\d*)/ ) {
+            my $bins = $1;
+            push @result,
+              $self->_coverage( $seqid, $start, $end, $bins, $filter );
+        }
+    } ## end for my $t (@types)
+    return $iterator ?
+      Bio::DB::HTS::FetchIterator->new( \@result, $self->last_feature_count ) :
+      @result;
+} ## end sub features
 
 sub coverage2BedGraph {
     my $self = shift;
@@ -1785,50 +1776,51 @@ sub coverage2BedGraph {
     my $lengths = $header->target_len;
     my $b       = $self->bam;
 
-    for my $tid (0..$header->n_targets-1) {
-	my $seqid = $seqids->[$tid];
-	my $len   = $lengths->[$tid];
+    for my $tid ( 0 .. $header->n_targets - 1 ) {
+        my $seqid = $seqids->[$tid];
+        my $len   = $lengths->[$tid];
 
-	my $sec_start = -1;
-	my $last_val = -1;
+        my $sec_start = -1;
+        my $last_val  = -1;
 
-	for (my $start=0;$start <= $len;$start += DUMP_INTERVAL) {
-	    my $end = $start+DUMP_INTERVAL;
-	    $end    = $len if $end > $len;
-	    my $coverage = $index->coverage($b,$tid,$start,$end);
-	    for (my $i=0; $i<@$coverage; $i++) {
-		if($last_val == -1) {
-		    $sec_start = 0;
-		    $last_val = $coverage->[$i];
-		}
-		if($last_val != $coverage->[$i]) {
-		    print $fh $seqid,"\t",$sec_start,"\t",$start+$i,"\t",$last_val,"\n"
-			unless $last_val == 0;
-		    $sec_start = $start+$i;
-		    $last_val = $coverage->[$i];
-		}
-		elsif($start+$i == $len-1) {
-		    print $fh $seqid,"\t",$sec_start,"\t",$start+$i,"\t",$last_val,"\n"
-			unless $last_val == 0;
-		}
-	    }
-	}
-    }
-}
+        for ( my $start = 0; $start <= $len; $start += DUMP_INTERVAL ) {
+            my $end = $start + DUMP_INTERVAL;
+            $end = $len if $end > $len;
+            my $coverage = $index->coverage( $b, $tid, $start, $end );
+            for ( my $i = 0; $i < @$coverage; $i++ ) {
+                if ( $last_val == -1 ) {
+                    $sec_start = 0;
+                    $last_val  = $coverage->[$i];
+                }
+                if ( $last_val != $coverage->[$i] ) {
+                    print $fh $seqid, "\t", $sec_start, "\t", $start + $i,
+                      "\t", $last_val, "\n"
+                      unless $last_val == 0;
+                    $sec_start = $start + $i;
+                    $last_val  = $coverage->[$i];
+                }
+                elsif ( $start + $i == $len - 1 ) {
+                    print $fh $seqid, "\t", $sec_start, "\t", $start + $i,
+                      "\t", $last_val, "\n"
+                      unless $last_val == 0;
+                }
+            }
+        }
+    } ## end for my $tid ( 0 .. $header...)
+} ## end sub coverage2BedGraph
 
-sub _filter_features
-{
+sub _filter_features {
     my $self = shift;
-    my ($seqid,$start,$end,$filter,$do_tam_fh,$max_features) = @_;
+    my ( $seqid, $start, $end, $filter, $do_tam_fh, $max_features ) = @_;
 
     my @result;
-    my $action = $do_tam_fh ? '\$self->header->view1($a)'
-                            : $self->_push_features($max_features);
+    my $action =
+      $do_tam_fh ? '\$self->header->view1($a)' :
+      $self->_push_features($max_features);
     my $user_code;
-    if (ref ($filter) eq 'CODE')
-    {
-      $user_code = $filter;
-      $filter = '';
+    if ( ref($filter) eq 'CODE' ) {
+        $user_code = $filter;
+        $filter    = '';
     }
 
     my $callback = defined($seqid) ? <<INDEXED : <<NONINDEXED;
@@ -1845,24 +1837,21 @@ sub {
     $action;
 }
 NONINDEXED
-    ;
 
     my $code = eval $callback;
     die $@ if $@;
-    if ($user_code)
-    {
-      my $new_callback = sub {
-        my $a = shift;
-        $code->($a) if $user_code->($a);
-      };
-      $self->_features($seqid,$start,$end,$new_callback);
+    if ($user_code) {
+        my $new_callback = sub {
+            my $a = shift;
+            $code->($a) if $user_code->($a);
+        };
+        $self->_features( $seqid, $start, $end, $new_callback );
     }
-    else
-    {
-      $self->_features($seqid,$start,$end,$code);
+    else {
+        $self->_features( $seqid, $start, $end, $code );
     }
     return \@result;
-}
+} ## end sub _filter_features
 
 sub _push_features {
     my $self = shift;
@@ -1871,13 +1860,12 @@ sub _push_features {
     # simple case -- no max specified. Will push onto an array called
     # @result.
 
-    return 'push @result,Bio::DB::HTS::AlignWrapper->new($a,$self)'
-	unless $max;
+    return 'push @result,Bio::DB::HTS::AlignWrapper->new($a,$self)' unless $max;
 
     $self->{_result_count} = 0;
 
     # otherwise we implement a simple subsampling
-    my $code=<<END;
+    my $code = <<END;
     my \$count = ++\$self->{_result_count};
     if (\@result < $max) {
 	push \@result,Bio::DB::HTS::AlignWrapper->new(\$a,\$self);
@@ -1889,127 +1877,117 @@ END
     return $code;
 }
 
-sub last_feature_count { shift->{_result_count}||0 }
+sub last_feature_count { shift->{_result_count} || 0 }
 
-sub _features
-{
+sub _features {
     my $self = shift;
-    my ($seqid,$start,$end,$callback) = @_;
-    if (defined $seqid)
-    {
-      my $region = $seqid;
-      if (defined $start)
-      {
-        $region   .= ":$start";
-        $region   .= "-$end"   if defined $end;
-      }
-      $self->_fetch($region,$callback);
+    my ( $seqid, $start, $end, $callback ) = @_;
+    if ( defined $seqid ) {
+        my $region = $seqid;
+        if ( defined $start ) {
+            $region .= ":$start";
+            $region .= "-$end" if defined $end;
+        }
+        $self->_fetch( $region, $callback );
     }
-    else
-    {
-      my $header = $self->{hts_file}->header_read ;
-      while (my $b = $self->{hts_file}->read1($header))
-      {
-        $callback->($b);
-      }
+    else {
+        my $header = $self->{hts_file}->header_read;
+        while ( my $b = $self->{hts_file}->read1($header) ) {
+            $callback->($b);
+        }
     }
 }
 
 # build mate pairs
 sub _build_mates {
     my $self = shift;
-    my ($src,$dest) = @_;
+    my ( $src, $dest ) = @_;
 
     my %read_pairs;
     for my $a (@$src) {
         my $name = $a->display_name;
-        unless ($read_pairs{$name}) {
+        unless ( $read_pairs{$name} ) {
             my $isize = $a->isize;
-            my $start = $isize >= 0 ? $a->start : $a->end+$isize+1;
-            my $end   = $isize <= 0 ? $a->end   : $a->start+$isize-1;
+            my $start = $isize >= 0 ? $a->start : $a->end + $isize + 1;
+            my $end   = $isize <= 0 ? $a->end : $a->start + $isize - 1;
             $read_pairs{$name} =
-		Bio::SeqFeature::Lite->new(
-		    -display_name => $name,
-		    -seq_id       => $a->seq_id,
-		    -start => $start,
-		    -end   => $end,
-		    -type  => 'read_pair',
-		    -class => 'read_pair',
-		);
+              Bio::SeqFeature::Lite->new( -display_name => $name,
+                                          -seq_id       => $a->seq_id,
+                                          -start        => $start,
+                                          -end          => $end,
+                                          -type         => 'read_pair',
+                                          -class        => 'read_pair', );
         }
         my $d = $self->{split_splices};
         if ($d) {
-	    my @parts = $a->get_SeqFeatures;
-	    if (!@parts) {
+            my @parts = $a->get_SeqFeatures;
+            if ( !@parts ) {
                 $read_pairs{$name}->add_SeqFeature($a);
-	    }
-	    else {
-		for my $x (@parts){
+            }
+            else {
+                for my $x (@parts) {
                     $read_pairs{$name}->add_SeqFeature($x);
-		}
-	    }
-        } else {
+                }
+            }
+        }
+        else {
             $read_pairs{$name}->add_SeqFeature($a);
         }
+    } ## end for my $a (@$src)
+    for my $name ( keys %read_pairs ) {
+        my $f = $read_pairs{$name};
+        my $primary_id = join( ';',
+                               map { s/;/%3B/g; $_ } (
+                                                $f->display_name,
+                                                ( $f->get_SeqFeatures )[0]->tid,
+                                                $f->start,
+                                                $f->end,
+                                                $f->strand,
+                                                $f->type, ) );
+        $read_pairs{$name}->primary_id($primary_id);
     }
-    for my $name (keys %read_pairs) {
-	my $f = $read_pairs{$name};
-	my $primary_id = join(';',
-			      map {s/;/%3B/g; $_}
-			      ($f->display_name,
-			       ($f->get_SeqFeatures)[0]->tid,
-			       $f->start,
-			       $f->end,
-			       $f->strand,
-			       $f->type,
-			      )
-	    );
-	$read_pairs{$name}->primary_id($primary_id);
-    }
-    push @$dest,values %read_pairs;
-}
+    push @$dest, values %read_pairs;
+} ## end sub _build_mates
 
 sub _coverage {
     my $self = shift;
-    my ($seqid,$start,$end,$bins,$filter) = @_;
+    my ( $seqid, $start, $end, $bins, $filter ) = @_;
 
     # Currently filter is ignored. In reality, we should
     # turn filter into a callback and invoke it on each
     # position in the pileup.
     croak "cannot calculate coverage unless a -seq_id is provided"
-	unless defined $seqid;
+      unless defined $seqid;
 
     my $region = $seqid;
-    if (defined $start) {
-	$region   .= ":$start";
-	$region   .= "-$end"   if defined $end;
+    if ( defined $start ) {
+        $region .= ":$start";
+        $region .= "-$end" if defined $end;
     }
 
-    my $header     = $self->{hts_file}->header_read;
-    my ($id,$s,$e) = $header->parse_region($region);
+    my $header = $self->{hts_file}->header_read;
+    my ( $id, $s, $e ) = $header->parse_region($region);
     return unless defined $id;
 
     # parse_region may return a very high value if no end specified
-    $end   = $e >= 1<<29 ? $header->target_len->[$id] : $e;
-    $start = $s+1;
-    $bins ||= $end-$start+1;
+    $end = $e >= 1 << 29 ? $header->target_len->[$id] : $e;
+    $start = $s + 1;
+    $bins ||= $end - $start + 1;
 
-    my $index      = $self->hts_index;
-    my $coverage   = $index->coverage($self->{hts_file},
-				      $id,$s,$e,
-				      $bins);
+    my $index = $self->hts_index;
+    my $coverage = $index->coverage( $self->{hts_file}, $id, $s, $e, $bins );
 
-    return Bio::SeqFeature::Coverage->new(
-	-display_name => "$seqid coverage",
-	-seq_id       => $seqid,
-	-start        => $start,
-	-end          => $end,
-	-strand       => 0,
-	-type         => "coverage:$bins",
-	-class        => "coverage:$bins",
-	-attributes   => { coverage => [$coverage] }
-    );
-}
+    return
+      Bio::SeqFeature::Coverage->new( -display_name => "$seqid coverage",
+                                      -seq_id       => $seqid,
+                                      -start        => $start,
+                                      -end          => $end,
+                                      -strand       => 0,
+                                      -type         => "coverage:$bins",
+                                      -class        => "coverage:$bins",
+                                      -attributes => { coverage => [$coverage] }
+      );
+} ## end sub _coverage
 
 sub _segment_search {
     my $self = shift;
@@ -2018,41 +1996,40 @@ sub _segment_search {
     my $targets = $self->_cache_targets;
     return $self->segment($name) if $targets->{$name};
 
-    if (my $regexp = $self->_glob_match($name)) {
-	my @results = grep {/^$regexp$/i} keys %$targets;
-	return map {$self->segment($_)} @results;
+    if ( my $regexp = $self->_glob_match($name) ) {
+        my @results = grep { /^$regexp$/i } keys %$targets;
+        return map { $self->segment($_) } @results;
     }
 
     return;
 }
 
-sub hts_index
-{
+sub hts_index {
     my $self = shift;
-    if( defined $self->{hts_idx} )
-    {
-      return $self->{hts_idx} ;
+    if ( defined $self->{hts_idx} ) {
+        return $self->{hts_idx};
     }
-    $self->{hts_idx} = Bio::DB::HTSfile->index($self) ;
-    return $self->{hts_idx} ;
+    $self->{hts_idx} = Bio::DB::HTSfile->index($self);
+    return $self->{hts_idx};
 }
 
 sub _features_fh {
-    my $self  = shift;
-    my ($seqid,$start,$end,$filter) = @_;
+    my $self = shift;
+    my ( $seqid, $start, $end, $filter ) = @_;
 
-    my $result = open my $fh,"-|";
-    if (!$result) {  # in child
-	$self->_filter_features($seqid,$start,$end,$filter,'do_fh'); # will print TAM to stdout
-	exit 0;
+    my $result = open my $fh, "-|";
+    if ( !$result ) {    # in child
+        $self->_filter_features( $seqid, $start, $end, $filter, 'do_fh' )
+          ;              # will print TAM to stdout
+        exit 0;
     }
     return $fh;
 
 }
 
 sub tam_fh {
-    my $self   = shift;
-    return $self->features(-fh=>1);
+    my $self = shift;
+    return $self->features( -fh => 1 );
 }
 
 sub max_pileup_cnt {
@@ -2068,10 +2045,11 @@ sub _filter_by_name {
 
     my $frag = "my \$name=\$a->qname; defined \$name or return; ";
 
-    if (my $regexp = $self->_glob_match($name)) {
-	$frag .= "return unless \$name =~ /^$regexp\$/i;\n";
-    } else {
-	$frag .= "return unless lc \$name eq '$name';\n";
+    if ( my $regexp = $self->_glob_match($name) ) {
+        $frag .= "return unless \$name =~ /^$regexp\$/i;\n";
+    }
+    else {
+        $frag .= "return unless lc \$name eq '$name';\n";
     }
 }
 
@@ -2081,28 +2059,28 @@ sub _filter_by_attribute {
     my $self       = shift;
     my $attributes = shift;
     my $result;
-    for my $tag (keys %$attributes) {
-	$result .= "my \$value = lc \$a->get_tag_values('$tag');\n";
-	$result .= "return unless defined \$value;\n";
-	my @comps = ref $attributes->{$tag} eq 'ARRAY'
-	    ? @{$attributes->{$tag}}
-	    : $attributes->{$tag};
-	my @matches;
-	for my $c (@comps) {
-	    if ($c =~ /^[+-]?[\deE.]+$/) { # numeric-looking argument
-		push @matches,"CORE::length \$value && \$value == $c";
-	    }
-	    elsif (my $regexp = $self->_glob_match($c)) {
-		push @matches,"\$value =~ /^$regexp\$/i";
-	    }
-	    else {
-		push @matches,"\$value eq lc '$c'";
-	    }
-	}
-	$result .= "return unless " . join (' OR ',@matches) . ";\n";
+    for my $tag ( keys %$attributes ) {
+        $result .= "my \$value = lc \$a->get_tag_values('$tag');\n";
+        $result .= "return unless defined \$value;\n";
+        my @comps =
+          ref $attributes->{$tag} eq 'ARRAY' ? @{ $attributes->{$tag} } :
+          $attributes->{$tag};
+        my @matches;
+        for my $c (@comps) {
+            if ( $c =~ /^[+-]?[\deE.]+$/ ) {    # numeric-looking argument
+                push @matches, "CORE::length \$value && \$value == $c";
+            }
+            elsif ( my $regexp = $self->_glob_match($c) ) {
+                push @matches, "\$value =~ /^$regexp\$/i";
+            }
+            else {
+                push @matches, "\$value eq lc '$c'";
+            }
+        }
+        $result .= "return unless " . join( ' OR ', @matches ) . ";\n";
     }
     return $result;
-}
+} ## end sub _filter_by_attribute
 
 # turn a glob expression into a regexp
 sub _glob_match {
@@ -2121,11 +2099,11 @@ sub open { shift->load(@_) }
 
 sub seq {
     my $self = shift;
-    my ($seqid,$start,$end) = @_;
+    my ( $seqid, $start, $end ) = @_;
     my $region = $seqid;
-    $region   .= ":$start" if defined $start;
-    $region   .= "-$end"   if defined $end;
-    return $self->fetch($region)
+    $region .= ":$start" if defined $start;
+    $region .= "-$end"   if defined $end;
+    return $self->fetch($region);
 }
 
 package Bio::SeqFeature::Coverage;
@@ -2133,7 +2111,7 @@ package Bio::SeqFeature::Coverage;
 use base 'Bio::SeqFeature::Lite';
 
 sub coverage {
-    my $self       = shift;
+    my $self = shift;
     my ($coverage) = $self->get_tag_values('coverage');
     return wantarray ? @$coverage : $coverage;
 }
@@ -2141,21 +2119,21 @@ sub coverage {
 sub source {
     my $self = shift;
     my $type = $self->type;
-    my ($base,$width) = split ':',$type;
+    my ( $base, $width ) = split ':', $type;
     return $width;
 }
 
 sub method {
     my $self = shift;
     my $type = $self->type;
-    my ($base,$width) = split ':',$type;
+    my ( $base, $width ) = split ':', $type;
     return $base;
 }
 
 sub gff3_string {
-    my $self = shift;
-    my $gff3 = $self->SUPER::gff3_string;
-    my $coverage = $self->escape(join(',',$self->coverage));
+    my $self     = shift;
+    my $gff3     = $self->SUPER::gff3_string;
+    my $coverage = $self->escape( join( ',', $self->coverage ) );
     $gff3 =~ s/coverage=[^;]+/coverage=$coverage/g;
     return $gff3;
 }
@@ -2166,37 +2144,32 @@ use File::Spec;
 use Cwd;
 use Carp 'croak';
 
-
-sub index
-{
-    my $self = shift ;
-    my $hts_obj = shift ;
-    my $fh = $hts_obj->{hts_file} ;
+sub index {
+    my $self      = shift;
+    my $hts_obj   = shift;
+    my $fh        = $hts_obj->{hts_file};
     my $autoindex = $hts_obj->{autoindex};
-    my $path = $hts_obj->{hts_path} ;
+    my $path      = $hts_obj->{hts_path};
 
     return $self->index_open_in_safewd($fh) if Bio::DB::HTS->is_remote($path);
 
-    if ($autoindex)
-    {
-      if( !(-e "${path}.bai" or -e "${path}.crai") )
-      {
-        $self->reindex($path) ;
-      }
-      elsif( -e "${path}.bai" && mtime($path) > mtime("${path}.bai") )
-      {
-        $self->reindex($path) ;
-      }
-      elsif( -e "${path}.crai" && mtime($path) > mtime("${path}.crai") )
-      {
-        $self->reindex($path) ;
-      }
+    if ($autoindex) {
+        if ( !( -e "${path}.bai" or -e "${path}.crai" ) ) {
+            $self->reindex($path);
+        }
+        elsif ( -e "${path}.bai" && mtime($path) > mtime("${path}.bai") ) {
+            $self->reindex($path);
+        }
+        elsif ( -e "${path}.crai" && mtime($path) > mtime("${path}.crai") ) {
+            $self->reindex($path);
+        }
     }
 
     croak "No index file for $path; try opening file with -autoindex"
-      unless -e "${path}.bai" or -e "${path}.crai" ;
+      unless -e "${path}.bai" or
+      -e "${path}.crai";
     return $self->index_load($fh);
-}
+} ## end sub index
 
 sub reindex {
     my $self = shift;
@@ -2206,35 +2179,37 @@ sub reindex {
     # we spawn a shell to intercept this eventuality
     print STDERR "[hts_index_build] creating index for $path\n" if -t STDOUT;
 
-    my $result = open my $fh,"-|";
+    my $result = open my $fh, "-|";
     die "Couldn't fork $!" unless defined $result;
 
-    if ($result == 0) { # in child
-	# dup stderr to stdout so that we can intercept messages from library
-	open STDERR,">&STDOUT";
-	$self->index_build($path);
-	exit 0;
+    if ( $result == 0 ) {    # in child
+           # dup stderr to stdout so that we can intercept messages from library
+        open STDERR, ">&STDOUT";
+        $self->index_build($path);
+        exit 0;
     }
 
     my $mesg = <$fh>;
-    $mesg  ||= '';
+    $mesg ||= '';
     close $fh;
-    if ($mesg =~ /not sorted/i) {
-	print STDERR "[hts_index_build] sorting by coordinate...\n" if -t STDOUT;
-	$self->sort_core(0,$path,"$path.sorted");
-	rename "$path.sorted.bam",$path;
-	$self->index_build($path);
-    } elsif ($mesg) {
-	die $mesg;
+    if ( $mesg =~ /not sorted/i ) {
+        print STDERR "[hts_index_build] sorting by coordinate...\n"
+          if -t STDOUT;
+        $self->sort_core( 0, $path, "$path.sorted" );
+        rename "$path.sorted.bam", $path;
+        $self->index_build($path);
     }
-}
+    elsif ($mesg) {
+        die $mesg;
+    }
+} ## end sub reindex
 
 # same as index_open(), but changes current wd to TMPDIR to accomodate
 # the C library when it tries to download the index file from remote
 # locations.
 sub index_open_in_safewd {
-    my $self = shift;
-    my $fh = shift;
+    my $self   = shift;
+    my $fh     = shift;
     my $dir    = getcwd;
     my $tmpdir = File::Spec->tmpdir;
     chdir($tmpdir);
@@ -2245,9 +2220,8 @@ sub index_open_in_safewd {
 
 sub mtime {
     my $path = shift;
-    (stat($path))[9];
+    ( stat($path) )[9];
 }
-
 
 1;
 __END__

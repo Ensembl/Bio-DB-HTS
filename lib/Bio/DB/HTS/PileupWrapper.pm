@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -34,6 +35,7 @@ than Bio::DB::HTS::Alignment.
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 
 =cut
+
 package Bio::DB::HTS::PileupWrapper;
 
 use strict;
@@ -44,24 +46,23 @@ use Carp 'croak';
 
 sub new {
     my $package = shift;
-    my ($align,$sam) = @_;
-    return bless {sam    => $sam,
-		  pileup => $align},ref $package || $package;
+    my ( $align, $sam ) = @_;
+    return bless { sam => $sam, pileup => $align }, ref $package || $package;
 
 }
 
 sub AUTOLOAD {
-  my($pack,$func_name) = $AUTOLOAD=~/(.+)::([^:]+)$/;
-  return if $func_name eq 'DESTROY';
+    my ( $pack, $func_name ) = $AUTOLOAD =~ /(.+)::([^:]+)$/;
+    return if $func_name eq 'DESTROY';
 
-  no strict 'refs';
-  $_[0] or die "autoload called for non-object symbol $func_name";
-  croak qq(Can't locate object method "$func_name" via package "$pack")
+    no strict 'refs';
+    $_[0] or die "autoload called for non-object symbol $func_name";
+    croak qq(Can't locate object method "$func_name" via package "$pack")
       unless $_[0]->{pileup}->can($func_name);
 
-  *{"${pack}::${func_name}"} = sub { shift->{pileup}->$func_name(@_) };
+    *{"${pack}::${func_name}"} = sub { shift->{pileup}->$func_name(@_) };
 
-  shift->$func_name(@_);
+    shift->$func_name(@_);
 }
 
 sub can {
@@ -72,7 +73,7 @@ sub can {
 
 sub alignment {
     my $self = shift;
-    return Bio::DB::HTS::AlignWrapper->new($self->{pileup}->b,$self->{sam});
+    return Bio::DB::HTS::AlignWrapper->new( $self->{pileup}->b, $self->{sam} );
 }
 
 1;

@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -446,6 +447,7 @@ operations:
 =back
 
 =cut
+
 package Bio::DB::HTS::Alignment;
 
 use strict;
@@ -454,20 +456,21 @@ use Bio::DB::HTS::Query;
 use Bio::DB::HTS::Target;
 use Bio::DB::HTS::Constants;
 
-sub each_tag_value { shift->get_tag_values(@_)  }
-
+sub each_tag_value { shift->get_tag_values(@_) }
 
 sub get_tag_values {
     my $self = shift;
     my $tag  = shift;
     defined $tag or return;
-    if (my $mask = RFLAGS->{uc $tag}) {  # special tag
-	# to avoid warnings when making numeric comps
-	return ($self->flag & $mask) == 0 ? 0 : 1;
-    } elsif ($tag eq 'FLAGS') {
-	$self->flag_str;
-    } else {
-	$self->aux_get($tag);
+    if ( my $mask = RFLAGS->{ uc $tag } ) {    # special tag
+            # to avoid warnings when making numeric comps
+        return ( $self->flag & $mask ) == 0 ? 0 : 1;
+    }
+    elsif ( $tag eq 'FLAGS' ) {
+        $self->flag_str;
+    }
+    else {
+        $self->aux_get($tag);
     }
 }
 
@@ -475,28 +478,29 @@ sub has_tag {
     my $self = shift;
     my $tag  = shift;
     defined $tag or return;
-    if (my $mask = RFLAGS->{uc $tag}) {  # special tag
-	return 1;
-    } elsif ($tag eq 'FLAGS') {
-	return 1;
-    } else {
-	my %keys = map {$_=>1} $self->aux_keys;
-	return exists $keys{uc $tag};
+    if ( my $mask = RFLAGS->{ uc $tag } ) {    # special tag
+        return 1;
+    }
+    elsif ( $tag eq 'FLAGS' ) {
+        return 1;
+    }
+    else {
+        my %keys = map { $_ => 1 } $self->aux_keys;
+        return exists $keys{ uc $tag };
     }
 }
 
 sub get_all_tags {
     my $self      = shift;
     my @aux_tags  = $self->aux_keys;
-    my @flag_tags = keys %{RFLAGS()};
-    return (@aux_tags,@flag_tags);
+    my @flag_tags = keys %{ RFLAGS() };
+    return ( @aux_tags, @flag_tags );
 }
-
 
 sub start {
     my $self = shift;
     return if $self->pos < 0 || $self->unmapped;
-    return $self->pos+1;
+    return $self->pos + 1;
 }
 
 sub end {
@@ -515,7 +519,7 @@ sub strand {
 sub abs_strand { shift->strand }
 
 sub mstrand {
-    my $self     = shift;
+    my $self = shift;
     return $self->mreversed ? -1 : 1;
 }
 
@@ -526,46 +530,43 @@ sub display_name {
 sub qscore {
     my $self   = shift;
     my $scores = $self->_qscore;
-    my @scores  = unpack('C*',$scores);
+    my @scores = unpack( 'C*', $scores );
     return wantarray ? @scores : \@scores;
 }
 
 sub qstring {
-    return join('',map{chr($_+33)} shift->qscore);
+    return join( '', map { chr( $_ + 33 ) } shift->qscore );
 }
 
 sub primary_id {
     my $self = shift;
     return join ';',
-    map {s/;/%3B/g; $_}
-    ($self->display_name,
-     $self->tid,
-     $self->start,
-     $self->end,
-     $self->strand);
+      map { s/;/%3B/g; $_ } ( $self->display_name, $self->tid, $self->start,
+                              $self->end,          $self->strand );
 }
+
 sub cigar_str {
     my $self   = shift;
     my $cigar  = $self->cigar;
     my $result = '';
     for my $c (@$cigar) {
-	my $op     = $c & BAM_CIGAR_MASK;
-	my $l      = $c >> BAM_CIGAR_SHIFT();
-	my $symbol = CIGAR_SYMBOLS()->[$op];
-	$result .= "${l}${symbol}";
+        my $op     = $c & BAM_CIGAR_MASK;
+        my $l      = $c >> BAM_CIGAR_SHIFT();
+        my $symbol = CIGAR_SYMBOLS()->[$op];
+        $result .= "${l}${symbol}";
     }
     return $result;
 }
 
 sub cigar_array {
-    my $self   = shift;
-    my $cigar  = $self->cigar;
+    my $self  = shift;
+    my $cigar = $self->cigar;
     my @result;
     for my $c (@$cigar) {
-	my $op     = $c & BAM_CIGAR_MASK();
-	my $l      = $c >> BAM_CIGAR_SHIFT();
-	my $symbol = CIGAR_SYMBOLS()->[$op];
-	push @result,[$symbol,$l];
+        my $op     = $c & BAM_CIGAR_MASK();
+        my $l      = $c >> BAM_CIGAR_SHIFT();
+        my $symbol = CIGAR_SYMBOLS()->[$op];
+        push @result, [ $symbol, $l ];
     }
     return \@result;
 
@@ -575,23 +576,22 @@ sub flag_str {
     my $self  = shift;
     my $flag  = $self->flag;
     my $flags = FLAGS;
-    return join '|',map {$flags->{$_}}
-			 grep {$flag & $_}
-			 sort {$a<=>$b}
-			 keys %{$flags};
+    return join '|',
+      map { $flags->{$_} }
+      grep { $flag & $_ } sort { $a <=> $b } keys %{$flags};
 }
 
 sub length {
-    my $self = shift;
-    my $end   = $self->end   || 0;
+    my $self  = shift;
+    my $end   = $self->end || 0;
     my $start = $self->start || 0;
-    return $end-$start+1;
+    return $end - $start + 1;
 }
 
 sub mate_start {
     my $self = shift;
     return if $self->mpos < 0 || $self->munmapped;
-    return $self->mpos+1;
+    return $self->mpos + 1;
 }
 
 sub mate_len {
@@ -600,21 +600,23 @@ sub mate_len {
     my $len     = $self->length;
 
     my $adjust = 0;
-    my @cigar = $self->cigar_array;
+    my @cigar  = $self->cigar_array;
     for my $event (@cigar) {
-        my ($op,$len) = @$event;
+        my ( $op, $len ) = @$event;
         $adjust += $len if $op eq 'I';
         $adjust -= $len if $op eq 'D';
     }
 
-    return $adjust + $ins_len + ($self->start-$self->mate_start) if $ins_len > 0;
-    return $adjust + $self->mate_start-($self->start+$ins_len)   if $ins_len < 0;
+    return $adjust + $ins_len + ( $self->start - $self->mate_start )
+      if $ins_len > 0;
+    return $adjust + $self->mate_start - ( $self->start + $ins_len )
+      if $ins_len < 0;
 }
 
 sub mate_end {
     my $self = shift;
     return unless $self->mate_len;
-    return $self->mate_start+$self->mate_len-1;
+    return $self->mate_start + $self->mate_len - 1;
 }
 
 sub query {
@@ -631,11 +633,10 @@ sub target {
     return Bio::DB::HTS::Target->new($self);
 }
 
-sub primary_tag { 'match'   }
+sub primary_tag { 'match' }
 sub source_tag  { 'sam/bam' }
 
 sub hit { shift->target(@_); }
-
 
 1;
 

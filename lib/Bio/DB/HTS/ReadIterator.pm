@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -15,29 +16,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 =cut
+
 package Bio::DB::HTS::ReadIterator;
 
 use strict;
 
-sub new
-{
+sub new {
     my $self = shift;
-    my ($sam,$hts_file,$filter,$header) = @_;
-    return bless {sam => $sam,
-		  hts_file => $hts_file,
-		  filter => $filter,
-      header =>$header,
-     },ref $self || $self;
+    my ( $sam, $hts_file, $filter, $header ) = @_;
+    return
+      bless { sam      => $sam,
+              hts_file => $hts_file,
+              filter   => $filter,
+              header   => $header, },
+      ref $self || $self;
 }
 
-sub next_seq
-{
-    my $self = shift;
-    my $header = $self->{header} ;
-    while (my $b = $self->{hts_file}->read1($header))
-    {
-      return Bio::DB::HTS::AlignWrapper->new($b,$self->{sam})
-        if $self->{filter}->($b);
+sub next_seq {
+    my $self   = shift;
+    my $header = $self->{header};
+    while ( my $b = $self->{hts_file}->read1($header) ) {
+        return Bio::DB::HTS::AlignWrapper->new( $b, $self->{sam} )
+          if $self->{filter}->($b);
     }
     return;
 }
