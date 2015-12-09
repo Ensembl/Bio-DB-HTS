@@ -3,7 +3,7 @@
    "author" : [
       "Rishi Nag"
    ],
-   "dynamic_config" : 0,
+   "dynamic_config" : 1,
    "generated_by" : "Module::Build version 0.421",
    "license" : [
       "perl_5"
@@ -19,6 +19,11 @@
             "ExtUtils::CBuilder" : "0"
          }
       },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.42"
+         }
+      },
       "runtime" : {
          "requires" : {
             "Bio::Root::Version" : "1.006009001",
@@ -29,7 +34,7 @@
    "provides" : {
       "Bio::DB::HTS" : {
          "file" : "lib/Bio/DB/HTS.pm",
-         "version" : "0.9"
+         "version" : "1.00"
       },
       "Bio::DB::HTS::AlignWrapper" : {
          "file" : "lib/Bio/DB/HTS/AlignWrapper.pm"
@@ -73,9 +78,6 @@
       "Bio::DB::HTSfile" : {
          "file" : "lib/Bio/DB/HTS.pm"
       },
-      "Bio::DB::Sam::SamToGBrowse" : {
-         "file" : "lib/Bio/DB/Sam/SamToGBrowse.pm"
-      },
       "Bio::SeqFeature::Coverage" : {
          "file" : "lib/Bio/DB/HTS.pm"
       }
@@ -86,5 +88,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.9"
+   "version" : "1.0"
 }

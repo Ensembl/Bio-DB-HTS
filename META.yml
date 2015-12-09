@@ -4,7 +4,9 @@ author:
   - 'Rishi Nag'
 build_requires:
   ExtUtils::CBuilder: '0'
-dynamic_config: 0
+configure_requires:
+  Module::Build: '0.42'
+dynamic_config: 1
 generated_by: 'Module::Build version 0.421, CPAN::Meta::Converter version 2.142690'
 license: perl
 meta-spec:
@@ -14,7 +16,7 @@ name: Bio-HTSTools
 provides:
   Bio::DB::HTS:
     file: lib/Bio/DB/HTS.pm
-    version: '0.9'
+    version: '1.00'
   Bio::DB::HTS::AlignWrapper:
     file: lib/Bio/DB/HTS/AlignWrapper.pm
   Bio::DB::HTS::Alignment:
@@ -43,8 +45,6 @@ provides:
     file: lib/Bio/DB/HTS/Target.pm
   Bio::DB::HTSfile:
     file: lib/Bio/DB/HTS.pm
-  Bio::DB::Sam::SamToGBrowse:
-    file: lib/Bio/DB/Sam/SamToGBrowse.pm
   Bio::SeqFeature::Coverage:
     file: lib/Bio/DB/HTS.pm
 requires:
@@ -52,4 +52,4 @@ requires:
   perl: '5.008'
 resources:
   license: http://dev.perl.org/licenses/
-version: '0.9'
+version: '1.0'
