@@ -91,7 +91,7 @@ info( 'Stage 3 Completed' ) ;
 # Step 4: Build Bio::DB::HTS
 # currently this fails
 info("Building Bio::DB::HTS");
-system "https://github.com/rishidev/Bio-HTS.git";
+system "git clone https://github.com/rishidev/Bio-HTS.git";
 chdir "$install_dir/Bio-HTS" ;
 system "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
 info( 'Stage 4 Not Completed' ) ;
