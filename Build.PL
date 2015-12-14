@@ -21,14 +21,14 @@ my $build = $class->new(
     dist_version_from  => 'lib/Bio/DB/HTS.pm',
     dist_author        => 'Rishi Nag',
     dist_abstract      => 'Perl interface to HTS library for DNA sequencing',
-    license            => 'perl',
+    license            => 'Apache Licence 2.0',
     include_dirs       => [$sam_include],
     extra_linker_flags => ["-L$sam_lib",'-lhts','-lpthread','-lz'],
 
     extra_compiler_flags=>[
 
         # must match DFLAGS in Samtools Makefile
-	'-D_IOLIB=2','-D_FILE_OFFSET_BITS=64', 
+	'-D_IOLIB=2','-D_FILE_OFFSET_BITS=64',
 
 	# turn off warnings originating in Perl's Newx* calls
 	'-Wformat=0',
@@ -110,7 +110,7 @@ sub find_sam
       die <<END;
 Can\'t find $LibFile and/or $HeaderFile!
 
-If you haven\'t done so already, please compile htslib from 
+If you haven\'t done so already, please compile htslib from
 http://htslib.org and set the HTSLIB_DIR
 environment variable to point to a  distribution directory
 containing the compiled $LibFile and $HeaderFile files.
@@ -132,7 +132,7 @@ sub prompt {
 	eval {readline::rl_set('TcshCompleteMode','On')};
     }
 
-    
+
     unless ($ReadLine) {
 	print STDOUT $msg;
 	chomp (my $in = <>);
@@ -152,4 +152,3 @@ sub _samtools
     ( can_load(modules => {'Alien::SamTools' => undef, 'File::ShareDir' => undef}) &&
       File::ShareDir::dist_dir('Alien-SamTools'));
 }
-  
