@@ -295,7 +295,7 @@ use Bio::DB::HTS::AlignWrapper;
     ok( $result[1], 50 );
     @result = $header->parse_region('seq_invalid:51-1000');
     ok( scalar @result, 0 );
-
+    my $index = Bio::DB::HTSfile->index_build($bamfile);
     my $index = Bio::DB::HTSfile->index_load($bam);
     ok($index);
 
