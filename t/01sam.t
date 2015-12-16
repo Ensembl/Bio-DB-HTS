@@ -253,7 +253,7 @@ use Bio::DB::HTS::AlignWrapper;
     );
 }
 
-# low level tests (defined in lib/Bio/DB/Sam.xs)
+# low level tests (defined in lib/Bio/DB/HTS.pm)
 {
     my $bamfile = "$Bin/data/ex1.bam";
     my $bam     = Bio::DB::HTSfile->open($bamfile);
@@ -295,7 +295,8 @@ use Bio::DB::HTS::AlignWrapper;
     ok( $result[1], 50 );
     @result = $header->parse_region('seq_invalid:51-1000');
     ok( scalar @result, 0 );
-    my $index = Bio::DB::HTSfile->index_build($bamfile);
+
+    Bio::DB::HTSfile->index_build($bamfile);
     my $index = Bio::DB::HTSfile->index_load($bam);
     ok($index);
 

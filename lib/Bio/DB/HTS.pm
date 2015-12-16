@@ -67,7 +67,7 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  }
 
  # low level API
- my $hfile        = Bio::DB::HTSfile->open('/path/to/bamfile');
+ my $hfile        = Bio::DB::HTSfile->open('/path/to/alignment_file');
  my $header       = $hfile->header_read;
  my $target_count = $header->n_targets;
  my $target_names = $header->target_name;
@@ -79,8 +79,9 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
     my $cigar     = $align->cigar_str;
  }
 
- my $index = Bio::DB::HTS->index_load('/path/to/bamfile');
- my $index = Bio::DB::HTS->index_open_in_safewd('/path/to/bamfile');
+ Bio::DB::HTSfile->index_build($bamfile);
+ my $index = Bio::DB::HTS->index_load('/path/to/alignment_file');
+ my $index = Bio::DB::HTS->index_open_in_safewd('/path/to/alignment_file');
 
  my $callback = sub {
      my $alignment = shift;
