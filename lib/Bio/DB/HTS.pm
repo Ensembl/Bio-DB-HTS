@@ -1353,8 +1353,6 @@ sub new {
     return $self;
 } ## end sub new
 
-sub bam { shift->{hts_file} }
-
 sub hts_file { shift->{hts_file} }
 
 sub is_remote {
