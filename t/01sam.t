@@ -79,12 +79,12 @@ use Bio::DB::HTS::AlignWrapper;
 '||||||||||          ||||||||||||||||||||                              ',
 'ACATGAGATT----------GCTTTACTGTCATAACTATGGAAGAGACTATTGCCAGATGATGTCCATGT' ], );
 
-    my $sam = Bio::DB::HTS->new( -bam   => "$Bin/data/ex2.bam",
+    my $hts = Bio::DB::HTS->new( -bam   => "$Bin/data/ex2.bam",
                                  -fasta => "$Bin/data/ex1.fa", );
-    my $bam    = $sam->hts_file;
-    my $header = $bam->header_read();
+    my $hts_file    = $hts->hts_file;
+    my $header = $hts_file->header_read();
     my $record = 0;
-    while ( my $a = $bam->read1($header) ) {
+    while ( my $a = $hts_file->read1($header) ) {
         ok( $a->query->start,
             $read_pos[$record]->[0],
             "Check query start $record" );
@@ -94,7 +94,7 @@ use Bio::DB::HTS::AlignWrapper;
         ok( $a->start, $ref_pos[$record]->[0], "Check ref pos start $record" );
         ok( $a->start, $ref_pos[$record]->[0], "Check ref pos end $record" );
 
-        my $aw = Bio::DB::HTS::AlignWrapper->new( $a, $sam );
+        my $aw = Bio::DB::HTS::AlignWrapper->new( $a, $hts );
         my ( $ref, $match, $query ) = $aw->padded_alignment;
         ok( $ref,
             $read_padded[$record]->[0],
@@ -162,13 +162,13 @@ use Bio::DB::HTS::AlignWrapper;
 '||||||||||          ||||||||||||||||||||                              ',
 'ACATGAGATT----------GCTTTACTGTCATAACTATGGAAGAGACTATTGCCAGATGATGTCCATGT' ], );
 
-    my $sam = Bio::DB::HTS->new( -bam          => "$Bin/data/ex2.bam",
+    my $hts = Bio::DB::HTS->new( -bam          => "$Bin/data/ex2.bam",
                                  -fasta        => "$Bin/data/ex1.fa",
                                  -force_refseq => 1, );
-    my $bam    = $sam->bam;
-    my $header = $bam->header_read();
+    my $hts_file    = $hts->hts_file;
+    my $header = $hts_file->header_read();
     my $record = 0;
-    while ( my $a = $bam->read1($header) ) {
+    while ( my $a = $hts_file->read1($header) ) {
         ok( $a->query->start,
             $read_pos[$record]->[0],
             "Check query start $record" );
@@ -178,7 +178,7 @@ use Bio::DB::HTS::AlignWrapper;
         ok( $a->start, $ref_pos[$record]->[0], "Check ref pos start $record" );
         ok( $a->start, $ref_pos[$record]->[0], "Check ref pos end $record" );
 
-        my $aw = Bio::DB::HTS::AlignWrapper->new( $a, $sam );
+        my $aw = Bio::DB::HTS::AlignWrapper->new( $a, $hts );
         my ( $ref, $match, $query ) = $aw->padded_alignment;
         ok( $ref,
             $read_padded[$record]->[0],
@@ -199,12 +199,12 @@ use Bio::DB::HTS::AlignWrapper;
     ## processing of multi-gaps"
     ## (https://sourceforge.net/tracker/?func=detail&aid=3083769&group_id=27707&atid=391291)
     my $bamfile = "$Bin/data/dm3_3R_4766911_4767130.sam.sorted.bam";
-    my $sam = Bio::DB::HTS->new( -bam           => $bamfile,
+    my $hts = Bio::DB::HTS->new( -bam           => $bamfile,
                                  -split_splices => 1,
                                  -autoindex     => 1, );
-    ok($sam);
-    ok( $sam->split_splices );
-    my @alignments = $sam->get_features_by_location("3R");
+    ok($hts);
+    ok( $hts->split_splices );
+    my @alignments = $hts->get_features_by_location("3R");
     ok( 75, @alignments, "count of alignments in $bamfile" );
     my @e3 =
       grep { my $c = $_->cigar_str; $c =~ /^\d+M124N3M91N\d+M$/ } @alignments;
@@ -256,10 +256,10 @@ use Bio::DB::HTS::AlignWrapper;
 # low level tests (defined in lib/Bio/DB/HTS.pm)
 {
     my $bamfile = "$Bin/data/ex1.bam";
-    my $bam     = Bio::DB::HTSfile->open($bamfile);
-    ok($bam);
+    my $hts_file     = Bio::DB::HTSfile->open($bamfile);
+    ok($hts_file);
 
-    my $header  = $bam->header_read();
+    my $header  = $hts_file->header_read();
     my $targets = $header->n_targets;
     ok( $targets, 2 );
 
@@ -285,7 +285,7 @@ use Bio::DB::HTS::AlignWrapper;
     ok( length $seq, 950 );
 
     my $count;
-    while ( my $b = $bam->read1($header) ) {
+    while ( my $b = $hts_file->read1($header) ) {
         $count++;
     }
     ok( $count, 3307 );
@@ -297,7 +297,7 @@ use Bio::DB::HTS::AlignWrapper;
     ok( scalar @result, 0 );
 
     Bio::DB::HTSfile->index_build($bamfile);
-    my $index = Bio::DB::HTSfile->index_load($bam);
+    my $index = Bio::DB::HTSfile->index_load($hts_file);
     ok($index);
 
     my @a;
@@ -307,7 +307,7 @@ use Bio::DB::HTS::AlignWrapper;
         return;
     };
 
-    $index->fetch( $bam, $header->parse_region('seq2'),
+    $index->fetch( $hts_file, $header->parse_region('seq2'),
                    $print_region, "foobar" );
     ok( scalar @a > 1 );
 
@@ -328,12 +328,12 @@ use Bio::DB::HTS::AlignWrapper;
         }
     };
 
-    $index->pileup( $bam, $header->parse_region('seq2:1-100'), $fetch_back );
+    $index->pileup( $hts_file, $header->parse_region('seq2:1-100'), $fetch_back );
     ok( $matches{matched}/$matches{total} > 0.99 );
 
     # try to get coverage
     my $coverage =
-      $index->coverage( $bam, $header->parse_region('seq2'), 100, 9000 );
+      $index->coverage( $hts_file, $header->parse_region('seq2'), 100, 9000 );
     ok( scalar @$coverage, 100 );
     my @c = sort { $a <=> $b } @$coverage;
     ok( $c[0] >= 0 );
@@ -343,18 +343,18 @@ use Bio::DB::HTS::AlignWrapper;
 
 # high level tests (defined in lib/Bio/DB/Sam.pm)
 for my $use_fasta ( 0, 1 ) {
-    my $sam = Bio::DB::HTS->new( -fasta        => "$Bin/data/ex1.fa",
+    my $hts = Bio::DB::HTS->new( -fasta        => "$Bin/data/ex1.fa",
                                  -bam          => "$Bin/data/ex1.bam",
                                  -expand_flags => 1,
                                  -autoindex    => 1,
                                  -force_refseq => $use_fasta, );
-    ok($sam);
-    ok( $sam->n_targets, 2 );
+    ok($hts);
+    ok( $hts->n_targets, 2 );
 
-    ok( $sam->length('seq1'), 1575 );
-    ok( join $sam->seq_ids,   'seq1 seq2' );
+    ok( $hts->length('seq1'), 1575 );
+    ok( join $hts->seq_ids,   'seq1 seq2' );
 
-    my $seg = $sam->segment('seq1');
+    my $seg = $hts->segment('seq1');
     ok($seg);
     ok( $seg->length, 1575 );
     my $seq = $seg->seq;
@@ -369,7 +369,7 @@ for my $use_fasta ( 0, 1 ) {
     ok( $@ =~ /does not exist/ );
 
     my @alignments =
-      $sam->get_features_by_location( -seq_id => 'seq2',
+      $hts->get_features_by_location( -seq_id => 'seq2',
                                       -start  => 500,
                                       -end    => 800 );
     ok( scalar @alignments,     442 );
@@ -385,7 +385,7 @@ for my $use_fasta ( 0, 1 ) {
     ok( scalar( keys %att ),       18 );
     ok( $alignments[0]->cigar_str, '35M' );
 
-    $sam->expand_flags(0);
+    $hts->expand_flags(0);
     @keys = $alignments[0]->get_all_tags;
     ok( scalar @keys, 7 );
 
@@ -412,68 +412,68 @@ for my $use_fasta ( 0, 1 ) {
     ok( $pads[0],            $pads[2] );
     ok( $pads[1] =~ tr/|/|/, length( $pads[0] ) );
 
-    my @f = $sam->features( -name => 'EAS114_45:2:1:1140:1206' );
+    my @f = $hts->features( -name => 'EAS114_45:2:1:1140:1206' );
     ok( scalar @f, 2 );
 
-    @f = $sam->features(
+    @f = $hts->features(
         -filter => sub {
             my $a = shift;
             return 1 if $a->display_name eq 'EAS114_45:2:1:1140:1206';
         } );
     ok( scalar @f, 2 );
 
-    @f = $sam->features(
+    @f = $hts->features(
         -seq_id => 'seq2',
         -filter => sub {
             my $a = shift;
             return 1 if $a->display_name =~ /^EAS114/;
         } );
     ok( scalar @f, 306 );
-    @f = $sam->features(
+    @f = $hts->features(
         -filter => sub {
             my $a = shift;
             return 1 if $a->display_name =~ /^EAS114/;
         } );
     ok( scalar @f, 534 );
 
-    @f = $sam->features( -name => 'EAS114_45:2:1:1140:1206',
+    @f = $hts->features( -name => 'EAS114_45:2:1:1140:1206',
                          -tags => { FIRST_MATE => 1 } );
     ok( scalar @f, 1 );
 
     # try iteration
     my $i =
-      $sam->get_seq_stream( -seq_id => 'seq2', -start => 500, -end => 800 );
+      $hts->get_seq_stream( -seq_id => 'seq2', -start => 500, -end => 800 );
     ok($i);
     my $count = 0;
     while ( $i->next_seq ) { $count++ }
     ok( $count, 442 );
 
     # try tam fh retrieval
-    my $fh = $sam->get_seq_fh( -seq_id => 'seq2', -start => 500, -end => 800, );
+    my $fh = $hts->get_seq_fh( -seq_id => 'seq2', -start => 500, -end => 800, );
     $count = 0;
     $count++ while <$fh>;
     ok( $count, 442 );
     $fh->close;
 
-    $i = $sam->get_seq_stream();    # all features!
+    $i = $hts->get_seq_stream();    # all features!
     ok($i);
     $count = 0;
     while ( $i->next_seq ) { $count++ }
     ok( $count, 3307 );
 
-    $i = $sam->get_seq_stream( -max_features => 200, -seq_id => 'seq1' );
+    $i = $hts->get_seq_stream( -max_features => 200, -seq_id => 'seq1' );
     ok($i);
     $count = 0;
     while ( $i->next_seq ) { $count++ }
     ok( $count,                   200 );
-    ok( $sam->last_feature_count, 1482 );
+    ok( $hts->last_feature_count, 1482 );
 
     # try the read_pair aggregation
-    my @pairs = $sam->features( -type => 'read_pair', -seq_id => 'seq2' );
+    my @pairs = $hts->features( -type => 'read_pair', -seq_id => 'seq2' );
     ok( scalar @pairs, 939 );
 
     # try coverage
-    my @coverage = $sam->features( -type => 'coverage', -seq_id => 'seq2' );
+    my @coverage = $hts->features( -type => 'coverage', -seq_id => 'seq2' );
     ok( scalar @coverage, 1 );
     my ($c) = $coverage[0]->get_tag_values('coverage');
     ok($c);
@@ -485,7 +485,7 @@ for my $use_fasta ( 0, 1 ) {
     my %matches;
     my $fetch_back = sub {
         my ( $seqid, $pos, $p ) = @_;
-        my $r = $sam->segment( $seqid, $pos, $pos )->dna;
+        my $r = $hts->segment( $seqid, $pos, $pos )->dna;
         for my $pileup (@$p) {
             my $a    = $pileup->alignment;
             my $qpos = $pileup->qpos;
@@ -499,7 +499,7 @@ for my $use_fasta ( 0, 1 ) {
         }
     };
 
-    $sam->pileup( 'seq2:1-100', $fetch_back );
+    $hts->pileup( 'seq2:1-100', $fetch_back );
     ok( $matches{matched}/$matches{total} > 0.99 );
 } ## end for my $use_fasta ( 0, ...)
 
