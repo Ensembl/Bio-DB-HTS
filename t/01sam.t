@@ -341,7 +341,7 @@ use Bio::DB::HTS::AlignWrapper;
 
 }
 
-# high level tests (defined in lib/Bio/DB/Sam.pm)
+# high level tests (defined in lib/Bio/DB/HTS.pm)
 for my $use_fasta ( 0, 1 ) {
     my $hts = Bio::DB::HTS->new( -fasta        => "$Bin/data/ex1.fa",
                                  -bam          => "$Bin/data/ex1.bam",
