@@ -436,7 +436,7 @@ hts_index_close(indexfile)
            Bio::DB::HTS::Index indexfile
     PROTOTYPE: $$
     CODE:
-           hts_idx_destroy(indexfile) ;
+      hts_idx_destroy(indexfile) ;
 
 
 
