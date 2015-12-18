@@ -80,8 +80,8 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  }
 
  Bio::DB::HTSfile->index_build($bamfile);
- my $index = Bio::DB::HTS->index_load('/path/to/alignment_file');
- my $index = Bio::DB::HTS->index_open_in_safewd('/path/to/alignment_file');
+ my $index = Bio::DB::HTSfile->index_load($hfile);
+ my $index = Bio::DB::HTSfile->index_open_in_safewd($hfile);
 
  my $callback = sub {
      my $alignment = shift;
