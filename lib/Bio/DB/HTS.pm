@@ -917,14 +917,13 @@ structures in the C interface. A major difference between the high and
 low level APIs is that in the high-level API, the reference sequence
 is identified using a human-readable seq_id. However, in the low-level
 API, the reference is identified using a numeric target ID
-("tid"). The target ID is established during the creation of the BAM
+("tid"). The target ID is established during the creation of the alignment
 file and is a small 0-based integer index. The Bio::DB::HTS::Header
 object provides methods for converting from seq_ids to tids.
 
 =head2 Indexed Fasta Files
 
-These methods relate to the BAM library's indexed Fasta (".fai")
-files.
+These methods relate to the indexed Fasta (".fai") files.
 
 =over 4
 
@@ -946,18 +945,17 @@ returns it as a string.
 
 =back
 
-=head2 BAM Files
+=head2 Alignment Files
 
-These methods provide interfaces to the "BAM" binary version of
-SAM. They usually have a .bam extension.
+These methods provide interfaces to alignment files in SAM/BAM/CRAM format.
 
 =over 4
 
 =item $hts_file = Bio::DB::HTSfile->open('/path/to/file.bam' [,$mode])
 
-Open up the BAM file at the indicated path. Mode, if present, must be
+Open the alignment file at the indicated path. Mode, if present, must be
 one of the file stream open flags ("r", "w", "a", "r+", etc.). If
-absent, mode defaults to "r".
+absent, mode defaults to "r". Currently writing is not supported.
 
 Note that Bio::DB::HTS objects are not stable across fork()
 operations. If you fork, and intend to use the object in both parent
@@ -975,65 +973,54 @@ Example:
 
 =item $header = $hfile->header_read()
 
-Given an open BAM file, return a Bio::DB::HTS::Header object
+Given an open alignment file, return a Bio::DB::HTS::Header object
 containing information about the reference sequence(s). Note that you
 must invoke header_read() at least once before calling read1().
 
-=item $status_code = $hfile->header_write($header)
-
-Given a Bio::DB::HTS::Header object and a BAM file opened in write
-mode, write the header to the file. If the write fails the process
-will be terminated at the C layer. The result code is (currently)
-always zero.
-
 =item $alignment = $hfile->read1($header)
 
-Read one alignment from the BAM file and return it as a
-Bio::DB::HTS::Alignment object. Note that you
-must invoke header() at least once before calling read1().
-
-=item $bytes = $hfile->write1($alignment)
-
-Given a BAM file that has been opened in write mode and a
-Bio::DB::HTS::Alignment object, write the alignment to the BAM file
-and return the number of bytes successfully written.
+Read one alignment from the alignment file and return it as a
+Bio::DB::HTS::Alignment object. The $header parameter is returned by
+invoking header().
 
 
 =back
 
-=head2 BAM index methods
+=head2 Index methods
 
-The Bio::DB::HTS::Index object provides access to BAM index (.bai)
-files.
+The Bio::DB::HTS::Index object provides access to index (.bai,.crai) files.
 
 =over 4
 
-=item $status_code = Bio::DB::HTS->index_build('/path/to/file.bam')
+=item $status_code = Bio::DB::HTS->index_build('/path/to/file.?am')
 
-Given the path to a .bam file, this function attempts to build a
-".bai" index. The process in which the .bam file exists must be
+Given the path to an alignment file, this function attempts to build an
+index. The process in which the alignment file exists must be
 writable by the current process and there must be sufficient disk
 space for the operation or the process will be terminated in the C
 library layer. The result code is currently always zero, but in the
 future may return a negative value to indicate failure.
 
-=item $index = Bio::DB::HTS->index('/path/to/file.bam',$reindex)
+The index file built will depend on the alignment file type specified.
+For CRAM this will be a .crai file, for BAM .bai.
 
-Attempt to open the index for the indicated BAM file. If $reindex is
+=item $index = Bio::DB::HTS->index('/path/to/file.?am',$reindex)
+
+Attempt to open the index for the indicated alignment file. If $reindex is
 true, and the index either does not exist or is out of date with
-respect to the BAM file (by checking modification dates), then attempt
+respect to the alignment file (by checking modification dates), then attempt
 to rebuild the index. Will throw an exception if the index does not
 exist or if attempting to rebuild the index was unsuccessful.
 
-=item $index = Bio::DB::HTS->index_load('/path/to/file.bam')
+=item $index = Bio::DB::HTS->index_load('/path/to/file.?am')
 
-Attempt to open the index file for a BAM file, returning a
-Bio::DB::HTS::Index object. The filename path to use is the .bam file,
-not the .bai file.
+Attempt to open the index file for an alignment file, returning a
+Bio::DB::HTS::Index object. The filename path to use is the alignment file,
+not the index file (i.e. .bam or .cram, not .bai or .crai)
 
-=item $index = Bio::DB::HTS->index_open_in_safewd('/path/to/file.bam' [,$mode])
+=item $index = Bio::DB::HTS->index_open_in_safewd('/path/to/file.?am' [,$mode])
 
-When opening a remote BAM file, you may not wish for the index to be
+When opening a remote alignmentfile, you may not wish for the index to be
 downloaded to the current working directory. This version of index_open
 copies the index into the directory indicated by the TMPDIR
 environment variable or the system-defined /tmp directory if not
@@ -1110,7 +1097,7 @@ are:
                alignment across the designated region.
 
  $callback_data  Any arbitrary Perl data that you wish to pass to the
-               $callback (optional).
+                 $callback (optional).
 
 The callback will be invoked with four arguments corresponding to the
 numeric sequence ID of the reference sequence, the B<zero-based>
@@ -1153,7 +1140,7 @@ specifying that you want an unlimited cap.
 =head2 BAM header methods
 
 The Bio::DB::HTS::Header object contains information regarding the
-reference sequence(s) used to construct the corresponding TAM or BAM
+reference sequence(s) used to construct the corresponding alignment
 file. It is most frequently used to translate between numeric target
 IDs and human-readable seq_ids. Headers can be created by reading
 from a BAM file using Bio::DB::HTS->header(). You can
@@ -1190,7 +1177,7 @@ array returned by target_len():
 =item $text = $header->text
 =item $header->text("new value")
 
-Read the text portion of the BAM header. The text can be replaced by
+Read the text portion of the header. The text can be replaced by
 providing the replacement string as an argument. Note that you should
 follow the header conventions when replacing the header text. No
 parsing or other error-checking is performed.
