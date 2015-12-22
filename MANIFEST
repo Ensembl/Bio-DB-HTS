@@ -18,7 +18,7 @@ LICENSE
 MANIFEST			This list of files
 META.json
 META.yml
-README.md
+README
 t/01bam.t
 t/data/00README.txt
 t/data/dm3_3R_4766911_4767130.sam
