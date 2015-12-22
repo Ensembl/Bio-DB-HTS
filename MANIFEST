@@ -1,4 +1,5 @@
 Build.PL
+INSTALL.pl
 Changes
 DISCLAIMER
 lib/Bio/DB/HTS/Alignment.pm

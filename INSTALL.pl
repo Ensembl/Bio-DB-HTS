@@ -3,7 +3,7 @@
 use strict;
 use File::Temp 'tempdir';
 
-prompt_yn("This will install Bio::DB::HTS and its dependencies. Continue?") or exit 0;
+prompt_yn("This will install Bio-HTSTools and its dependencies. Continue?") or exit 0;
 
 # STEP 0: various dependencies
 my $git = `which git`;
@@ -101,12 +101,12 @@ system "./Build";
 `./Build test` =~ /Result: PASS/ or die "Build test failed. Not continuing";
 
 # Step 6: Install
-info("Installing Bio::DB::HTSLib using sudo. You will be asked for your password.");
+info("Installing Bio-HTSTools using sudo. You will be asked for your password.");
 info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
 system "sudo ./Build install";
 
 # Step 7: Yay!
-info("Bio::DB::HTS is now installed.");
+info("Bio-HTSTools is now installed.");
 chdir '/';
 
 exit 0;

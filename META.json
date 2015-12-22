@@ -6,7 +6,7 @@
    "dynamic_config" : 1,
    "generated_by" : "Module::Build version 0.421",
    "license" : [
-      "perl_5"
+      "unknown"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
@@ -83,10 +83,5 @@
       }
    },
    "release_status" : "stable",
-   "resources" : {
-      "license" : [
-         "http://dev.perl.org/licenses/"
-      ]
-   },
-   "version" : "1.0"
+   "version" : "1.00"
 }
