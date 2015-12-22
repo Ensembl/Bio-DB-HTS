@@ -81,6 +81,11 @@ These fields are defined in bam.h but their interpretation is obscure.
 
 =back
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
+
+
 =head1 SEE ALSO
 
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Constants>

@@ -1,4 +1,5 @@
 Build.PL
+INSTALL.pl
 Changes
 DISCLAIMER
 lib/Bio/DB/HTS/Alignment.pm
@@ -18,7 +19,7 @@ MANIFEST			This list of files
 META.json
 META.yml
 README
-t/01sam.t
+t/01bam.t
 t/data/00README.txt
 t/data/dm3_3R_4766911_4767130.sam
 t/data/dm3_3R_4766911_4767130.sam.bam

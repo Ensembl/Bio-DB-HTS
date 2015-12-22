@@ -8,7 +8,7 @@ configure_requires:
   Module::Build: '0.42'
 dynamic_config: 1
 generated_by: 'Module::Build version 0.421, CPAN::Meta::Converter version 2.142690'
-license: perl
+license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
@@ -50,6 +50,4 @@ provides:
 requires:
   Bio::Root::Version: '1.006009001'
   perl: '5.008'
-resources:
-  license: http://dev.perl.org/licenses/
-version: '1.0'
+version: '1.00'

@@ -67,7 +67,7 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  }
 
  # low level API
- my $hfile        = Bio::DB::HTSfile->open('/path/to/bamfile');
+ my $hfile        = Bio::DB::HTSfile->open('/path/to/alignment_file');
  my $header       = $hfile->header_read;
  my $target_count = $header->n_targets;
  my $target_names = $header->target_name;
@@ -79,8 +79,9 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
     my $cigar     = $align->cigar_str;
  }
 
- my $index = Bio::DB::HTS->index_load('/path/to/bamfile');
- my $index = Bio::DB::HTS->index_open_in_safewd('/path/to/bamfile');
+ Bio::DB::HTSfile->index_build($bamfile);
+ my $index = Bio::DB::HTSfile->index_load($hfile);
+ my $index = Bio::DB::HTSfile->index_open_in_safewd($hfile);
 
  my $callback = sub {
      my $alignment = shift;
@@ -94,29 +95,26 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
 
 =head1 DESCRIPTION
 
-This module provides a Perl interface to the libhts library for
+This module provides a Perl interface to the HTSlib library for
 indexed and unindexed SAM/BAM sequence alignment databases. It
 provides support for retrieving information on individual alignments,
 read pairs, and alignment coverage information across large
 regions. It also provides callback functionality for calling SNPs and
-performing other base-by-base functions. Most operations are
-compatible with the BioPerl Bio::SeqFeatureI interface, allowing BAM
-files to be used as a backend to the GBrowse genome browser
-application (gmod.sourceforge.net).
+performing other base-by-base functions.
 
 =head2 The high-level API
 
 The high-level API provides a BioPerl-compatible interface to indexed
-BAM files. The BAM database is treated as a collection of
+BAM and CRAM files. The alignment file database is treated as a collection of
 Bio::SeqFeatureI features, and can be searched for features by name,
 location, type and combinations of feature tags such as whether the
 alignment is part of a mate-pair.
 
-When opening a BAM database using the high-level API, you provide the
+When opening a alignment database using the high-level API, you provide the
 pathnames of two files: the FASTA file that contains the reference
 genome sequence, and the BAM file that contains the query sequences
 and their alignments. If either of the two files needs to be indexed,
-the indexing will happen automatically. You can then query the
+the indexing will need to be built. You can then query the
 database for alignment features by combinations of name, position,
 type, and feature tag.
 
@@ -141,7 +139,7 @@ The high-level API provides access to up to four feature "types":
 
 B<Features> can be en masse in a single call, retrieved in a
 memory-efficient streaming basis using an iterator, or interrogated
-using a filehandle that return a series of TAM-format lines.
+using a filehandle that return a series of SAM-format lines.
 
 B<SAM alignment flags> can be retrieved using BioPerl's feature "tag"
 mechanism. For example, to interrogate the FIRST_MATE flag, one
@@ -169,7 +167,7 @@ calling.
 B<Access to the reference sequence> When you create the Bio::DB::HTS
 object, you can pass the path to a FASTA file containing the reference
 sequence. Alternatively, you may pass an object that knows how to
-retrieve DNA sequences across a range via the seq() of fetch_seq()
+retrieve DNA sequences across a range via the seq() or fetch_seq()
 methods, as described under new().
 
 If the SAM/BAM file has MD tags, then these tags will be used to
@@ -208,13 +206,9 @@ You may encounter other classes as well. These include:
 
 =head2 The low-level API
 
-The low-level API closely mirrors that of the libbam library. It
-provides the ability to open TAM and BAM files, read and write to
-them, build indexes, and perform searches across them. There is less
-overhead to using the API because there is very little Perl memory
-management, but the functions are less convenient to use. Some
-operations, such as writing BAM files, are only available through the
-low-level API.
+The low-level API closely mirrors that of the HTSlib library. It
+provides the ability to open and read SAM, BAM and CRAM files,
+build indexes, and perform searches across them.
 
 The classes you will be interacting with in the low-level API are as
 follows:
@@ -228,8 +222,7 @@ follows:
 =head1 METHODS
 
 We cover the high-level API first. The high-level API code can be
-found in the files Bio/DB/Sam.pm, Bio/DB/Sam/*.pm, and
-Bio/DB/Bam/*.pm.
+found in the files Bio/DB/HTS.pm and Bio/DB/HTS/*.pm.
 
 =head2 Bio::DB::HTS Constructor and basic accessors
 
@@ -238,7 +231,7 @@ Bio/DB/Bam/*.pm.
 =item $sam = Bio::DB::HTS->new(%options)
 
 The Bio::DB::HTS object combines a Fasta file of the reference
-sequences with a BAM file to allow for convenient retrieval of
+sequences with an SAM/BAM/CRAM  alignment file to allow for convenient retrieval of
 human-readable sequence IDs and reference sequences. The new()
 constructor accepts a -name=>value style list of options as
 follows:
@@ -246,9 +239,8 @@ follows:
   Option         Description
   ------         -------------
 
-  -bam           Path to the BAM file that contains the
-                   alignments (required). When using samtools 0.1.6
-                   or higher, an http: or ftp: URL is accepted.
+  -bam           Path to the SAM/BAM/CRAM alignmen file that contains the
+                   alignments (required). A http: or ftp: URL is accepted.
 
   -fasta         Path to the Fasta file that contains
                    the reference sequences (optional). Alternatively,
@@ -275,9 +267,9 @@ follows:
                    or when the reference contains non-canonical (modified)
                    bases.
 
-  -autoindex      Create a BAM index file if one does not exist
+  -autoindex      Create an alignment index file if one does not exist
                    or the current one has a modification date
-                   earlier than the BAM file.
+                   earlier than the alignment file.
 
 An example of a typical new() constructor invocation is:
 
@@ -314,9 +306,8 @@ relationships:
 Because there is some overhead to splitting up the spliced alignments,
 this option is false by default.
 
-B<Remote access> to BAM files located on an HTTP or FTP server is
-possible when using the Samtools library version 0.1.6 or
-higher. Simply replace the path to the BAM file with the appropriate
+B<Remote access> to alignment files located on an HTTP or FTP server is
+possible. Simply replace the path to the BAM file with the appropriate
 URL. Note that incorrect URLs may lead to a core dump.
 
 It is not currently possible to refer to a remote FASTA file. These
@@ -326,58 +317,49 @@ will have to be downloaded locally and indexed before using.
 
 Get or set the expand_flags option. This can be done after object
 creation and will have an immediate effect on all alignments fetched
-from the BAM file.
+from the alignment file.
 
 =item $flag = $hts->split_splices([$new_value])
 
 Get or set the split_splices option. This can be done after object
-creation and will affect all alignments fetched from the BAM file
+creation and will affect all alignments fetched from the alignment file
 B<subsequently.>
 
 =item $header = $hts->header
 
-Return the Bio::DB::HTS::Header object associated with the BAM
+Return the Bio::DB::HTS::Header object associated with the alignment
 file. You can manipulate the header using the low-level API.
 
 =item $hts_path = $hts->hts_path
 
-Return the path of the bam file used to create the sam object. This
-makes the sam object more portable.
+Return the path of the alignment file used to create the hts object. This
+makes the object more portable.
 
 =item $hts_file    = $hts->$hts_file
 
-Returns the low-level Bio::DB::HTS object associated with the opened
+Returns the low-level Bio::DB::HTSfile object associated with the opened
 file.
 
 =item $fai    = $hts->fai
 
 Returns the Bio::DB::HTS::Fai object associated with the Fasta
-file. You can then manipuate this object with the low-level API.
+file. You can then manipulate this object with the low-level API.
 
-B<The index will be built automatically for you if it does not already
+B<The index can be built automatically for you if it does not already
 exist.> If index building is necessarily, the process will need write
 privileges to the same directory in which the Fasta file resides.> If
 the process does not have write permission, then the call will fail.
-Unfortunately, the BAM library does not do great error recovery for
-this condition, and you may experience a core dump. This is not
-trappable via an eval {}.
+
 
 =item $hts_idx    = $hts->hts_index
 
-Return the Bio::DB::HTS::Index object associated with the BAM file.
+Return the Bio::DB::HTS::Index object associated with the alignment file.
 
-B<The BAM file index will be built automatically for you if it does
-not already exist.> In addition, if the BAM file is not already sorted
-by chromosome and coordinate, it will be sorted automatically, an
-operation that consumes significant time and disk space. The current
-process must have write permission to the directory in which the BAM
-file resides in order for this to work.> In case of a permissions
-problem, the Perl library will catch the error and die. You can trap
-it with an eval {}.
+The index is not automatically built.
 
 =item $hts->clone
 
-Bio::DB::SAM objects are not stable across fork() operations. If you
+Bio::DB::HTS objects are not stable across fork() operations. If you
 fork, you must call clone() either in the parent or the child process
 before attempting to call any methods.
 
@@ -486,7 +468,7 @@ subsequences.
 
 =item @alignments = $segment->features(%args)
 
-Return alignments that overlap the segment in the associated BAM
+Return alignments that overlap the segment in the associated alignment
 file. The optional %args list allows you to filter features by name,
 tag or other attributes. See the documentation of the
 Bio::DB::HTS->features() method for the full list of options. Here are
@@ -499,7 +481,7 @@ some typical examples:
  my $iterator     = $segment->features(-iterator=>1);
  while (my $align = $iterator->next_seq) { do something }
 
- # get a TAM filehandle across the alignments
+ # get a SAM filehandle across the alignments
  my $fh           = $segment->features(-fh=>1);
  while (<$fh>) { print }
 
@@ -535,12 +517,12 @@ don't do anything of interest.
 =head2 Retrieving alignments, mate pairs and coverage information
 
 The features() method is an all-purpose tool for retrieving alignment
-information from the SAM/BAM database. In addition, the methods
+information from the SAM/BAM/CRAM alignment file database. In addition, the methods
 get_features_by_name(), get_features_by_location() and others provide
 convenient shortcuts to features().
 
 These methods either return a list of features, an iterator across a
-list of features, or a filehandle opened on a pseudo-TAM file.
+list of features, or a filehandle opened on a pseudo-SAM file.
 
 =over 4
 
@@ -560,10 +542,11 @@ option list selected from the following list of options:
   ------         -------------
 
   -type          Filter on features of a given type. You may provide
-  		 either a scalar typename, or a reference to an
+                 either a scalar typename, or a reference to an
                  array of desired feature types. Valid types are
                  "match", "read_pair", "coverage" and "chromosome."
-		 See below for a full explanation of feature types.
+
+                 See below for a full explanation of feature types.
 
   -name          Filter on reads with the designated name. Note that
                  this can be a slow operation unless accompanied by
@@ -573,7 +556,7 @@ option list selected from the following list of options:
   -start         and end. -start and -end must be used in conjunction
   -end           with -seq_id. If -start and/or -end are absent, they
                  will default to 1 and the end of the reference
-		 sequence, respectively.
+                 sequence, respectively.
 
   -flags         Filter features that match a list of one or more
                  flags. See below for the format.
@@ -588,9 +571,9 @@ option list selected from the following list of options:
 
   -iterator      Instead of returning a list of features, return an
                  iterator across the results. To retrieve the results,
-		 call the iterator's next_seq() method repeatedly
+                 call the iterator's next_seq() method repeatedly
                  until it returns undef to indicate that no more
-		 matching features remain.
+                 matching features remain.
 
   -fh            Instead of returning a list of features, return a
                  filehandle. Read from the filehandle to retrieve
@@ -720,7 +703,7 @@ next_seq():
   }
 
 Similarly, by passing a true value to the argument B<-fh>, you can
-obtain a filehandle to a virtual TAM file. This only works with the
+obtain a filehandle to a virtual SAM file. This only works with the
 "match" feature type:
 
   my $high_qual  = $hts->features(-filter  => sub {shift->qual > 80},
@@ -788,9 +771,8 @@ indexed BAM databases.
 
 =item $hts->fetch($region,$callback)
 
-This method, which is named after the native bam_fetch() function in
-the C interface, traverses the indicated region and invokes a callback
-code reference on each match. Specify a region using the BAM syntax
+This method traverses the indicated region and invokes a callback
+code reference on each match. Specify a region using the syntax
 "seqid:start-end", or either of the alternative syntaxes
 "seqid:start..end" and "seqid:start,end". If start and end are absent,
 then the entire reference sequence is traversed. If end is absent,
@@ -912,7 +894,7 @@ create AlignWrapper objects on an as needed basis:
 
 =item $hts->max_pileup_cnt([$new_cnt])
 
-The Samtools library caps pileups at a set level, defaulting to
+The HTSlib library caps pileups at a set level, defaulting to
 8000. The callback will not be invoked on a single position more than
 the level set by the cap, even if there are more reads. Called with no
 arguments, this method returns the current cap value. Called with a
@@ -924,7 +906,7 @@ This method can be called as an instance method or a class method.
 =item $hts->coverage2BedGraph([$fh])
 
 This special-purpose method will compute a four-column BED graph of
-the coverage across the entire SAM/BAM file and print it to STDOUT.
+the coverage across the entire alignment file and print it to STDOUT.
 You may provide a filehandle to redirect output to a file or pipe.
 
 =back
@@ -935,14 +917,13 @@ structures in the C interface. A major difference between the high and
 low level APIs is that in the high-level API, the reference sequence
 is identified using a human-readable seq_id. However, in the low-level
 API, the reference is identified using a numeric target ID
-("tid"). The target ID is established during the creation of the BAM
+("tid"). The target ID is established during the creation of the alignment
 file and is a small 0-based integer index. The Bio::DB::HTS::Header
 object provides methods for converting from seq_ids to tids.
 
 =head2 Indexed Fasta Files
 
-These methods relate to the BAM library's indexed Fasta (".fai")
-files.
+These methods relate to the indexed Fasta (".fai") files.
 
 =over 4
 
@@ -964,18 +945,17 @@ returns it as a string.
 
 =back
 
-=head2 BAM Files
+=head2 Alignment Files
 
-These methods provide interfaces to the "BAM" binary version of
-SAM. They usually have a .bam extension.
+These methods provide interfaces to alignment files in SAM/BAM/CRAM format.
 
 =over 4
 
 =item $hts_file = Bio::DB::HTSfile->open('/path/to/file.bam' [,$mode])
 
-Open up the BAM file at the indicated path. Mode, if present, must be
+Open the alignment file at the indicated path. Mode, if present, must be
 one of the file stream open flags ("r", "w", "a", "r+", etc.). If
-absent, mode defaults to "r".
+absent, mode defaults to "r". Currently writing is not supported.
 
 Note that Bio::DB::HTS objects are not stable across fork()
 operations. If you fork, and intend to use the object in both parent
@@ -993,65 +973,54 @@ Example:
 
 =item $header = $hfile->header_read()
 
-Given an open BAM file, return a Bio::DB::HTS::Header object
+Given an open alignment file, return a Bio::DB::HTS::Header object
 containing information about the reference sequence(s). Note that you
 must invoke header_read() at least once before calling read1().
 
-=item $status_code = $hfile->header_write($header)
-
-Given a Bio::DB::HTS::Header object and a BAM file opened in write
-mode, write the header to the file. If the write fails the process
-will be terminated at the C layer. The result code is (currently)
-always zero.
-
 =item $alignment = $hfile->read1($header)
 
-Read one alignment from the BAM file and return it as a
-Bio::DB::HTS::Alignment object. Note that you
-must invoke header() at least once before calling read1().
-
-=item $bytes = $hfile->write1($alignment)
-
-Given a BAM file that has been opened in write mode and a
-Bio::DB::HTS::Alignment object, write the alignment to the BAM file
-and return the number of bytes successfully written.
+Read one alignment from the alignment file and return it as a
+Bio::DB::HTS::Alignment object. The $header parameter is returned by
+invoking header().
 
 
 =back
 
-=head2 BAM index methods
+=head2 Index methods
 
-The Bio::DB::HTS::Index object provides access to BAM index (.bai)
-files.
+The Bio::DB::HTS::Index object provides access to index (.bai,.crai) files.
 
 =over 4
 
-=item $status_code = Bio::DB::HTS->index_build('/path/to/file.bam')
+=item $status_code = Bio::DB::HTS->index_build('/path/to/file.?am')
 
-Given the path to a .bam file, this function attempts to build a
-".bai" index. The process in which the .bam file exists must be
+Given the path to an alignment file, this function attempts to build an
+index. The process in which the alignment file exists must be
 writable by the current process and there must be sufficient disk
 space for the operation or the process will be terminated in the C
 library layer. The result code is currently always zero, but in the
 future may return a negative value to indicate failure.
 
-=item $index = Bio::DB::HTS->index('/path/to/file.bam',$reindex)
+The index file built will depend on the alignment file type specified.
+For CRAM this will be a .crai file, for BAM .bai.
 
-Attempt to open the index for the indicated BAM file. If $reindex is
+=item $index = Bio::DB::HTS->index('/path/to/file.?am',$reindex)
+
+Attempt to open the index for the indicated alignment file. If $reindex is
 true, and the index either does not exist or is out of date with
-respect to the BAM file (by checking modification dates), then attempt
+respect to the alignment file (by checking modification dates), then attempt
 to rebuild the index. Will throw an exception if the index does not
 exist or if attempting to rebuild the index was unsuccessful.
 
-=item $index = Bio::DB::HTS->index_load('/path/to/file.bam')
+=item $index = Bio::DB::HTS->index_load('/path/to/file.?am')
 
-Attempt to open the index file for a BAM file, returning a
-Bio::DB::HTS::Index object. The filename path to use is the .bam file,
-not the .bai file.
+Attempt to open the index file for an alignment file, returning a
+Bio::DB::HTS::Index object. The filename path to use is the alignment file,
+not the index file (i.e. .bam or .cram, not .bai or .crai)
 
-=item $index = Bio::DB::HTS->index_open_in_safewd('/path/to/file.bam' [,$mode])
+=item $index = Bio::DB::HTS->index_open_in_safewd('/path/to/file.?am' [,$mode])
 
-When opening a remote BAM file, you may not wish for the index to be
+When opening a remote alignmentfile, you may not wish for the index to be
 downloaded to the current working directory. This version of index_open
 copies the index into the directory indicated by the TMPDIR
 environment variable or the system-defined /tmp directory if not
@@ -1128,7 +1097,7 @@ are:
                alignment across the designated region.
 
  $callback_data  Any arbitrary Perl data that you wish to pass to the
-               $callback (optional).
+                 $callback (optional).
 
 The callback will be invoked with four arguments corresponding to the
 numeric sequence ID of the reference sequence, the B<zero-based>
@@ -1171,7 +1140,7 @@ specifying that you want an unlimited cap.
 =head2 BAM header methods
 
 The Bio::DB::HTS::Header object contains information regarding the
-reference sequence(s) used to construct the corresponding TAM or BAM
+reference sequence(s) used to construct the corresponding alignment
 file. It is most frequently used to translate between numeric target
 IDs and human-readable seq_ids. Headers can be created by reading
 from a BAM file using Bio::DB::HTS->header(). You can
@@ -1208,7 +1177,7 @@ array returned by target_len():
 =item $text = $header->text
 =item $header->text("new value")
 
-Read the text portion of the BAM header. The text can be replaced by
+Read the text portion of the header. The text can be replaced by
 providing the replacement string as an argument. Note that you should
 follow the header conventions when replacing the header text. No
 parsing or other error-checking is performed.
@@ -1291,6 +1260,10 @@ exported to the Perl API just in case.
 Please see L<Bio::DB::HTS::Alignment> for documentation of the
 Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
+
 =cut
 
 package Bio::DB::HTS;
@@ -1351,8 +1324,6 @@ sub new {
     $self->header;    # catch it
     return $self;
 } ## end sub new
-
-sub bam { shift->{hts_file} }
 
 sub hts_file { shift->{hts_file} }
 
