@@ -5,8 +5,11 @@ This is a Perl interface to the HTS Library. See http://htslib.org
 In the root directory of this distribution you will find the script
 INSTALL.pl. Running this will download the latest versions of this
 module and HTSlib into a temporary directory, compile them, test and
-install. Simply run:
+install Bio-HTSTools. Note that HTSlib will need to be installed
+on your system, or the LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on Mac OSX)
+includes the location of libhts.a
 
+Simply run:
   perl INSTALL.pl
 
 * MULTI-STEP INSTALLATION
