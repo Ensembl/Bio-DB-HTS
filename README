@@ -4,7 +4,7 @@ This is a Perl interface to the HTS Library. See http://htslib.org
 
 In the root directory of this distribution you will find the script
 INSTALL.pl. Running this will download the latest versions of this
-module and SamTools into a temporary directory, compile them, test and
+module and HTSlib into a temporary directory, compile them, test and
 install. Simply run:
 
   perl INSTALL.pl
@@ -12,13 +12,9 @@ install. Simply run:
 * MULTI-STEP INSTALLATION
 
 The more traditional install requires you to separately download,
-unpack and compile SAMtools 0.1.4 or higher in some accessible
-directory. FOR SAMTOOLS VERSION 0.1.4, YOU MUST RUN "make -f
-makefile.generic" IN THE DISTRIBUTION DIRECTORY IN ORDER TO CREATE THE
-REQUIRED libbam.a LIBRARY FILE. For other versions, just "make" will
-usually work.
+unpack and compile HTSlib.
 
-Then set the environment variable SAMTOOLS to point to this directory.
+Then set the environment variable HTSLIB_DIR to point to this directory.
 
 You will also need to install Bio::Perl from CPAN.
 
@@ -33,7 +29,7 @@ TROUBLESHOOTING:
 
 If you encounter problems during compiling, you may need to edit
 Build.PL so that extra_compiler_flags matches the CFLAGS and DFLAGS
-settings in the Samtools Makefile.  Here are some common problems:
+settings in the HTSlib Makefile.  Here are some common problems:
 
 1. When building this module, you get an error like the following:
 relocation R_X86_64_32 against `a local symbol' can not be used when
@@ -61,7 +57,7 @@ looks like this:
 TESTING AND CONTRIBUTING:
 
 You can obtain the most recent development version of this module via
-its GitHub site at https://github.com/GMOD/GBrowse-Adaptors. Please
+its GitHub site at https://github.com/rishidev/Bio-HTS. Please
 feel free to submit bug reports, patches, etc. via GitHub.
 
 AUTHOR:
