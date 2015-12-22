@@ -59,6 +59,10 @@ The reverse of FLAGS:
 
 =back
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
+
 =head1 SEE ALSO
 
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::Bam::Alignment>

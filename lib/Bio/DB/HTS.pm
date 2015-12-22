@@ -1260,6 +1260,10 @@ exported to the Perl API just in case.
 Please see L<Bio::DB::HTS::Alignment> for documentation of the
 Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
+
 =cut
 
 package Bio::DB::HTS;

@@ -26,6 +26,10 @@ and start and end positions are all given in the orientation in which
 the read was sequenced, not in the oreintation in which it was
 aligned.
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
+
 =cut
 
 package Bio::DB::HTS::Target;

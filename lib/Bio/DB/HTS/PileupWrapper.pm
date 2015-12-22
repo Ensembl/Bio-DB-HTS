@@ -30,6 +30,10 @@ methods. This class is used by the high-level API to return
 Bio::DB::HTS::AlignWrapper objects from the call to alignment() rather
 than Bio::DB::HTS::Alignment.
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
+
 =head1 SEE ALSO
 
 L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>

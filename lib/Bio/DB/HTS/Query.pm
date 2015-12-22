@@ -41,6 +41,10 @@ part of a SAM alignment.
 
 =over 4
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
+
 =cut
 
 package Bio::DB::HTS::Query;

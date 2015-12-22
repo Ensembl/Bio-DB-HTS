@@ -446,6 +446,10 @@ operations:
 
 =back
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
+
 =cut
 
 package Bio::DB::HTS::Alignment;
