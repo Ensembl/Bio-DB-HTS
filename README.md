@@ -1,6 +1,6 @@
 This is a Perl interface to the HTS Library. See http://htslib.org
 
-* ONE-STEP INSTALLATION
+## ONE-STEP INSTALLATION
 
 In the root directory of this distribution you will find the script
 INSTALL.pl. Running this will download the latest versions of this
@@ -12,7 +12,7 @@ includes the location of libhts.a
 Simply run:
   perl INSTALL.pl
 
-* MULTI-STEP INSTALLATION
+## MULTI-STEP INSTALLATION
 
 The more traditional install requires you to separately download,
 unpack and compile HTSlib.
@@ -22,13 +22,14 @@ Then set the environment variable HTSLIB_DIR to point to this directory.
 You will also need to install Bio::Perl from CPAN.
 
 Now run:
-
+```
   perl Build.PL
   ./Build
   ./Build test
   (sudo) ./Build install
+```
 
-TROUBLESHOOTING:
+## TROUBLESHOOTING:
 
 If you encounter problems during compiling, you may need to edit
 Build.PL so that extra_compiler_flags matches the CFLAGS and DFLAGS
@@ -57,13 +58,13 @@ looks like this:
 
   CFLAGS=	-g -Wall -O2 -fPIC #-m64 #-arch ppc
 
-TESTING AND CONTRIBUTING:
+## TESTING AND CONTRIBUTING:
 
 You can obtain the most recent development version of this module via
 its GitHub site at https://github.com/Ensembl/Bio-HTS. Please
 feel free to submit bug reports, patches, etc. via GitHub.
 
-AUTHOR:
+## AUTHOR:
 
 Rishi Nag <rishi@ebi.ac.uk>
 
