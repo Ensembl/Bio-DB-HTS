@@ -27,4 +27,6 @@ t/data/dm3_3R_4766911_4767130.sam.sorted.bam
 t/data/ex1.bam
 t/data/ex1.fa
 t/data/ex1.sam.gz
+t/data/ex2.bam
+t/data/ex2.sam.gz
 typemap

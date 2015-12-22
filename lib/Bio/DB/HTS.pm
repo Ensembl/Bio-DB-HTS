@@ -1267,7 +1267,7 @@ Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 =cut
 
 package Bio::DB::HTS;
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 use strict;
 use warnings;

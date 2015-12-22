@@ -34,7 +34,7 @@
    "provides" : {
       "Bio::DB::HTS" : {
          "file" : "lib/Bio/DB/HTS.pm",
-         "version" : "1.00"
+         "version" : "1.01"
       },
       "Bio::DB::HTS::AlignWrapper" : {
          "file" : "lib/Bio/DB/HTS/AlignWrapper.pm"
@@ -83,5 +83,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "1.00"
+   "version" : "1.01"
 }
