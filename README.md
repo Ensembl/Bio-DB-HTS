@@ -29,7 +29,7 @@ Now run:
   (sudo) ./Build install
 ```
 
-## TROUBLESHOOTING:
+### TROUBLESHOOTING
 
 If you encounter problems during compiling, you may need to edit
 Build.PL so that extra_compiler_flags matches the CFLAGS and DFLAGS
@@ -58,15 +58,17 @@ looks like this:
 
   CFLAGS=	-g -Wall -O2 -fPIC #-m64 #-arch ppc
 
-## TESTING AND CONTRIBUTING:
+## TESTING AND CONTRIBUTING
 
 You can obtain the most recent development version of this module via
 its GitHub site at https://github.com/Ensembl/Bio-HTS. Please
 feel free to submit bug reports, patches, etc. via GitHub.
 
-## AUTHOR:
+### AUTHOR
 
 Rishi Nag <rishi@ebi.ac.uk>
+
+### COPYRIGHT
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
 
