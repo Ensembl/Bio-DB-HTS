@@ -20,7 +20,7 @@ my $build = $class->new(
     dist_version_from  => 'lib/Bio/DB/HTS.pm',
     dist_author        => 'Rishi Nag',
     dist_abstract      => 'Perl interface to HTS library for DNA sequencing',
-    license            => 'Apache Licence 2.0',
+    license            => 'Software::License::Apache_2_0',
     include_dirs       => [$sam_include],
     extra_linker_flags => [ "-L$sam_lib", '-lhts', '-lpthread', '-lz' ],
 
