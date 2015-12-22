@@ -65,7 +65,7 @@ system "git checkout master";
 # STEP 3: Check out Bio-HTS
 info("Checking out Bio-HTS");
 chdir $install_dir;
-system "git clone https://github.com/rishidev/Bio-HTS.git";
+system "git clone https://github.com/Ensembl/Bio-HTS.git";
 -d './Bio-HTS' or die "git clone seems to have failed. Could not find $install_dir/Bio-HTS directory";
 chdir "./Bio-HTS";
 system "git checkout master";
