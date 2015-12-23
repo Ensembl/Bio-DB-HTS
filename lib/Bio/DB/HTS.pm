@@ -1949,7 +1949,7 @@ sub _coverage {
     my $coverage = $index->coverage( $self->{hts_file}, $id, $s, $e, $bins );
 
     return
-      Bio::SeqFeature::Coverage->new( -display_name => "$seqid coverage",
+      Bio::SeqFeature::HTSCoverage->new( -display_name => "$seqid coverage",
                                       -seq_id       => $seqid,
                                       -start        => $start,
                                       -end          => $end,
@@ -2077,7 +2077,7 @@ sub seq {
     return $self->fetch($region);
 }
 
-package Bio::SeqFeature::Coverage;
+package Bio::SeqFeature::HTSCoverage;
 
 use base 'Bio::SeqFeature::Lite';
 
