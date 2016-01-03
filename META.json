@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : "2"
    },
-   "name" : "Bio-HTSTools",
+   "name" : "Bio-DB-HTS",
    "prereqs" : {
       "build" : {
          "requires" : {
@@ -34,37 +34,46 @@
    "provides" : {
       "Bio::DB::HTS" : {
          "file" : "lib/Bio/DB/HTS.pm",
-         "version" : "1.01"
+         "version" : "1.02"
       },
       "Bio::DB::HTS::AlignWrapper" : {
-         "file" : "lib/Bio/DB/HTS/AlignWrapper.pm"
+         "file" : "lib/Bio/DB/HTS/AlignWrapper.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::Alignment" : {
-         "file" : "lib/Bio/DB/HTS/Alignment.pm"
+         "file" : "lib/Bio/DB/HTS/Alignment.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::Constants" : {
-         "file" : "lib/Bio/DB/HTS/Constants.pm"
+         "file" : "lib/Bio/DB/HTS/Constants.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::Fai" : {
          "file" : "lib/Bio/DB/HTS.pm"
       },
       "Bio::DB::HTS::FetchIterator" : {
-         "file" : "lib/Bio/DB/HTS/FetchIterator.pm"
+         "file" : "lib/Bio/DB/HTS/FetchIterator.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::Pileup" : {
-         "file" : "lib/Bio/DB/HTS/Pileup.pm"
+         "file" : "lib/Bio/DB/HTS/Pileup.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::PileupWrapper" : {
-         "file" : "lib/Bio/DB/HTS/PileupWrapper.pm"
+         "file" : "lib/Bio/DB/HTS/PileupWrapper.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::Query" : {
-         "file" : "lib/Bio/DB/HTS/Query.pm"
+         "file" : "lib/Bio/DB/HTS/Query.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::ReadIterator" : {
-         "file" : "lib/Bio/DB/HTS/ReadIterator.pm"
+         "file" : "lib/Bio/DB/HTS/ReadIterator.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::Segment" : {
-         "file" : "lib/Bio/DB/HTS/Segment.pm"
+         "file" : "lib/Bio/DB/HTS/Segment.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTS::Segment::Iterator" : {
          "file" : "lib/Bio/DB/HTS/Segment.pm"
@@ -73,15 +82,16 @@
          "file" : "lib/Bio/DB/HTS/AlignWrapper.pm"
       },
       "Bio::DB::HTS::Target" : {
-         "file" : "lib/Bio/DB/HTS/Target.pm"
+         "file" : "lib/Bio/DB/HTS/Target.pm",
+         "version" : "1.02"
       },
       "Bio::DB::HTSfile" : {
          "file" : "lib/Bio/DB/HTS.pm"
       },
-      "Bio::SeqFeature::Coverage" : {
+      "Bio::SeqFeature::HTSCoverage" : {
          "file" : "lib/Bio/DB/HTS.pm"
       }
    },
    "release_status" : "stable",
-   "version" : "1.01"
+   "version" : "1.02"
 }

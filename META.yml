@@ -12,42 +12,52 @@ license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
-name: Bio-HTSTools
+name: Bio-DB-HTS
 provides:
   Bio::DB::HTS:
     file: lib/Bio/DB/HTS.pm
-    version: '1.01'
+    version: '1.02'
   Bio::DB::HTS::AlignWrapper:
     file: lib/Bio/DB/HTS/AlignWrapper.pm
+    version: '1.02'
   Bio::DB::HTS::Alignment:
     file: lib/Bio/DB/HTS/Alignment.pm
+    version: '1.02'
   Bio::DB::HTS::Constants:
     file: lib/Bio/DB/HTS/Constants.pm
+    version: '1.02'
   Bio::DB::HTS::Fai:
     file: lib/Bio/DB/HTS.pm
   Bio::DB::HTS::FetchIterator:
     file: lib/Bio/DB/HTS/FetchIterator.pm
+    version: '1.02'
   Bio::DB::HTS::Pileup:
     file: lib/Bio/DB/HTS/Pileup.pm
+    version: '1.02'
   Bio::DB::HTS::PileupWrapper:
     file: lib/Bio/DB/HTS/PileupWrapper.pm
+    version: '1.02'
   Bio::DB::HTS::Query:
     file: lib/Bio/DB/HTS/Query.pm
+    version: '1.02'
   Bio::DB::HTS::ReadIterator:
     file: lib/Bio/DB/HTS/ReadIterator.pm
+    version: '1.02'
   Bio::DB::HTS::Segment:
     file: lib/Bio/DB/HTS/Segment.pm
+    version: '1.02'
   Bio::DB::HTS::Segment::Iterator:
     file: lib/Bio/DB/HTS/Segment.pm
   Bio::DB::HTS::SplitAlignmentPart:
     file: lib/Bio/DB/HTS/AlignWrapper.pm
   Bio::DB::HTS::Target:
     file: lib/Bio/DB/HTS/Target.pm
+    version: '1.02'
   Bio::DB::HTSfile:
     file: lib/Bio/DB/HTS.pm
-  Bio::SeqFeature::Coverage:
+  Bio::SeqFeature::HTSCoverage:
     file: lib/Bio/DB/HTS.pm
 requires:
   Bio::Root::Version: '1.006009001'
   perl: '5.008'
-version: '1.01'
+version: '1.02'
