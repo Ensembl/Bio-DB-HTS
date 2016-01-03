@@ -22,6 +22,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::Segment;
+$Bio::DB::HTS::Segment::VERSION = '1.02';
 
 use strict;
 

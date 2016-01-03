@@ -41,6 +41,7 @@ L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 =cut
 
 package Bio::DB::HTS::PileupWrapper;
+$Bio::DB::HTS::PileupWrapper::VERSION = '1.02';
 
 use strict;
 use Bio::DB::HTS::AlignWrapper;

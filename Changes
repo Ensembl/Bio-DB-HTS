@@ -1,2 +1,10 @@
-Version 0.9
-   * htslib port from Bio::DB::Sam
+
+
+1.02
+   * Version numbers added to PM files
+
+1.01
+   * Package renaming
+
+1.00
+   * First full release of htslib port from Bio::DB::Sam

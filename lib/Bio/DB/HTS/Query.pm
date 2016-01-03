@@ -48,6 +48,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::Query;
+$Bio::DB::HTS::Query::VERSION = '1.02';
 
 use strict;
 use Bio::DB::HTS;

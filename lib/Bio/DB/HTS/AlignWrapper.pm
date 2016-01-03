@@ -56,6 +56,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::AlignWrapper;
+$Bio::DB::HTS::AlignWrapper::VERSION = '1.02';
 
 use strict;
 use Bio::DB::HTS::Constants;
