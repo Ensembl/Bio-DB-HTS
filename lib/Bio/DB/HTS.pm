@@ -1267,7 +1267,7 @@ Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 =cut
 
 package Bio::DB::HTS;
-$Bio::DB::HTS::VERSION = '1.02';
+$Bio::DB::HTS::VERSION = '1.03';
 
 use strict;
 use warnings;
@@ -2066,6 +2066,8 @@ sub _glob_match {
 
 package Bio::DB::HTS::Fai;
 
+$Bio::DB::HTS::Fai::VERSION = '1.03';
+
 sub open { shift->load(@_) }
 
 sub seq {
@@ -2080,6 +2082,8 @@ sub seq {
 package Bio::SeqFeature::HTSCoverage;
 
 use base 'Bio::SeqFeature::Lite';
+
+$Bio::SeqFeature::HTSCoverage::VERSION = '1.03';
 
 sub coverage {
     my $self = shift;

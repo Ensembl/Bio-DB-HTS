@@ -1,4 +1,8 @@
 
+1.03
+   * license field corrected in Build.PL
+   * Version numbers added to PM files
+   * Alien::HTSlib module referred to
 
 1.02
    * Version numbers added to PM files

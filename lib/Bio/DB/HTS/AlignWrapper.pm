@@ -56,7 +56,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::AlignWrapper;
-$Bio::DB::HTS::AlignWrapper::VERSION = '1.02';
+$Bio::DB::HTS::AlignWrapper::VERSION = '1.03';
 
 use strict;
 use Bio::DB::HTS::Constants;
@@ -449,6 +449,8 @@ sub tam_line {
 }
 
 package Bio::DB::HTS::SplitAlignmentPart;
+
+$Bio::DB::HTS::SplitAlignmentPart::VERSION = '1.03';
 
 use base 'Bio::SeqFeature::Lite';
 
