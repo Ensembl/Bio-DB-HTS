@@ -3,7 +3,7 @@
    "author" : [
       "Rishi Nag"
    ],
-   "dynamic_config" : 1,
+   "dynamic_config" : 0,
    "generated_by" : "Module::Build version 0.421",
    "license" : [
       "unknown"
@@ -17,11 +17,6 @@
       "build" : {
          "requires" : {
             "ExtUtils::CBuilder" : "0"
-         }
-      },
-      "configure" : {
-         "requires" : {
-            "Module::Build" : "0.42"
          }
       },
       "runtime" : {
