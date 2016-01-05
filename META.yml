@@ -4,9 +4,11 @@ author:
   - 'Rishi Nag'
 build_requires:
   ExtUtils::CBuilder: '0'
-dynamic_config: 0
+configure_requires:
+  Module::Build: '0.42'
+dynamic_config: 1
 generated_by: 'Module::Build version 0.421, CPAN::Meta::Converter version 2.142690'
-license: unknown
+license: apache
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
@@ -14,48 +16,54 @@ name: Bio-DB-HTS
 provides:
   Bio::DB::HTS:
     file: lib/Bio/DB/HTS.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::AlignWrapper:
     file: lib/Bio/DB/HTS/AlignWrapper.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::Alignment:
     file: lib/Bio/DB/HTS/Alignment.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::Constants:
     file: lib/Bio/DB/HTS/Constants.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::Fai:
     file: lib/Bio/DB/HTS.pm
+    version: '1.03'
   Bio::DB::HTS::FetchIterator:
     file: lib/Bio/DB/HTS/FetchIterator.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::Pileup:
     file: lib/Bio/DB/HTS/Pileup.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::PileupWrapper:
     file: lib/Bio/DB/HTS/PileupWrapper.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::Query:
     file: lib/Bio/DB/HTS/Query.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::ReadIterator:
     file: lib/Bio/DB/HTS/ReadIterator.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::Segment:
     file: lib/Bio/DB/HTS/Segment.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTS::Segment::Iterator:
     file: lib/Bio/DB/HTS/Segment.pm
+    version: '1.03'
   Bio::DB::HTS::SplitAlignmentPart:
     file: lib/Bio/DB/HTS/AlignWrapper.pm
+    version: '1.03'
   Bio::DB::HTS::Target:
     file: lib/Bio/DB/HTS/Target.pm
-    version: '1.02'
+    version: '1.03'
   Bio::DB::HTSfile:
     file: lib/Bio/DB/HTS.pm
   Bio::SeqFeature::HTSCoverage:
     file: lib/Bio/DB/HTS.pm
+    version: '1.03'
 requires:
   Bio::Root::Version: '1.006009001'
   perl: '5.008'
-version: '1.02'
+resources:
+  license: http://www.apache.org/licenses/LICENSE-2.0.txt
+version: '1.03'

@@ -3,10 +3,10 @@
    "author" : [
       "Rishi Nag"
    ],
-   "dynamic_config" : 0,
+   "dynamic_config" : 1,
    "generated_by" : "Module::Build version 0.421",
    "license" : [
-      "unknown"
+      "apache_2_0"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
@@ -19,6 +19,11 @@
             "ExtUtils::CBuilder" : "0"
          }
       },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.42"
+         }
+      },
       "runtime" : {
          "requires" : {
             "Bio::Root::Version" : "1.006009001",
@@ -29,64 +34,73 @@
    "provides" : {
       "Bio::DB::HTS" : {
          "file" : "lib/Bio/DB/HTS.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::AlignWrapper" : {
          "file" : "lib/Bio/DB/HTS/AlignWrapper.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Alignment" : {
          "file" : "lib/Bio/DB/HTS/Alignment.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Constants" : {
          "file" : "lib/Bio/DB/HTS/Constants.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Fai" : {
-         "file" : "lib/Bio/DB/HTS.pm"
+         "file" : "lib/Bio/DB/HTS.pm",
+         "version" : "1.03"
       },
       "Bio::DB::HTS::FetchIterator" : {
          "file" : "lib/Bio/DB/HTS/FetchIterator.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Pileup" : {
          "file" : "lib/Bio/DB/HTS/Pileup.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::PileupWrapper" : {
          "file" : "lib/Bio/DB/HTS/PileupWrapper.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Query" : {
          "file" : "lib/Bio/DB/HTS/Query.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::ReadIterator" : {
          "file" : "lib/Bio/DB/HTS/ReadIterator.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Segment" : {
          "file" : "lib/Bio/DB/HTS/Segment.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Segment::Iterator" : {
-         "file" : "lib/Bio/DB/HTS/Segment.pm"
+         "file" : "lib/Bio/DB/HTS/Segment.pm",
+         "version" : "1.03"
       },
       "Bio::DB::HTS::SplitAlignmentPart" : {
-         "file" : "lib/Bio/DB/HTS/AlignWrapper.pm"
+         "file" : "lib/Bio/DB/HTS/AlignWrapper.pm",
+         "version" : "1.03"
       },
       "Bio::DB::HTS::Target" : {
          "file" : "lib/Bio/DB/HTS/Target.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       },
       "Bio::DB::HTSfile" : {
          "file" : "lib/Bio/DB/HTS.pm"
       },
       "Bio::SeqFeature::HTSCoverage" : {
-         "file" : "lib/Bio/DB/HTS.pm"
+         "file" : "lib/Bio/DB/HTS.pm",
+         "version" : "1.03"
       }
    },
    "release_status" : "stable",
-   "version" : "1.02"
+   "resources" : {
+      "license" : [
+         "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      ]
+   },
+   "version" : "1.03"
 }
