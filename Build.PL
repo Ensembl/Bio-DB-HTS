@@ -20,7 +20,7 @@ my $build = $class->new(
     dist_version_from  => 'lib/Bio/DB/HTS.pm',
     dist_author        => 'Rishi Nag',
     dist_abstract      => 'Perl interface to HTS library for DNA sequencing',
-    license            => 'Software::License::Apache_2_0',
+    license            => 'Apache_2_0',
     include_dirs       => [$sam_include],
     extra_linker_flags => [ "-L$sam_lib", '-lhts', '-lpthread', '-lz' ],
 
@@ -131,7 +131,7 @@ sub prompt {
 sub _samtools {
     $ENV{HTSLIB_DIR} || (
         can_load(
-            modules => { 'Alien::SamTools' => undef, 'File::ShareDir' => undef }
+            modules => { 'Alien::HTSlib' => undef, 'File::ShareDir' => undef }
         ) &&
-        File::ShareDir::dist_dir('Alien-SamTools') );
+        File::ShareDir::dist_dir('Alien-HTSlib') );
 }
