@@ -1,4 +1,4 @@
-package Faidx;
+package Bio::DB::HTS::Faidx;
 
 use 5.014002;
 use strict;
@@ -28,7 +28,7 @@ our @EXPORT = qw(
 our $VERSION = '1.04';
 
 require XSLoader;
-XSLoader::load('Faidx', $VERSION);
+XSLoader::load('Bio::DB::HTS::Faidx', $VERSION);
 
 # Preloaded methods go here.
 
