@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ppport.h"
-
 #ifdef PERL_CAPI
 #define WIN32IO_IS_STDIO
 #endif

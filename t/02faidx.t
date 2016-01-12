@@ -21,22 +21,23 @@
 
 use strict;
 use warnings;
-
-use Test::More tests => 5 ;
-BEGIN { use_ok('Faidx') } ;
+use FindBin '$Bin';
+use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
+use Test::More tests => 6 ;
 
 #########################
 
 # Insert your test code below, the Test::More module is use()ed here so read
 # its man page ( perldoc Test::More ) for help writing this test script.
-
-ok(1) ;
-Faidx::print_hello() ;
+BEGIN { use_ok('Bio::DB::HTS') } ;
 ok(1) ;
 
-my $fasta = "t/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz" ;
+BEGIN { use_ok('Bio::DB::HTS::Faidx') } ;
+ok(1) ;
+
+my $fasta = "$Bin/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz" ;
 my $location = "I:1-100" ;
-my $index = Faidx->new($fasta);
+my $index = Bio::DB::HTS::Faidx->new($fasta);
 
 my $seq = "" ;
 my $length = 0 ;

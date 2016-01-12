@@ -31,7 +31,6 @@ require XSLoader;
 XSLoader::load('Bio::DB::HTS::Faidx', $VERSION);
 
 # Preloaded methods go here.
-
 1;
 __END__
 

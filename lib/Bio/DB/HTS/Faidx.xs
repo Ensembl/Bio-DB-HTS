@@ -18,8 +18,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "ppport.h"
-
 #include <stdio.h>
 
 #include "htslib/faidx.h"
@@ -36,12 +34,6 @@ typedef struct
   faidx_t* index;
 } Faidx ;
 
-
-
-void print_hello()
-{
-  printf( "Hello from the Faidx XS module\n" ) ;
-}
 
 
 SV* new(const char * classname, const char * path)
@@ -113,9 +105,6 @@ void DESTROY(SV* obj)
 
 MODULE = Bio::DB::HTS::Faidx    PACKAGE = Bio::DB::HTS::Faidx
 PROTOTYPES: ENABLE
-
-void
-print_hello()
 
 
 SV*
