@@ -12,23 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl Faidx.t'
 
 #########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
 
 use strict;
 use warnings;
 use FindBin '$Bin';
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
-use Test::More tests => 6 ;
+use Test::More tests => 8 ;
 
 #########################
 
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
 BEGIN { use_ok('Bio::DB::HTS') } ;
 ok(1) ;
 
@@ -38,14 +32,14 @@ ok(1) ;
 my $fasta = "$Bin/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz" ;
 my $location = "I:1-100" ;
 my $index = Bio::DB::HTS::Faidx->new($fasta);
+ok($index) ;
 
 my $seq = "" ;
 my $length = 0 ;
 ($seq, $length) = $index->get_sequence($location);
-warn $seq;
-warn $length;
-
-ok(1) ;
+ok($seq eq
+  'CCACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
+ok($length eq 100);
 
 $index->get_all_sequence_ids();
 ok(1) ;
