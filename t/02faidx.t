@@ -41,5 +41,5 @@ ok($seq eq
   'CCACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
 ok($length eq 100);
 
-$index->get_all_sequence_ids();
-ok(1) ;
+my @seq_ids = $index->get_all_sequence_ids();
+ok($seq_ids[0] eq 'I') ;
