@@ -4,6 +4,8 @@ Changes
 DISCLAIMER
 lib/Bio/DB/HTS/Alignment.pm
 lib/Bio/DB/HTS/AlignWrapper.pm
+lib/Bio/DB/HTS/Faidx.pm
+lib/Bio/DB/HTS/Faidx.xs
 lib/Bio/DB/HTS/FetchIterator.pm
 lib/Bio/DB/HTS/Pileup.pm
 lib/Bio/DB/HTS/PileupWrapper.pm
@@ -20,6 +22,7 @@ META.json
 META.yml
 README
 t/01bam.t
+t/02faidx.t
 t/data/00README.txt
 t/data/dm3_3R_4766911_4767130.sam
 t/data/dm3_3R_4766911_4767130.sam.bam
@@ -29,4 +32,5 @@ t/data/ex1.fa
 t/data/ex1.sam.gz
 t/data/ex2.bam
 t/data/ex2.sam.gz
+t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz
 typemap
