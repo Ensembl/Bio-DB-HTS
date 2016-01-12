@@ -35,7 +35,6 @@ typedef struct
 } Faidx ;
 
 
-
 SV* new(const char * classname, const char * path)
 {
   Faidx   * faidx;
@@ -91,7 +90,6 @@ int length(SV* obj, char* seq_id)
     length = faidx_seq_len(fai, seq_id) ;
     return length ;
 }
-
 
 
 void DESTROY(SV* obj)
@@ -164,7 +162,6 @@ PPCODE:
       faidx_name = faidx_iseq(fai,i) ;
       PUSHs(sv_2mortal(newSVpv(faidx_name,0))) ;
     }
-
 
 
 void
