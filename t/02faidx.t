@@ -53,7 +53,6 @@ ok($seq eq
 $seq = "" ;
 $length = 0 ;
 ($seq, $length) = $index->get_sequence2("I",1,99);
-warn $seq ;
 ok($seq eq
   'CACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
 ok($length eq 99);
