@@ -75,6 +75,24 @@ void get_sequence(SV* obj, SV* location, SV** seq, int* seq_len)
   free(char_seq);
 }
 
+void get_sequence2(SV* obj, SV* seq_id, int start, int end, SV** seq, int* seq_len)
+{
+  faidx_t *fai;
+  char* char_seq;
+
+  *seq = newSVpvn("",0);
+  *seq_len = 0;
+
+  fai = ((Faidx*)SvIV(SvRV(obj)))->index;
+  //Fetch sequence
+  char_seq = faidx_fetch_seq(fai, SvPV(seq_id, PL_na), start, end, seq_len);
+
+  //Push into a SV
+  sv_catpv(*seq, char_seq);
+  //Free the buffer created by faidx
+  free(char_seq);
+}
+
 
 int has_sequence(SV* obj, SV* seq_id)
 {
@@ -140,10 +158,18 @@ get_sequence2(obj, seq_id, start, end, OUTLIST seq, OUTLIST length)
   int end
   SV* seq
   int length = NO_INIT
-  CODE:
-     char location[1024] ;
-     sprintf(location, "%s:%d-%d", seq_id, start, end) ;
-     get_sequence(obj, &location, &seq, &length) ;
+
+
+void
+get_sequence2_no_length(obj, seq_id, start, end, OUTLIST seq)
+  SV* obj
+  SV* seq_id
+  int start
+  int end
+  SV* seq
+CODE:
+  int seq_len=0 ;
+  get_sequence2(obj, seq_id, start, end, &seq, &seq_len) ;
 
 
 int

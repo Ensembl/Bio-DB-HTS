@@ -19,7 +19,7 @@ use strict;
 use warnings;
 use FindBin '$Bin';
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
-use Test::More tests => 13 ;
+use Test::More tests => 15 ;
 
 #########################
 
@@ -41,12 +41,6 @@ ok($seq eq
   'CCACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
 ok($length eq 100);
 
-$seq = "" ;
-$length = 0 ;
-($seq, $length) = $index->get_sequence2("I",1,99);
-ok($seq eq
-  'CCACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCT');
-ok($length eq 99);
 
 my @seq_ids = $index->get_all_sequence_ids();
 ok($seq_ids[0] eq 'I') ;
@@ -54,6 +48,24 @@ ok($seq_ids[0] eq 'I') ;
 $seq = $index->get_sequence_no_length($location);
 ok($seq eq
   'CCACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
+
+
+$seq = "" ;
+$length = 0 ;
+($seq, $length) = $index->get_sequence2("I",1,99);
+warn $seq ;
+ok($seq eq
+  'CACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
+ok($length eq 99);
+
+
+$seq = "" ;
+$length = 0 ;
+$seq = $index->get_sequence2_no_length("I",1,99);
+ok($seq eq
+  'CACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
+
+
 
 $length = $index->length('I');
 warn $length ;

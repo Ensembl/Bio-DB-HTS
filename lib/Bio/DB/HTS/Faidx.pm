@@ -41,19 +41,27 @@ Faidx - Perl extension for accessing bgzip compressed and indexed FASTA using ht
 
 =head1 SYNOPSIS
 
+#include the module
 use Bio::DB::HTS::Faidx;
 
+#create the index object
 my $fasta = "$Bin/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz" ;
 my $location = "I:1-100" ;
 my $seq_id = "I" ;
 my $index = Bio::DB::HTS::Faidx->new($fasta);
 
+#get sequence using the location
 my $seq = "" ;
 my $length = 0 ;
 ($seq, $length) = $index->get_sequence($location);
 
 $seq = $index->get_sequence_no_length($location);
 $length = $index->length($seq_id);
+
+#get sequence using the separate parameters.
+#Note here that the sequence start and end points are zero indexed, so code accordingly.
+($seq, $length) = $index->get_sequence2("I",1,99);
+$seq = $index->get_sequence2_no_length("I",1,99);
 
 my @seq_ids = $index->get_all_sequence_ids();
 
