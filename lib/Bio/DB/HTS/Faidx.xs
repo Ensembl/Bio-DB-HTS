@@ -19,6 +19,7 @@
 #include "XSUB.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "htslib/faidx.h"
 #ifndef Newx
@@ -121,7 +122,6 @@ get_sequence(obj, location, OUTLIST seq, OUTLIST length)
      get_sequence(obj, location, &seq, &length) ;
 
 
-
 void
 get_sequence_no_length(obj, location, OUTLIST seq)
   SV* obj
@@ -131,6 +131,19 @@ CODE:
   int seq_len=0 ;
   get_sequence(obj, location, &seq, &seq_len) ;
 
+
+void
+get_sequence2(obj, seq_id, start, end, OUTLIST seq, OUTLIST length)
+  SV* obj
+  SV* seq_id
+  int start
+  int end
+  SV* seq
+  int length = NO_INIT
+  CODE:
+     char location[1024] ;
+     sprintf(location, "%s:%d-%d", seq_id, start, end) ;
+     get_sequence(obj, &location, &seq, &length) ;
 
 
 int
