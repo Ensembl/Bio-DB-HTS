@@ -19,7 +19,7 @@ use strict;
 use warnings;
 use FindBin '$Bin';
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
-use Test::More tests => 8 ;
+use Test::More tests => 10 ;
 
 #########################
 
@@ -43,3 +43,11 @@ ok($length eq 100);
 
 my @seq_ids = $index->get_all_sequence_ids();
 ok($seq_ids[0] eq 'I') ;
+
+$seq = $index->get_sequence_no_length($location);
+ok($seq eq
+  'CCACACCACACCCACACACCCACACACCACACCACACACCACACCACACCCACACACACACATCCTAACACTACCCTAACACAGCCCTAATCTAACCCTG');
+
+$length = $index->length('I');
+warn $length ;
+ok($length eq 230218, "length of I");
