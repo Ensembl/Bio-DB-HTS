@@ -3,5 +3,7 @@ _build/
 blib/
 lib/Bio/DB/HTS.c
 lib/Bio/DB/HTS.o
+lib/Bio/DB/HTS/Faidx.c
+lib/Bio/DB/HTS/Faidx.o
 t/data/*ai
 MYMETA.*
