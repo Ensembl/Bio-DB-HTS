@@ -75,10 +75,10 @@ void get_sequence(SV* obj, SV* location, SV** seq, int* seq_len)
 }
 
 
-int has_sequence(SV* obj, SV* location)
+int has_sequence(SV* obj, SV* seq_id)
 {
   int has_seq=-1 ;
-  has_seq = faidx_has_seq(((Faidx*)SvIV(SvRV(obj)))->index, SvPV(location, PL_na));
+  has_seq = faidx_has_seq(((Faidx*)SvIV(SvRV(obj)))->index, SvPV(seq_id, PL_na));
   return has_seq;
 }
 
@@ -134,9 +134,9 @@ CODE:
 
 
 int
-has_sequence(obj, location)
+has_sequence(obj, seq_id)
   SV* obj
-  SV* location
+  SV* seq_id
 
 
 int

@@ -57,6 +57,8 @@ $length = $index->length($seq_id);
 
 my @seq_ids = $index->get_all_sequence_ids();
 
+#returns 1 if sequence ID is present, 0 if not
+my $has_seq = $index->has_sequence('I');
 
 
 =head1 AUTHOR

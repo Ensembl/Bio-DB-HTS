@@ -19,7 +19,7 @@ use strict;
 use warnings;
 use FindBin '$Bin';
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
-use Test::More tests => 10 ;
+use Test::More tests => 12 ;
 
 #########################
 
@@ -51,3 +51,9 @@ ok($seq eq
 $length = $index->length('I');
 warn $length ;
 ok($length eq 230218, "length of I");
+
+my $has_seq = $index->has_sequence('I');
+ok($has_seq eq 1, "has sequence I");
+
+$has_seq = $index->has_sequence('II');
+ok($has_seq eq 0, "Does not have sequence II");
