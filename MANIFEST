@@ -20,6 +20,7 @@ LICENSE
 MANIFEST			This list of files
 META.json
 META.yml
+ppport.h
 README
 t/01bam.t
 t/02faidx.t
