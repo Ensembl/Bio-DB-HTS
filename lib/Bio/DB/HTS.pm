@@ -2066,7 +2066,7 @@ sub _glob_match {
 
 package Bio::DB::HTS::Fai;
 
-$Bio::DB::HTS::Fai::VERSION = '1.03';
+$Bio::DB::HTS::Fai::VERSION = '1.04';
 
 sub open { shift->load(@_) }
 
@@ -2083,7 +2083,7 @@ package Bio::SeqFeature::HTSCoverage;
 
 use base 'Bio::SeqFeature::Lite';
 
-$Bio::SeqFeature::HTSCoverage::VERSION = '1.03';
+$Bio::SeqFeature::HTSCoverage::VERSION = '1.04';
 
 sub coverage {
     my $self = shift;
