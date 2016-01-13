@@ -25,18 +25,18 @@ use Bio::DB::HTS::AlignWrapper;
 
 # low level tests (defined in lib/Bio/DB/HTS.pm)
 {
-    my $cramfile = "$Bin/data/ex3.cram";
+    my $cramfile = "$Bin/data/yeast.sorted.cram";
     my $hts_file     = Bio::DB::HTSfile->open($cramfile);
     ok($hts_file);
 
     my $header  = $hts_file->header_read();
     my $targets = $header->n_targets;
-    ok( $targets, 2 );
+    ok( $targets, 17, "Targets Found" );
 
     my $target_names = $header->target_name;
     ok($target_names);
-    ok( scalar @$target_names, 2 );
-    ok( $target_names->[0],    'seq1' );
+    ok( scalar @$target_names );
+    ok( $target_names->[0],    'II' );
 
     my $target_lens = $header->target_len;
     ok($target_lens);
@@ -66,7 +66,7 @@ use Bio::DB::HTS::AlignWrapper;
     @result = $header->parse_region('seq_invalid:51-1000');
     ok( scalar @result, 0 );
 
-    Bio::DB::HTSfile->index_build($bamfile);
+    Bio::DB::HTSfile->index_build($cramfile);
     my $index = Bio::DB::HTSfile->index_load($hts_file);
     ok($index);
 
