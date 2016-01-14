@@ -34,14 +34,14 @@ use Bio::DB::HTS::AlignWrapper;
     ok( $targets, 17, "Targets Found" );
 
     my $target_names = $header->target_name;
-    ok($target_names);
+    ok( $target_names );
     ok( scalar @$target_names );
-    ok( $target_names->[0],    'II' );
+    ok( $target_names->[10], 'X' );
 
     my $target_lens = $header->target_len;
-    ok($target_lens);
-    ok( scalar @$target_lens, 2 );
-    ok( $target_lens->[0],    1575 );
+    ok( $target_lens ) ;
+    ok( scalar @$target_lens, 17 );
+    ok( $target_lens->[0], 745751 );
 
     my $text = $header->text;
     ok( length $text > 0 );
@@ -50,18 +50,20 @@ use Bio::DB::HTS::AlignWrapper;
     $header->text($c);
     ok( $header->text, $c );
 
-    my $fai = Bio::DB::HTS::Fai->open("$Bin/data/ex1.fa");
-    my $seq = $fai->fetch('seq2:51-1000');
+    my $region = 'X:51-1000' ;
+    my $fai = Bio::DB::HTS::Fai->open("$Bin/data/yeast.fasta");
+    my $seq = $fai->fetch($region);
     ok( length $seq, 950 );
 
     my $count;
-    while ( my $b = $hts_file->read1($header) ) {
+    while ( my $b = $hts_file->read1($header) )
+    {
         $count++;
     }
-    ok( $count, 3307 );
+    ok( $count, 50000 );
 
-    my @result = $header->parse_region('seq2:51-1000');
-    ok( $result[0], 1 );
+    my @result = $header->parse_region($region);
+    ok( $result[0], 10 );
     ok( $result[1], 50 );
     @result = $header->parse_region('seq_invalid:51-1000');
     ok( scalar @result, 0 );
@@ -77,7 +79,7 @@ use Bio::DB::HTS::AlignWrapper;
         return;
     };
 
-    $index->fetch( $hts_file, $header->parse_region('seq2'),
+    $index->fetch( $hts_file, $header->parse_region('X'),
                    $print_region, "foobar" );
     ok( scalar @a > 1 );
 
@@ -98,12 +100,13 @@ use Bio::DB::HTS::AlignWrapper;
         }
     };
 
-    $index->pileup( $hts_file, $header->parse_region('seq2:1-100'), $fetch_back );
-    ok( $matches{matched}/$matches{total} > 0.99 );
+    $index->pileup( $hts_file, $header->parse_region($region), $fetch_back );
+    ok( $matches{matched}, 37 );
+    ok( $matches{total}, 96 );
 
     # try to get coverage
     my $coverage =
-      $index->coverage( $hts_file, $header->parse_region('seq2'), 100, 9000 );
+      $index->coverage( $hts_file, $header->parse_region('X'), 100, 9000 );
     ok( scalar @$coverage, 100 );
     my @c = sort { $a <=> $b } @$coverage;
     ok( $c[0] >= 0 );
@@ -112,6 +115,15 @@ use Bio::DB::HTS::AlignWrapper;
 }
 
 # high level tests (defined in lib/Bio/DB/HTS.pm)
+my $dummy = eval
+{
+  Bio::DB::HTS->new( -fasta => "invalid_path.txt",
+                     -bam   => "invalid_path.txt" );
+};
+ok( $dummy, undef );
+ok( $@ =~ /does not exist/ );
+
+
 for my $use_fasta ( 0, 1 ) {
     my $hts = Bio::DB::HTS->new( -fasta        => "$Bin/data/ex1.fa",
                                  -bam          => "$Bin/data/ex1.bam",
@@ -119,10 +131,10 @@ for my $use_fasta ( 0, 1 ) {
                                  -autoindex    => 1,
                                  -force_refseq => $use_fasta, );
     ok($hts);
-    ok( $hts->n_targets, 2 );
+    ok( $hts->n_targets, 17 );
 
-    ok( $hts->length('seq1'), 1575 );
-    ok( join $hts->seq_ids,   'seq1 seq2' );
+    ok( $hts->length('X'), 745751 );
+    ok( $hts->seq_ids,   'seq1 seq2' );
 
     my $seg = $hts->segment('seq1');
     ok($seg);
@@ -130,13 +142,6 @@ for my $use_fasta ( 0, 1 ) {
     my $seq = $seg->seq;
     ok( $seq->isa('Bio::PrimarySeq') );
     ok( length $seq->seq, 1575 );
-
-    my $dummy = eval {
-        Bio::DB::HTS->new( -fasta => "invalid_path.txt",
-                           -bam   => "invalid_path.txt" );
-    };
-    ok( $dummy, undef );
-    ok( $@ =~ /does not exist/ );
 
     my @alignments =
       $hts->get_features_by_location( -seq_id => 'seq2',
