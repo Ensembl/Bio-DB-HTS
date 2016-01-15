@@ -134,57 +134,52 @@ for my $use_fasta ( 0, 1 ) {
     ok( $hts->n_targets, 17 );
 
     ok( $hts->length('X'), 745751 );
-    ok( $hts->seq_ids,   'seq1 seq2' );
 
-    my $seg = $hts->segment('seq1');
+    my $seg = $hts->segment('I');
     ok($seg);
-    ok( $seg->length, 1575 );
+    ok( $seg->length, 230218 );
     my $seq = $seg->seq;
     ok( $seq->isa('Bio::PrimarySeq') );
-    ok( length $seq->seq, 1575 );
+    ok( length $seq->seq, 230218 );
 
     my @alignments =
-      $hts->get_features_by_location( -seq_id => 'seq2',
+      $hts->get_features_by_location( -seq_id => 'I',
                                       -start  => 500,
-                                      -end    => 800 );
-    ok( scalar @alignments,     442 );
-    ok( $alignments[0]->seq_id, 'seq2' );
+                                      -end    => 20000 );
+    ok( scalar @alignments, 71 );
+    ok( $alignments[0]->seq_id, 'I' );
 
     ok( scalar @{ $alignments[0]->qscore }, length $alignments[0]->dna );
 
     my @keys = $alignments[0]->get_all_tags;
-    ok( scalar @keys,                         18 );
-    ok( $alignments[0]->get_tag_values('MF'), 18 );
+    ok( scalar @keys,                         17 );
+    ok( $alignments[0]->get_tag_values('AS'), 36 );
 
     my %att = $alignments[0]->attributes;
-    ok( scalar( keys %att ),       18 );
-    ok( $alignments[0]->cigar_str, '35M' );
-
-    $hts->expand_flags(0);
-    @keys = $alignments[0]->get_all_tags;
-    ok( scalar @keys, 7 );
+    ok( scalar( keys %att ),       17 );
+    ok( $alignments[0]->cigar_str, '36M' );
 
     my $query = $alignments[0]->query;
     ok($query);
     ok( $query->start,          1 );
-    ok( $query->end,            35 );
-    ok( $query->length,         35 );
+    ok( $query->end,            36 );
+    ok( $query->length,         36 );
     ok( $query->dna,            $alignments[0]->dna );
     ok( $alignments[0]->strand, -1 );
     ok( $query->strand,         -1 );
 
     my $target = $alignments[0]->target;
     ok($target);
-    ok( $target->start,  35 );
+    ok( $target->start,  36 );
     ok( $target->end,    1 );
-    ok( $target->length, 35 );
+    ok( $target->length, 3 );
     ok( $target->dna,    reversec( $alignments[0]->dna ) );
 
     ok( $alignments[0]->get_tag_values('FLAGS'), $alignments[0]->flag_str );
 
     my @pads = $alignments[0]->padded_alignment;
-    ok( @pads,               3 );
-    ok( $pads[0],            $pads[2] );
+    ok( scalar @pads, 3 );
+    ok( $pads[0], $pads[2] );
     ok( $pads[1] =~ tr/|/|/, length( $pads[0] ) );
 
     my @f = $hts->features( -name => 'EAS114_45:2:1:1140:1206' );
