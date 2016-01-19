@@ -106,14 +106,6 @@ my $cramfile = "$Bin/data/yeast.sorted.cram";
     ok( $matches{matched}, 37 );
     ok( $matches{total}, 96 );
 
-    # try to get coverage
-    my $coverage =
-      $index->coverage( $hts_file, $header->parse_region('X'), 100, 9000 );
-    ok( scalar @$coverage, 100 );
-    my @c = sort { $a <=> $b } @$coverage;
-    ok( $c[0] >= 0 );
-    ok( $c[-1] < 1000 );
-
 }
 
 # high level tests (defined in lib/Bio/DB/HTS.pm)
@@ -176,7 +168,7 @@ for my $use_fasta ( 0, 1 )
     ok($target);
     ok( $target->start,  36 );
     ok( $target->end,    1 );
-    ok( $target->length, 3 );
+    ok( $target->length, 36 );
     ok( $target->dna,    reversec( $alignments[0]->dna ) );
 
     ok( $alignments[0]->get_tag_values('FLAGS'), $alignments[0]->flag_str );
@@ -238,7 +230,7 @@ $hts = Bio::DB::HTS->new(
             my $a = shift;
             return 1 if $a->display_name =~ /^SRR507778/;
         } );
-    ok( scalar @f, 500000 );
+    ok( scalar @f, 50000 );
 
 $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
@@ -248,7 +240,7 @@ $hts = Bio::DB::HTS->new(
                                  -force_refseq => $use_fasta, );
     @f = $hts->features( -name => 'SRR507778.24982',
                          -tags => { FIRST_MATE => 1 } );
-    ok( scalar @f, 2 );
+    ok( scalar @f, 1 );
 
     # try iteration
     my $i =
@@ -265,13 +257,26 @@ $hts = Bio::DB::HTS->new(
     ok( $count, 65 );
     $fh->close;
 
+$hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
     $i = $hts->get_seq_stream();    # all features!
     ok($i);
     $count = 0;
     while ( $i->next_seq ) { $count++ }
     ok( $count, 50000 );
 
-    $i = $hts->get_seq_stream( -max_features => 200, -seq_id => 'seq1' );
+
+    $hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
+    $i = $hts->get_seq_stream( -max_features => 200, -seq_id => 'XIII' );
     ok($i);
     $count = 0;
     while ( $i->next_seq ) { $count++ }
@@ -281,15 +286,6 @@ $hts = Bio::DB::HTS->new(
     # try the read_pair aggregation
     my @pairs = $hts->features( -type => 'read_pair', -seq_id => 'XIII' );
     ok( scalar @pairs, 1682 );
-
-    # try coverage
-    my @coverage = $hts->features( -type => 'coverage', -seq_id => 'XIII' );
-    ok( scalar @coverage, 1 );
-    my ($c) = $coverage[0]->get_tag_values('coverage');
-    ok($c);
-    ok( $c->[0],            0.300 );
-    ok( $c->[1],            0.278 );
-    ok( $coverage[0]->type, "coverage:924431" );
 
     # test high level API version of pileup
     my %matches;
