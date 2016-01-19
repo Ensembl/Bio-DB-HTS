@@ -24,11 +24,11 @@ BEGIN {
 use Bio::DB::HTS;
 use Bio::DB::HTS::AlignWrapper;
 
-my $cramfile = "data/yeast.sorted.cram";
+my $cramfile = "$Bin/data/yeast.sorted.cram";
 
 # low level tests (defined in lib/Bio/DB/HTS.pm)
 {
-    my $hts_file     = Bio::DB::HTSfile->open($cramfile);
+    my $hts_file = Bio::DB::HTSfile->open($cramfile);
     ok($hts_file);
 
     my $header  = $hts_file->header_read();
@@ -43,7 +43,7 @@ my $cramfile = "data/yeast.sorted.cram";
     my $target_lens = $header->target_len;
     ok( $target_lens ) ;
     ok( scalar @$target_lens, 17 );
-    ok( $target_lens->[0], 745751 );
+    ok( $target_lens->[0], 230218 );
 
     my $text = $header->text;
     ok( length $text > 0 );
@@ -128,7 +128,7 @@ ok( $@ =~ /does not exist/ );
 
 for my $use_fasta ( 0, 1 )
 {
-  $hts = Bio::DB::HTS->new(
+  my $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
                                  -bam          => $cramfile,
                                  -expand_flags => 1,

@@ -7,9 +7,11 @@ two introns; the CIGAR lines match /\d+M124N3M91N\d+M/, where
 the internal 3M is the 3bp exon. and the flanking 124N and 91N are the
 introns.
 
-
 NOTE: These files were copied from the examples directory in the
 Samtools distribution version 0.1.3. The original README follows.
+
+The yeast data files were obtained from EBI and prepared as detailed
+at http://www.htslib.org/workflow/#mapping_to_cram
 
 ORIGINAL 00README.txt
 
@@ -35,4 +37,3 @@ To try samtools, you may run the following commands:
   samtools tview ex1.bam ex1.fa         # view alignment
   samtools pileup -cf ex1.fa ex1.bam    # pileup and consensus
   samtools pileup -cf ex1.fa -t ex1.fa.fai ex1.sam.gz
-
