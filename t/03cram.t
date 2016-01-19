@@ -1,3 +1,4 @@
+
 #-*-Perl-*-
 
 use strict;
@@ -23,9 +24,10 @@ BEGIN {
 use Bio::DB::HTS;
 use Bio::DB::HTS::AlignWrapper;
 
+my $cramfile = "data/yeast.sorted.cram";
+
 # low level tests (defined in lib/Bio/DB/HTS.pm)
 {
-    my $cramfile = "$Bin/data/yeast.sorted.cram";
     my $hts_file     = Bio::DB::HTSfile->open($cramfile);
     ok($hts_file);
 
@@ -124,9 +126,11 @@ ok( $dummy, undef );
 ok( $@ =~ /does not exist/ );
 
 
-for my $use_fasta ( 0, 1 ) {
-    my $hts = Bio::DB::HTS->new( -fasta        => "$Bin/data/ex1.fa",
-                                 -bam          => "$Bin/data/ex1.bam",
+for my $use_fasta ( 0, 1 )
+{
+  $hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
                                  -force_refseq => $use_fasta, );
@@ -182,74 +186,110 @@ for my $use_fasta ( 0, 1 ) {
     ok( $pads[0], $pads[2] );
     ok( $pads[1] =~ tr/|/|/, length( $pads[0] ) );
 
-    my @f = $hts->features( -name => 'EAS114_45:2:1:1140:1206' );
+# There is an issue to be resolved still with fetching features by name for CRAM files
+# so opening a new object each time to ensure the tests take place.
+$hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
+
+
+
+    my @f = $hts->features( -name => 'SRR507778.24982' );
     ok( scalar @f, 2 );
 
+$hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
     @f = $hts->features(
         -filter => sub {
             my $a = shift;
-            return 1 if $a->display_name eq 'EAS114_45:2:1:1140:1206';
+            return 1 if $a->display_name eq 'SRR507778.24982';
         } );
     ok( scalar @f, 2 );
 
+$hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
     @f = $hts->features(
-        -seq_id => 'seq2',
+        -seq_id => 'XIII',
         -filter => sub {
             my $a = shift;
-            return 1 if $a->display_name =~ /^EAS114/;
+            return 1 if $a->display_name =~ /^SRR507778/;
         } );
-    ok( scalar @f, 306 );
-    @f = $hts->features(
-        -filter => sub {
-            my $a = shift;
-            return 1 if $a->display_name =~ /^EAS114/;
-        } );
-    ok( scalar @f, 534 );
+    ok( scalar @f, 3296 );
 
-    @f = $hts->features( -name => 'EAS114_45:2:1:1140:1206',
+$hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
+    @f = $hts->features(
+        -filter => sub {
+            my $a = shift;
+            return 1 if $a->display_name =~ /^SRR507778/;
+        } );
+    ok( scalar @f, 500000 );
+
+$hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
+    @f = $hts->features( -name => 'SRR507778.24982',
                          -tags => { FIRST_MATE => 1 } );
-    ok( scalar @f, 1 );
+    ok( scalar @f, 2 );
 
     # try iteration
     my $i =
-      $hts->get_seq_stream( -seq_id => 'seq2', -start => 500, -end => 800 );
+      $hts->get_seq_stream( -seq_id => 'XIII', -start => 200, -end => 10000 );
     ok($i);
     my $count = 0;
     while ( $i->next_seq ) { $count++ }
-    ok( $count, 442 );
+    ok( $count, 65 );
 
     # try tam fh retrieval
-    my $fh = $hts->get_seq_fh( -seq_id => 'seq2', -start => 500, -end => 800, );
+    my $fh = $hts->get_seq_fh( -seq_id => 'XIII', -start => 200, -end => 10000, );
     $count = 0;
     $count++ while <$fh>;
-    ok( $count, 442 );
+    ok( $count, 65 );
     $fh->close;
 
     $i = $hts->get_seq_stream();    # all features!
     ok($i);
     $count = 0;
     while ( $i->next_seq ) { $count++ }
-    ok( $count, 3307 );
+    ok( $count, 50000 );
 
     $i = $hts->get_seq_stream( -max_features => 200, -seq_id => 'seq1' );
     ok($i);
     $count = 0;
     while ( $i->next_seq ) { $count++ }
     ok( $count,                   200 );
-    ok( $hts->last_feature_count, 1482 );
+    ok( $hts->last_feature_count, 3296 );
 
     # try the read_pair aggregation
-    my @pairs = $hts->features( -type => 'read_pair', -seq_id => 'seq2' );
-    ok( scalar @pairs, 939 );
+    my @pairs = $hts->features( -type => 'read_pair', -seq_id => 'XIII' );
+    ok( scalar @pairs, 1682 );
 
     # try coverage
-    my @coverage = $hts->features( -type => 'coverage', -seq_id => 'seq2' );
+    my @coverage = $hts->features( -type => 'coverage', -seq_id => 'XIII' );
     ok( scalar @coverage, 1 );
     my ($c) = $coverage[0]->get_tag_values('coverage');
     ok($c);
-    ok( $c->[0],            3 );
-    ok( $c->[1],            4 );
-    ok( $coverage[0]->type, "coverage:1584" );
+    ok( $c->[0],            0.300 );
+    ok( $c->[1],            0.278 );
+    ok( $coverage[0]->type, "coverage:924431" );
 
     # test high level API version of pileup
     my %matches;
@@ -269,8 +309,9 @@ for my $use_fasta ( 0, 1 ) {
         }
     };
 
-    $hts->pileup( 'seq2:1-100', $fetch_back );
-    ok( $matches{matched}/$matches{total} > 0.99 );
+    $hts->pileup( 'XIII:1-1000', $fetch_back );
+    ok( $matches{matched}, 115 );
+    ok( $matches{total}, 211 );
 } ## end for my $use_fasta ( 0, ...)
 
 exit 0;
