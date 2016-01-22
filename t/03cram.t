@@ -304,7 +304,12 @@ $hts = Bio::DB::HTS->new(
             $matches{total}++;
         }
     };
-
+    $hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
     $hts->pileup( 'XIII:1-1000', $fetch_back );
     ok( $matches{matched}, 115 );
     ok( $matches{total}, 211 );
