@@ -239,37 +239,36 @@ follows:
   Option         Description
   ------         -------------
 
-  -bam           Path to the SAM/BAM/CRAM alignmen file that contains the
-                   alignments (required). A http: or ftp: URL is accepted.
+  -bam           Path to the SAM/BAM/CRAM alignment file that contains the
+                 alignments (required). A http: or ftp: URL is accepted.
 
   -fasta         Path to the Fasta file that contains
-                   the reference sequences (optional). Alternatively,
-                   you may pass any object that supports a seq()
-                   or fetch_seq() method and takes the three arguments
-                   ($seq_id,$start,$end).
+                 the reference sequences (optional). Alternatively,
+                 you may pass any object that supports a seq()
+                 or fetch_seq() method and takes the three arguments
+                 ($seq_id,$start,$end).
 
   -expand_flags  A boolean value. If true then the standard
-                   alignment flags will be broken out as
-                   individual tags such as 'M_UNMAPPED' (default
-                   false).
+                 alignment flags will be broken out as
+                 individual tags such as 'M_UNMAPPED' (default false).
 
   -split_splices A boolean value. If true, then alignments that
-                  are split across splices will be broken out
-                  into a single alignment containing two sub-
-                  alignments (default false).
+                 are split across splices will be broken out
+                 into a single alignment containing two sub-
+                 alignments (default false).
 
-  -split          The same as -split_splices.
+  -split         The same as -split_splices.
 
-  -force_refseq   Always use the reference sequence file to derive the
-                   reference sequence, even when the sequence can be
-                   derived from the MD tag. This is slower, but safer
-                   when working with BAM files derived from buggy aligners
-                   or when the reference contains non-canonical (modified)
-                   bases.
+  -force_refseq  Always use the reference sequence file to derive the
+                 reference sequence, even when the sequence can be
+                 derived from the MD tag. This is slower, but safer
+                 when working with BAM files derived from buggy aligners
+                 or when the reference contains non-canonical (modified)
+                 bases.
 
-  -autoindex      Create an alignment index file if one does not exist
-                   or the current one has a modification date
-                   earlier than the alignment file.
+  -autoindex     Create an alignment index file if one does not exist
+                 or the current one has a modification date
+                 earlier than the alignment file.
 
 An example of a typical new() constructor invocation is:
 
@@ -1137,7 +1136,7 @@ specifying that you want an unlimited cap.
 
 =back
 
-=head2 BAM header methods
+=head2 HTS header methods
 
 The Bio::DB::HTS::Header object contains information regarding the
 reference sequence(s) used to construct the corresponding alignment
