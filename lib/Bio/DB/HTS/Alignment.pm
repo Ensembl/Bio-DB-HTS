@@ -120,9 +120,6 @@ reference sequence.
 Return the strand of the alignment as -1 for reversed, +1 for
 forward.
 
-NOTE: In versions 1.00-1.06, this method always returned +1. As of
-version 1.07, this behavior is fixed.
-
 =item $mstrand = $align->mstrand
 
 If the read has a mate pair, return the strand of the mate in the
@@ -453,7 +450,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::Alignment;
-$Bio::DB::HTS::Alignment::VERSION = '1.04';
+$Bio::DB::HTS::Alignment::VERSION = '1.05';
 
 use strict;
 use warnings;
