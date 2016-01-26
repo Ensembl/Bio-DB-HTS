@@ -1,6 +1,7 @@
 Build.PL
 INSTALL.pl
 Changes
+cpanfile
 DISCLAIMER
 lib/Bio/DB/HTS/Alignment.pm
 lib/Bio/DB/HTS/AlignWrapper.pm
@@ -24,6 +25,7 @@ ppport.h
 README
 t/01bam.t
 t/02faidx.t
+t/03cram.t
 t/data/00README.txt
 t/data/dm3_3R_4766911_4767130.sam
 t/data/dm3_3R_4766911_4767130.sam.bam
@@ -34,4 +36,6 @@ t/data/ex1.sam.gz
 t/data/ex2.bam
 t/data/ex2.sam.gz
 t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz
+t/data/yeast.fasta
+t/data/yeast.sorted.cram
 typemap

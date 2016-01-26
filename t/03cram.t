@@ -118,7 +118,7 @@ ok( $dummy, undef );
 ok( $@ =~ /does not exist/ );
 
 
-for my $use_fasta ( 0, 1 )
+for my $use_fasta ( 0,1 )
 {
   my $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
@@ -178,21 +178,19 @@ for my $use_fasta ( 0, 1 )
     ok( $pads[0], $pads[2] );
     ok( $pads[1] =~ tr/|/|/, length( $pads[0] ) );
 
-# There is an issue to be resolved still with fetching features by name for CRAM files
-# so opening a new object each time to ensure the tests take place.
-$hts = Bio::DB::HTS->new(
+   # There is an issue to be resolved still with fetching features by name for CRAM files
+   # so opening a new object each time to ensure the tests take place.
+   $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
                                  -force_refseq => $use_fasta, );
 
-
-
     my @f = $hts->features( -name => 'SRR507778.24982' );
     ok( scalar @f, 2 );
 
-$hts = Bio::DB::HTS->new(
+    $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
@@ -205,7 +203,7 @@ $hts = Bio::DB::HTS->new(
         } );
     ok( scalar @f, 2 );
 
-$hts = Bio::DB::HTS->new(
+    $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
@@ -219,7 +217,7 @@ $hts = Bio::DB::HTS->new(
         } );
     ok( scalar @f, 3296 );
 
-$hts = Bio::DB::HTS->new(
+    $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
@@ -232,7 +230,7 @@ $hts = Bio::DB::HTS->new(
         } );
     ok( scalar @f, 50000 );
 
-$hts = Bio::DB::HTS->new(
+    $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
@@ -257,7 +255,7 @@ $hts = Bio::DB::HTS->new(
     ok( $count, 65 );
     $fh->close;
 
-$hts = Bio::DB::HTS->new(
+    $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
@@ -268,7 +266,6 @@ $hts = Bio::DB::HTS->new(
     $count = 0;
     while ( $i->next_seq ) { $count++ }
     ok( $count, 50000 );
-
 
     $hts = Bio::DB::HTS->new(
                                  -fasta => "data/yeast.fasta",
@@ -288,6 +285,14 @@ $hts = Bio::DB::HTS->new(
     ok( scalar @pairs, 1682 );
 
     # test high level API version of pileup
+    $hts = Bio::DB::HTS->new(
+                                 -fasta => "data/yeast.fasta",
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
+    my @coverage = $hts->features( -type => 'coverage', -seq_id => 'XIII' );
+    my ($c) = $coverage[0]->get_tag_values('coverage');
     my %matches;
     my $fetch_back = sub {
         my ( $seqid, $pos, $p ) = @_;
@@ -304,15 +309,11 @@ $hts = Bio::DB::HTS->new(
             $matches{total}++;
         }
     };
-    $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
-                                 -bam          => $cramfile,
-                                 -expand_flags => 1,
-                                 -autoindex    => 1,
-                                 -force_refseq => $use_fasta, );
     $hts->pileup( 'XIII:1-1000', $fetch_back );
     ok( $matches{matched}, 115 );
     ok( $matches{total}, 211 );
+
+
 } ## end for my $use_fasta ( 0, ...)
 
 exit 0;

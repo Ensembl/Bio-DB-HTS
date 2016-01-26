@@ -1,4 +1,11 @@
 
+1.05
+   * CRAM tests added
+   * cpanfile added
+
+1.04
+   * FAIDX added
+
 1.03
    * license field corrected in Build.PL
    * Version numbers added to PM files
