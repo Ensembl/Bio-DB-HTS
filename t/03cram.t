@@ -5,7 +5,7 @@ use strict;
 use ExtUtils::MakeMaker;
 use File::Temp qw(tempfile);
 use FindBin '$Bin';
-use constant TEST_COUNT => 135;
+use constant TEST_COUNT => 115;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -25,6 +25,7 @@ use Bio::DB::HTS;
 use Bio::DB::HTS::AlignWrapper;
 
 my $cramfile = "$Bin/data/yeast.sorted.cram";
+my $fastafile = "$Bin/data/yeast.fasta";
 
 # low level tests (defined in lib/Bio/DB/HTS.pm)
 {
@@ -118,10 +119,10 @@ ok( $dummy, undef );
 ok( $@ =~ /does not exist/ );
 
 
-for my $use_fasta ( 0,1 )
+for my $use_fasta (0,1)
 {
   my $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                              -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -181,7 +182,7 @@ for my $use_fasta ( 0,1 )
    # There is an issue to be resolved still with fetching features by name for CRAM files
    # so opening a new object each time to ensure the tests take place.
    $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -191,7 +192,7 @@ for my $use_fasta ( 0,1 )
     ok( scalar @f, 2 );
 
     $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -204,7 +205,7 @@ for my $use_fasta ( 0,1 )
     ok( scalar @f, 2 );
 
     $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -218,7 +219,7 @@ for my $use_fasta ( 0,1 )
     ok( scalar @f, 3296 );
 
     $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -231,7 +232,7 @@ for my $use_fasta ( 0,1 )
     ok( scalar @f, 50000 );
 
     $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -256,7 +257,7 @@ for my $use_fasta ( 0,1 )
     $fh->close;
 
     $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -268,7 +269,7 @@ for my $use_fasta ( 0,1 )
     ok( $count, 50000 );
 
     $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
@@ -286,13 +287,14 @@ for my $use_fasta ( 0,1 )
 
     # test high level API version of pileup
     $hts = Bio::DB::HTS->new(
-                                 -fasta => "data/yeast.fasta",
+                                 -fasta => $fastafile,
                                  -bam          => $cramfile,
                                  -expand_flags => 1,
                                  -autoindex    => 1,
                                  -force_refseq => $use_fasta, );
     my @coverage = $hts->features( -type => 'coverage', -seq_id => 'XIII' );
     my ($c) = $coverage[0]->get_tag_values('coverage');
+    ok( $coverage[0]->type, "coverage:924431" ) ;
     my %matches;
     my $fetch_back = sub {
         my ( $seqid, $pos, $p ) = @_;
