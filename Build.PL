@@ -8,7 +8,7 @@ my $HeaderFile = "hts.h";
 my $LibFile    = "libhts.a";
 my $ReadLine;
 
-my ( $sam_include, $sam_lib ) = find_sam();    # may exit with error here
+my ( $hts_include, $hts_lib ) = find_hts();    # may exit with error here
 
 my $class = Module::Build->subclass( code => <<EOF);
 
@@ -21,15 +21,15 @@ my $build = $class->new(
     dist_author        => 'Rishi Nag',
     dist_abstract      => 'Perl interface to HTS library for DNA sequencing',
     license            => 'Apache_2_0',
-    include_dirs       => [$sam_include],
-    extra_linker_flags => [ "-L$sam_lib", '-lhts', '-lpthread', '-lz' ],
+    include_dirs       => [$hts_include],
+    extra_linker_flags => [ "-L$hts_lib", '-lhts', '-lpthread', '-lz' ],
 
     extra_compiler_flags => [
 
-        # must match DFLAGS in Samtools Makefile
+        # must match DFLAGS in HTSlib Makefile
         '-D_IOLIB=2', '-D_FILE_OFFSET_BITS=64',
 
-        # turn off warnings originating in Perl's Newx* calls
+        # turn off warnings originatiNg in Perl's Newx* calls
         '-Wformat=0', ],
 
     build_requires => { 'ExtUtils::CBuilder' => 0, },
@@ -42,33 +42,33 @@ $build->create_build_script;
 
 exit 0;
 
-sub find_sam {
-    my ( $sam_include, $sam_lib );
+sub find_hts {
+    my ( $hts_include, $hts_lib );
 
-    if ( my $samtools = _samtools() ) {
-        $sam_include = $samtools if -e "$samtools/$HeaderFile";
-        $sam_include = "$samtools/include"
-          if -e "$samtools/include/$HeaderFile";
-        $sam_include = "$samtools/htslib" if -e "$samtools/htslib/$HeaderFile";
-        $sam_lib     = $samtools          if -e "$samtools/$LibFile";
-        $sam_lib     = "$samtools/lib"    if -e "$samtools/lib/$LibFile";
+    if ( my $htslib_dir = _htstools() ) {
+        $hts_include = $htslib_dir if -e "$htslib_dir/$HeaderFile";
+        $hts_include = "$htslib_dir/include"
+          if -e "$htslib_dir/include/$HeaderFile";
+        $hts_include = "$htslib_dir/htslib" if -e "$htslib_dir/htslib/$HeaderFile";
+        $hts_lib     = $htslib_dir          if -e "$htslib_dir/$LibFile";
+        $hts_lib     = "$htslib_dir/lib"    if -e "$htslib_dir/lib/$LibFile";
     }
 
     my @search_path = qw(/ /usr /usr/share /usr/local);
 
-    unless ($sam_include) {
+    unless ($hts_include) {
         for my $p (@search_path) {
-            $sam_include ||= "$p/include" if -e "$p/include/$HeaderFile";
+            $hts_include ||= "$p/include" if -e "$p/include/$HeaderFile";
         }
     }
 
-    unless ($sam_lib) {
+    unless ($hts_lib) {
         for my $p (@search_path) {
-            $sam_lib ||= "$p/lib" if -e "$p/lib/$LibFile";
+            $hts_lib ||= "$p/lib" if -e "$p/lib/$LibFile";
         }
     }
 
-    unless ( $sam_include && $sam_lib ) {
+    unless ( $hts_include && $hts_lib ) {
         print STDOUT "This module requires htslib (http://htslib.org).\n";
         my $prompt =
 "Please enter the location of the $HeaderFile and compiled $LibFile files: ";
@@ -77,12 +77,12 @@ sub find_sam {
             my $path = prompt($prompt);
             print STDOUT "\n";
             last unless $path;
-            $sam_include = $path           if -e "$path/$HeaderFile";
-            $sam_include = "$path/include" if -e "$path/include/$HeaderFile";
-            $sam_include = "$path/htslib"  if -e "$path/htslib/$HeaderFile";
-            $sam_lib     = $path           if -e "$path/$LibFile";
-            $sam_lib     = "$path/lib"     if -e "$path/lib/$LibFile";
-            $found = $sam_include && $sam_lib;
+            $hts_include = $path           if -e "$path/$HeaderFile";
+            $hts_include = "$path/include" if -e "$path/include/$HeaderFile";
+            $hts_include = "$path/htslib"  if -e "$path/htslib/$HeaderFile";
+            $hts_lib     = $path           if -e "$path/$LibFile";
+            $hts_lib     = "$path/lib"     if -e "$path/lib/$LibFile";
+            $found = $hts_include && $hts_lib;
 
             unless ($found) {
                 print STDOUT "That didn't seem to be right.\n";
@@ -91,7 +91,7 @@ sub find_sam {
         }
     }
 
-    unless ( $sam_include && $sam_lib ) {
+    unless ( $hts_include && $hts_lib ) {
         die <<END;
 Can\'t find $LibFile and/or $HeaderFile!
 
@@ -102,9 +102,9 @@ containing the compiled $LibFile and $HeaderFile files.
 END
     }
 
-    print STDOUT "Found $sam_include/$HeaderFile and $sam_lib/$LibFile\n";
-    return ( $sam_include, $sam_lib );
-} ## end sub find_sam
+    print STDOUT "Found $hts_include/$HeaderFile and $hts_lib/$LibFile\n";
+    return ( $hts_include, $hts_lib );
+} ## end sub find_hts
 
 sub prompt {
     my $msg = shift;
@@ -129,7 +129,7 @@ sub prompt {
     return $in;
 }
 
-sub _samtools {
+sub _htstools {
     $ENV{HTSLIB_DIR} || (
         can_load(
             modules => { 'Alien::HTSlib' => undef, 'File::ShareDir' => undef }
