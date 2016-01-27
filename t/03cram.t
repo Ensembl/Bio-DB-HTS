@@ -110,6 +110,12 @@ my $fastafile = "$Bin/data/yeast.fasta";
 }
 
 # high level tests (defined in lib/Bio/DB/HTS.pm)
+
+#
+# Note that the high level API does not reset the CRAM file pointer to the start
+# of the file as the method to do so is (at time or writing) not easily accessible.
+# Therefore some of these tests create a new HTS object.
+#
 my $dummy = eval
 {
   Bio::DB::HTS->new( -fasta => "invalid_path.txt",

@@ -24,6 +24,9 @@ Bio::DB::HTS -- Read SAM/BAM/CRAM database files
  use Bio::DB::HTS;
 
  # high level API
+ # Note that the high level API does not reset the CRAM file pointer to the start
+ # of the file as the method to do so is (at time or writing) not easily accessible.
+ # Therefore a new HTS object may be needed to repeat a query.
  my $hts = Bio::DB::HTS->new(-bam  =>"data/ex1.bam",
                              -fasta=>"data/ex1.fa",
 			     );
