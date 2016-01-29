@@ -11,7 +11,8 @@ NOTE: These files were copied from the examples directory in the
 Samtools distribution version 0.1.3. The original README follows.
 
 The yeast data files were obtained from EBI and prepared as detailed
-at http://www.htslib.org/workflow/#mapping_to_cram
+at http://www.htslib.org/workflow/#mapping_to_cram. The yeast fasta
+file was then trimmed to contain only sequences used in test.
 
 ORIGINAL 00README.txt
 
