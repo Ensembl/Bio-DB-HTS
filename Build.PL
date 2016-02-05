@@ -8,9 +8,32 @@ my $HeaderFile = "hts.h";
 my $LibFile    = "libhts.a";
 my $ReadLine;
 
-my ( $hts_include, $hts_lib ) = find_hts();    # may exit with error here
+my ( $hts_include, $hts_lib );
+my $htslib_base_dir = $ARGV[0];
 
-my $class = Module::Build->subclass( code => <<EOF);
+if( $htslib_base_dir )
+{
+  printf("Using HTSlib in $htslib_base_dir\n") ;
+  $hts_include = "$htslib_base_dir/htslib" if -e "$htslib_base_dir/htslib/$HeaderFile";
+  $hts_lib     = $htslib_base_dir     if -e "$htslib_base_dir/$LibFile";
+  unless ( $hts_include && $hts_lib ) {
+        die <<END;
+Can\'t find $LibFile and/or $HeaderFile in the specifed HTSlib dir $htslib_base_dir!
+
+If you haven\'t done so already, please compile htslib from
+http://htslib.org and set the distribution directory
+containing the compiled $LibFile and $HeaderFile files as either
+1. the first parameter in the call to this script, or
+2. as the HTSLIB_DIR environment variable.
+END
+   }
+}
+else
+{
+  ( $hts_include, $hts_lib ) = find_hts();  # may exit with error here
+}
+
+my $class = Module::Build->subclass(code => <<EOF);
 
 
 EOF
@@ -96,9 +119,10 @@ sub find_hts {
 Can\'t find $LibFile and/or $HeaderFile!
 
 If you haven\'t done so already, please compile htslib from
-http://htslib.org and set the HTSLIB_DIR
-environment variable to point to a  distribution directory
-containing the compiled $LibFile and $HeaderFile files.
+http://htslib.org and set the distribution directory
+containing the compiled $LibFile and $HeaderFile files as either
+1. the first parameter in the call to this script, or
+2. as the HTSLIB_DIR environment variable.
 END
     }
 

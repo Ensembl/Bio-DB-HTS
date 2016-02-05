@@ -1,4 +1,7 @@
 
+1.06
+   * htslib directory parameter added for perl Build.PL
+
 1.05
    * CRAM tests added
    * cpanfile added

@@ -29,6 +29,11 @@ Now run:
   (sudo) ./Build install
 ```
 
+You may also pass in HTSLIB_DIR as the parameter to Build.PL
+```
+  perl Build.PL $HTSLIB_DIR
+```
+
 ### TROUBLESHOOTING
 
 If you encounter problems during compiling, you may need to edit
