@@ -450,7 +450,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::Alignment;
-$Bio::DB::HTS::Alignment::VERSION = '1.05';
+$Bio::DB::HTS::Alignment::VERSION = '1.06';
 
 use strict;
 use warnings;
