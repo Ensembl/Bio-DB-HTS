@@ -42,11 +42,15 @@ limitations under the License.
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include "kseq.h"
 #include "hts.h"
 #include "sam.h"
 #include "khash.h"
 #include "faidx.h"
+#include "tbx.h"
 #include "bgzf.h"
+#include "vcf.h"
+#include "synced_bcf_reader.h"
 
 /* stolen from bam_aux.c */
 #define BAM_MAX_REGION 1<<29
@@ -57,10 +61,8 @@ typedef bam1_t*         Bio__DB__HTS__Alignment;
 typedef hts_idx_t*      Bio__DB__HTS__Index;
 typedef faidx_t*        Bio__DB__HTS__Fai;
 typedef bam_pileup1_t*  Bio__DB__HTS__Pileup;
-
 typedef tbx_t*          Bio__DB__HTS__Tabix;
 typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
-
 typedef bcf_srs_t*      Bio__DB__HTS__VCF;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
@@ -1223,11 +1225,13 @@ tabix_tbx_open(fname)
   OUTPUT:
     RETVAL
 
+
 void
 tabix_tbx_close(t)
     tbx_t* t
   CODE:
     tbx_destroy(t);
+  OUTPUT:
 
 hts_itr_t*
 tabix_tbx_query(t, region)
@@ -1237,6 +1241,7 @@ tabix_tbx_query(t, region)
     RETVAL = tbx_itr_querys(t, region);
   OUTPUT:
     RETVAL
+
 
 #this must be called before reading any lines or it will break.
 #i can't easily use ftell on fp and I can't be bothered to untangle it. just use it properly
@@ -1373,4 +1378,6 @@ vcf_bcf_sr_close(vcf)
     bcf_srs_t* vcf
     CODE:
         bcf_sr_destroy(vcf);
+  OUTPUT:
+
 
