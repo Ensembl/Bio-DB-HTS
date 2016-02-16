@@ -17,7 +17,7 @@ has 'filename' => (
 #pointer to a htsFile
 has '_htsfile' => (
     is        => 'ro',
-    isa       => 'htsFilePtr',
+    isa       => 'Bio::DB::HTSfile',
     builder   => '_build__htsfile',
     predicate => '_has_htsfile',
     lazy      => 1,

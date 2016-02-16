@@ -15,7 +15,7 @@ has "_tabix_iter" => (
 #an open htsFile pointer
 has '_htsfile' => (
     is       => 'ro',
-    isa      => 'htsFilePtr',
+    isa      => 'Bio::DB::HTSfile',
     required => 1,
 );
 
