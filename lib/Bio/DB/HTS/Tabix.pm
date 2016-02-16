@@ -4,7 +4,6 @@ use Mouse;
 use Log::Log4perl qw( :easy );
 
 use Bio::DB::HTS; #load the XS
-use Bio::DB::HTSfile qw(hts_open hts_close);
 use Bio::DB::HTS::Tabix::Iterator;
 
 with 'Bio::DB::HTS::Logger';
@@ -29,7 +28,7 @@ sub _build__htsfile {
 
     die "Filename " . $self->filename . " does not exist" unless -e $self->filename;
 
-    return hts_open($self->filename);
+    return Bio::DB::HTSfile->open($self->filename);
 }
 
 has '_tabix_index' => (
@@ -154,7 +153,7 @@ sub DEMOLISH {
     my $self = shift;
 
     if ( $self->_has_htsfile ) {
-        hts_close($self->_htsfile);
+        Bio::DB::HTSfile->close($self->_htsfile);
     }
 
     if ( $self->_has_tabix_index ) {
