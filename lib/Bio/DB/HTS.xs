@@ -1243,8 +1243,7 @@ tabix_tbx_query(t, region)
     RETVAL
 
 
-#this must be called before reading any lines or it will break.
-#i can't easily use ftell on fp and I can't be bothered to untangle it. just use it properly
+
 SV*
 tabix_tbx_header(fp, tabix)
     htsFile* fp
