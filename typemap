@@ -10,3 +10,10 @@ Bio::DB::HTS::Tabix::Iterator T_PTROBJ
 Bio::DB::HTS::VCF             T_PTROBJ
 Bio::DB::HTS::VCF::Header     T_PTROBJ
 Bio::DB::HTS::VCF::Row        T_PTROBJ
+htsFile*     T_PTROBJ
+tbx_t*       T_PTROBJ
+hts_itr_t*   T_PTROBJ
+bcf_srs_t*   T_PTROBJ
+bcf_hdr_t*   T_PTROBJ
+bcf1_t*      T_PTROBJ
+
