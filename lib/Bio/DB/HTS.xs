@@ -1217,7 +1217,7 @@ pl_alignment(pl)
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Tabix PREFIX = tabix_
 
-tbx_t* 
+Bio::DB::HTS::Tabix
 tabix_tbx_open(fname)
     char *fname
   CODE:
@@ -1228,14 +1228,14 @@ tabix_tbx_open(fname)
 
 void
 tabix_tbx_close(t)
-    tbx_t* t
+    Bio::DB::HTS::Tabix t
   CODE:
     tbx_destroy(t);
   OUTPUT:
 
-hts_itr_t*
+Bio::DB::HTS::Tabix::Iterator
 tabix_tbx_query(t, region)
-    tbx_t* t
+    Bio::DB::HTS::Tabix t
     char *region
   CODE:
     RETVAL = tbx_itr_querys(t, region);
@@ -1246,8 +1246,8 @@ tabix_tbx_query(t, region)
 
 SV*
 tabix_tbx_header(fp, tabix)
-    htsFile* fp
-    tbx_t* tabix
+    Bio::DB::HTSfile fp
+    Bio::DB::HTS::Tabix tabix
   PREINIT:
     int num_header_lines = 0;
     AV *av_ref;
@@ -1272,7 +1272,7 @@ tabix_tbx_header(fp, tabix)
 
 SV*
 tabix_tbx_seqnames(t)
-    tbx_t* t
+    Bio::DB::HTS::Tabix t
   PREINIT:
     const char **names;
     int i, num_seqs;
@@ -1298,9 +1298,9 @@ MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Tabix::Iterator PREFIX = tabix_
 
 SV*
 tabix_tbx_iter_next(iter, fp, t)
-    hts_itr_t* iter
-    htsFile* fp
-    tbx_t* t
+    Bio::DB::HTS::Tabix::Iterator iter
+    Bio::DB::HTSfile fp
+    Bio::DB::HTS::Tabix t
   PREINIT:
     kstring_t str = {0,0,0};
   CODE:
@@ -1313,39 +1313,42 @@ tabix_tbx_iter_next(iter, fp, t)
 
 void
 tabix_tbx_iter_free(iter)
-	hts_itr_t* iter
+	Bio::DB::HTS::Tabix::Iterator iter
   CODE:
 	tbx_itr_destroy(iter);
 
+
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF PREFIX = vcf_
 
-bcf_srs_t*
+Bio::DB::HTS::VCF
 vcf_bcf_sr_open(filename)
     char* filename
     PREINIT:
-        bcf_srs_t* sr = bcf_sr_init();
+        Bio::DB::HTS::VCF sr = bcf_sr_init();
     CODE:
         bcf_sr_add_reader(sr, filename);
         RETVAL = sr;
     OUTPUT:
         RETVAL
 
-bcf_hdr_t*
+
+Bio::DB::HTS::VCF::Header
 vcf_bcf_header(vcf)
-    bcf_srs_t* vcf
+    Bio::DB::HTS::VCF vcf
     PREINIT:
-        bcf_hdr_t *h;
+        Bio::DB::HTS::VCF::Header *h;
     CODE:
         h = vcf->readers[0].header;
         RETVAL = h;
     OUTPUT:
         RETVAL
 
-bcf1_t*
+
+Bio::DB::HTS::VCF::Row
 vcf_bcf_next(vcf)
-    bcf_srs_t* vcf
+    Bio::DB::HTS::VCF vcf
     PREINIT:
-        bcf1_t* line;
+        Bio::DB::HTS::VCF::Row line;
     CODE:
         if ( bcf_sr_next_line(vcf) ) {
             line = bcf_sr_get_line(vcf, 0); //0 being the first and only reader
@@ -1357,9 +1360,10 @@ vcf_bcf_next(vcf)
     OUTPUT:
         RETVAL
 
+
 SV*
 vcf_bcf_num_variants(vcf)
-    bcf_srs_t* vcf
+    Bio::DB::HTS::VCF vcf
     PREINIT:
         int n_records = 0;
     CODE:
@@ -1372,9 +1376,10 @@ vcf_bcf_num_variants(vcf)
     OUTPUT:
         RETVAL
 
+
 void
 vcf_bcf_sr_close(vcf)
-    bcf_srs_t* vcf
+    Bio::DB::HTS::VCF vcf
     CODE:
         bcf_sr_destroy(vcf);
   OUTPUT:

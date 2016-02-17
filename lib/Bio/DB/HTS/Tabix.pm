@@ -60,10 +60,10 @@ sub query {
 
     $self->log->trace("Fetching region $region from " . $self->filename);
 
-    my $iter = tbx_query( $self->_tabix_index, $region );
+    my $iter = tbx_query( $self->tabix_index, $region );
 
     unless ( $iter ) {
-      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.      
+      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.
       if ( not exists $self->seqnames_hash->{ $chr } ) {
         $self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->filename);
       }
@@ -73,24 +73,24 @@ sub query {
 
     }
 
-    return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->_htsfile, _tabix_index => $self->_tabix_index );
+    return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->htsfile, _tabix_index => $self->tabix_index );
 }
 
 sub seqnames {
     my $self = shift;
-    return tbx_seqnames($self->_tabix_index);
+    return tbx_seqnames($self->tabix_index);
 }
 
 #free up memory allocated in XS code
 sub DEMOLISH {
     my $self = shift;
 
-    if ( $self->_htsfile ) {
-        Bio::DB::HTSfile->close($self->_htsfile);
+    if ( $self->htsfile ) {
+        Bio::DB::HTSfile->close($self->htsfile);
     }
 
-    if ( $self->_has_tabix_index ) {
-        tbx_close($self->_tabix_index);
+    if ( $self->tabix_index ) {
+        tbx_close($self->tabix_index);
     }
 }
 
