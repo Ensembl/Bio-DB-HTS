@@ -1,109 +1,34 @@
 package Bio::DB::HTS::Tabix;
 
-use Mouse;
 use Log::Log4perl qw( :easy );
 
 use Bio::DB::HTS; #load the XS
 use Bio::DB::HTS::Tabix::Iterator;
 
-with 'Bio::DB::HTS::Logger';
 
-has 'filename' => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
-);
+sub new {
+  my (%args) = @_;
+  my $filename = $args{filename} ;
 
-#pointer to a htsFile
-has '_htsfile' => (
-    is        => 'ro',
-    isa       => 'Bio::DB::HTSfile',
-    builder   => '_build__htsfile',
-    predicate => '_has_htsfile',
-    lazy      => 1,
-);
+    printf("TABIX.pm filename:".$filename."\n") ;
+    # filename checks
+    die "Tabix region lookup requires a gzipped, tabixed bedfile" unless $filename =~ /gz$/;
+    die "Filename " . $filename . " does not exist" unless -e $filename;
 
-sub _build__htsfile {
-    my $self = shift;
-
-    die "Filename " . $self->filename . " does not exist" unless -e $self->filename;
-
-    return Bio::DB::HTSfile->open($self->filename);
-}
-
-has '_tabix_index' => (
-    is        => 'ro',
-    isa       => 'tbx_tPtr',
-    builder   => '_build__tabix_index',
-    predicate => '_has_tabix_index',
-    lazy      => 1,
-);
-
-sub _build__tabix_index {
-    my $self = shift;
-
-    #make sure the htsfile is instantiated
-    $self->_htsfile;
-
-    my $index = tbx_open($self->filename);
-
-    die "Couldn't find index for file " . $self->filename unless $index;
-
-    return $index;
-}
-
-has 'header' => (
-    is      => 'ro',
-    isa     => 'Str',
-    builder => '_build_header',
-    lazy    => 1,
-);
-
-sub _build_header {
-    my $self = shift;
-
-    #returns an arrayref
+    $self->_htsfile = Bio::DB::HTSfile->open($filename);
+    $self->_tabix_index = tbx_open($filename);
+    die "Couldn't find index for file " . $filename unless $index;
     my $header = tbx_header($self->_htsfile, $self->_tabix_index);
+    if( $header ) {
+      $self->_header = join "", @{ $header } ;
+    }
 
-    return unless $header;
-
-    return join "", @{ $header };
-}
-
-has 'seqnames_hash' => (
-    is      => 'ro',
-    isa     => 'HashRef',
-    builder => '_build_seqnames_hash',
-    lazy    => 1,
-);
-
-sub _build_seqnames_hash {
-    my $self = shift;
-
-    return { map { $_ => 1 } @{ $self->seqnames } };
-}
-
-#set to false to only output error messages
-has 'warnings' => (
-    is      => 'ro',
-    isa     => 'Bool',
-    default => 1,
-);
-
-sub BUILD {
-    my ( $self ) = @_;
-
-    die "Tabix region lookup requires a gzipped, tabixed bedfile"
-        unless $self->filename =~ /gz$/;
-
-    #fetch the header of the file, which will in turn open the tabix index and the file
-    $self->header;
+    $self->seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
 
     if ( not $self->warnings ) {
         my $logger = Log::Log4perl::get_logger(__PACKAGE__);
         $logger->level($TRACE);
     }
-
     return;
 }
 
@@ -130,12 +55,12 @@ sub query {
     my $iter = tbx_query( $self->_tabix_index, $region );
 
     unless ( $iter ) {
-        #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.
-        if ( not exists $self->seqnames_hash->{ $chr } ) {
-            $self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->filename);
-        }
-        else {
-            die "Unable to get iterator for region '$region' in file ". $self->filename . " -- htslib couldn't parse your region string";
+      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.      
+      if ( not exists $self->seqnames_hash->{ $chr } ) {
+        $self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->filename);
+      }
+      else {
+        die "Unable to get iterator for region '$region' in file ". $self->filename . " -- htslib couldn't parse your region string";
         }
 
     }
@@ -152,7 +77,7 @@ sub seqnames {
 sub DEMOLISH {
     my $self = shift;
 
-    if ( $self->_has_htsfile ) {
+    if ( $self->_htsfile ) {
         Bio::DB::HTSfile->close($self->_htsfile);
     }
 
@@ -195,10 +120,6 @@ retrieving regions from a tabixed file, because that's all I needed it for.
 =item C<filename>
 
 The gzipped file you want to query. Must have a filename.tbi (the index is not created automatically)
-
-=item C<warnings>
-
-Set to 0 to turn off all the warnings. Default is on
 
 =back
 
