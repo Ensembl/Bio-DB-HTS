@@ -1324,7 +1324,7 @@ Bio::DB::HTS::VCF
 vcf_bcf_sr_open(filename)
     char* filename
     PREINIT:
-        Bio::DB::HTS::VCF sr = bcf_sr_init();
+        bcf_srs_t* sr = bcf_sr_init();
     CODE:
         bcf_sr_add_reader(sr, filename);
         RETVAL = sr;
@@ -1336,7 +1336,7 @@ Bio::DB::HTS::VCF::Header
 vcf_bcf_header(vcf)
     Bio::DB::HTS::VCF vcf
     PREINIT:
-        Bio::DB::HTS::VCF::Header *h;
+        bcf_hdr_t* *h;
     CODE:
         h = vcf->readers[0].header;
         RETVAL = h;
@@ -1348,7 +1348,7 @@ Bio::DB::HTS::VCF::Row
 vcf_bcf_next(vcf)
     Bio::DB::HTS::VCF vcf
     PREINIT:
-        Bio::DB::HTS::VCF::Row line;
+        bcf1_t* line;
     CODE:
         if ( bcf_sr_next_line(vcf) ) {
             line = bcf_sr_get_line(vcf, 0); //0 being the first and only reader
