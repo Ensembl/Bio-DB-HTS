@@ -10,6 +10,7 @@ sub new {
   my $class         = shift;
   my (%args) = @_;
   my $filename = $args{filename};
+  my $warnings = $args{warnings};
 
   # filename checks
   die "Tabix region lookup requires a gzipped, tabixed bedfile" unless $filename =~ /gz$/;
@@ -24,20 +25,14 @@ sub new {
     $header = join "", @{ $header } ;
   }
 
-  my $seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
-
   my $self = bless {
-                    htsfile => $htsfile,
-                    filename => $filename,
-                    tabix_index => $tabix_index,
-                    header=> $header,
+                    _htsfile => $htsfile,
+                    _filename => $filename,
+                    _tabix_index => $tabix_index,
+                    _header=> $header,
                    }, ref $class || $class;
 
-  if ( not $self->warnings ) {
-    my $logger = Log::Log4perl::get_logger(__PACKAGE__);
-    $logger->level($TRACE);
-  }
-  return;
+  return $self;
 }
 
 sub query {
@@ -58,39 +53,38 @@ sub query {
         }
     }
 
-    $self->log->trace("Fetching region $region from " . $self->filename);
-
-    my $iter = tbx_query( $self->tabix_index, $region );
+    my $iter = tbx_query( $self->{_tabix_index}, $region );
 
     unless ( $iter ) {
-      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.
-      if ( not exists $self->seqnames_hash->{ $chr } ) {
-        $self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->filename);
+      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.    
+      my $seqnames_hash = { map { $_ => 1 } @{ seqnames() } };
+      if ( not exists $seqnames_hash->{ $chr } ) {
+        #$self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->_filename);
       }
       else {
-        die "Unable to get iterator for region '$region' in file ". $self->filename . " -- htslib couldn't parse your region string";
+        die "Unable to get iterator for region '$region' in file ". $self->{_filename} . " -- htslib couldn't parse your region string";
         }
 
     }
 
-    return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->htsfile, _tabix_index => $self->tabix_index );
+    return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->{_htsfile}, _tabix_index => $self->{tabix_index} );
 }
 
 sub seqnames {
     my $self = shift;
-    return tbx_seqnames($self->tabix_index);
+    return tbx_seqnames($self->{_tabix_index});
 }
 
 #free up memory allocated in XS code
 sub DEMOLISH {
     my $self = shift;
 
-    if ( $self->htsfile ) {
-        Bio::DB::HTSfile->close($self->htsfile);
+    if ( $self->{_htsfile} ) {
+        Bio::DB::HTSfile->close($self->{_htsfile});
     }
 
     if ( $self->tabix_index ) {
-        tbx_close($self->tabix_index);
+        tbx_close($self->{_tabix_index});
     }
 }
 

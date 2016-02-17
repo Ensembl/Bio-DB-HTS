@@ -1,47 +1,45 @@
 package Bio::DB::HTS::Tabix::Iterator;
 
-use Mouse;
 use Bio::DB::HTS; #load the XS
 
 #this class is just a wrapper around the tabix_iter_next method,
 #all the attributes it needs come from the main Tabix method
 
-#a hts_itr_t pointer which is returned from Tabix::query
-has "_tabix_iter" => (
-    is  => 'ro',
-    isa => 'Maybe[hts_itr_tPtr]',
-);
+sub new {
+  my $class         = shift;
+  my (%args) = @_;
+  my $tabix_iter = $args{_tabix_iter}; #a hts_itr_t pointer which is returned from Tabix::query
+  my $htsfile = $args{_htsfile}; #an open htsFile pointer
+  my $tabix_index = $args{_tabix_index};
 
-#an open htsFile pointer
-has '_htsfile' => (
-    is       => 'ro',
-    isa      => 'Bio::DB::HTSfile',
-    required => 1,
-);
+  my $self = bless {
+                    _tabix_iter => $tabix_iter,
+                    _htsfile => $htsfile,
+                    _tabix_index => $tabix_index,
+                   }, ref $class || $class;
 
-has '_tabix_index' => (
-    is       => 'ro',
-    isa      => 'tbx_tPtr',
-    required => 1,
-);
+  return $self;
+
+}
+
 
 sub next {
     my $self = shift;
 
     #sometimes tabix_query doesn't return an iterator, just NULL so we have to allow
     #a null iterator
-    return unless defined $self->_tabix_iter;
+    return unless defined $self->{_tabix_iter};
 
     #this is an xs method
-    return tbx_iter_next($self->_tabix_iter, $self->_htsfile, $self->_tabix_index);
+    return tbx_iter_next($self->{_tabix_iter}, $self->{_htsfile}, $self->{_tabix_index});
 }
 
 sub DEMOLISH {
     my $self = shift;
 
     #xs method
-    if ( defined $self->_tabix_iter ) {
-        tbx_iter_free($self->_tabix_iter);
+    if ( defined $self->{_tabix_iter} ) {
+        tbx_iter_free($self->{_tabix_iter});
     }
 }
 

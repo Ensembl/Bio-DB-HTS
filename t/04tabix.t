@@ -10,7 +10,7 @@ dies_ok { Bio::DB::HTS::Tabix->new( filename => $test_file . "efleaf" ); } 'miss
 dies_ok { Bio::DB::HTS::Tabix->new( filename => $Bin . '/data/no_index.tsv.gz' ); } 'file with no tabix index dies';
 
 my $tbx = Bio::DB::HTS::Tabix->new( filename => $test_file, warnings => 0 );
-isa_ok $tbx, "Bio::DB::HTS::Tabix";
+isa $tbx, "Bio::DB::HTS::Tabix" ;
 ok my $iter = $tbx->query("12:8000000-8000008"), "can query a region";
 isa $iter, "Bio::DB::HTS::Tabix::Iterator";
 
