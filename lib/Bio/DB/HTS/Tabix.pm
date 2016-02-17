@@ -7,29 +7,37 @@ use Bio::DB::HTS::Tabix::Iterator;
 
 
 sub new {
+  my $class         = shift;
   my (%args) = @_;
-  my $filename = $args{filename} ;
+  my $filename = $args{filename};
 
-    printf("TABIX.pm filename:".$filename."\n") ;
-    # filename checks
-    die "Tabix region lookup requires a gzipped, tabixed bedfile" unless $filename =~ /gz$/;
-    die "Filename " . $filename . " does not exist" unless -e $filename;
+  # filename checks
+  die "Tabix region lookup requires a gzipped, tabixed bedfile" unless $filename =~ /gz$/;
+  die "Filename " . $filename . " does not exist" unless -e $filename;
 
-    $self->_htsfile = Bio::DB::HTSfile->open($filename);
-    $self->_tabix_index = tbx_open($filename);
-    die "Couldn't find index for file " . $filename unless $index;
-    my $header = tbx_header($self->_htsfile, $self->_tabix_index);
-    if( $header ) {
-      $self->_header = join "", @{ $header } ;
-    }
+  my $htsfile = Bio::DB::HTSfile->open($filename);
+  my $tabix_index = tbx_open($filename);
+  die "Couldn't find index for file " . $filename unless $tabix_index;
+  my $header = tbx_header($htsfile, $tabix_index);
+  if( $header )
+  {
+    $header = join "", @{ $header } ;
+  }
 
-    $self->seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
+  my $seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
 
-    if ( not $self->warnings ) {
-        my $logger = Log::Log4perl::get_logger(__PACKAGE__);
-        $logger->level($TRACE);
-    }
-    return;
+  my $self = bless {
+                    htsfile => $htsfile,
+                    filename => $filename,
+                    tabix_index => $tabix_index,
+                    header=> $header,
+                   }, ref $class || $class;
+
+  if ( not $self->warnings ) {
+    my $logger = Log::Log4perl::get_logger(__PACKAGE__);
+    $logger->level($TRACE);
+  }
+  return;
 }
 
 sub query {
