@@ -55,7 +55,7 @@ sub query {
 
     unless ( $iter ) {
       #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.
-      my $seqnames_hash = { map { $_ => 1 } @{ seqnames() } };
+      my $seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
       if ( not exists $seqnames_hash->{ $chr } ) {
         #$self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->_filename);
       }
@@ -65,7 +65,7 @@ sub query {
 
     }
 
-    return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->{_htsfile}, _tabix_index => $self->{tabix_index} );
+    return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->{_htsfile}, _tabix_index => $self->{_tabix_index} );
 }
 
 sub seqnames {

@@ -1,4 +1,4 @@
-use Test::Most tests => 11, 'die';
+use Test::Most tests => 10, 'die';
 
 use FindBin qw( $Bin );
 
@@ -10,9 +10,7 @@ dies_ok { Bio::DB::HTS::Tabix->new( filename => $test_file . "efleaf" ); } 'miss
 dies_ok { Bio::DB::HTS::Tabix->new( filename => $Bin . '/data/no_index.tsv.gz' ); } 'file with no tabix index dies';
 
 my $tbx = Bio::DB::HTS::Tabix->new( filename => $test_file, warnings => 0 );
-isa $tbx, "Bio::DB::HTS::Tabix" ;
 ok my $iter = $tbx->query("12:8000000-8000008"), "can query a region";
-isa $iter, "Bio::DB::HTS::Tabix::Iterator";
 
 #make sure we can call next
 ok my $row = $iter->next, 'can get a value from the iterator';
