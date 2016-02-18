@@ -1290,7 +1290,7 @@ tabix_tbx_seqnames(t)
     free(names);
 
     //return a reference to our array
-    RETVAL = newRV_noinc((SV*)av_ref); 
+    RETVAL = newRV_noinc((SV*)av_ref);
   OUTPUT:
     RETVAL
 
@@ -1336,7 +1336,7 @@ Bio::DB::HTS::VCF::Header
 vcf_bcf_header(vcf)
     Bio::DB::HTS::VCF vcf
     PREINIT:
-        bcf_hdr_t* *h;
+        bcf_hdr_t* h;
     CODE:
         h = vcf->readers[0].header;
         RETVAL = h;
@@ -1383,5 +1383,3 @@ vcf_bcf_sr_close(vcf)
     CODE:
         bcf_sr_destroy(vcf);
   OUTPUT:
-
-
