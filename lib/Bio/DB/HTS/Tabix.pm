@@ -1,7 +1,5 @@
 package Bio::DB::HTS::Tabix;
 
-use Log::Log4perl qw( :easy );
-
 use Bio::DB::HTS; #load the XS
 use Bio::DB::HTS::Tabix::Iterator;
 
@@ -49,14 +47,14 @@ sub query {
     }
     else {
         if ( defined $start ) {
-            $self->log->warn("You have not specified an end, which actually means chr:start-end_of_chromosome");
+            #$self->log->warn("You have not specified an end, which actually means chr:start-end_of_chromosome");
         }
     }
 
     my $iter = tbx_query( $self->{_tabix_index}, $region );
 
     unless ( $iter ) {
-      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.    
+      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.
       my $seqnames_hash = { map { $_ => 1 } @{ seqnames() } };
       if ( not exists $seqnames_hash->{ $chr } ) {
         #$self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->_filename);
