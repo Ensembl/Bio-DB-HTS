@@ -1,4 +1,4 @@
-use Test::Most tests => 3, 'die';
+use Test::More tests => 3, 'die';
 
 use FindBin qw( $Bin );
 
