@@ -72,6 +72,9 @@ feel free to submit bug reports, patches, etc. via GitHub.
 ### AUTHOR
 
 Rishi Nag <rishi@ebi.ac.uk>
+based on Bio::DB::Sam by Lincoln Stein
+and further contributions gratefully accepted from 
+Alex Hodgkins, Congenica Ltd for Tabix, VCF work
 
 ### COPYRIGHT
 
