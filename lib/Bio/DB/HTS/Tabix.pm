@@ -166,12 +166,9 @@ Returns an array ref of chromosomes that are in the indexed file
 
 =back
 
-=head1 COPYRIGHT
-
-Copyright 2015 Congenica Ltd.
-
 =head1 AUTHOR
 
 Alex Hodgkins
+Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 
 =cut

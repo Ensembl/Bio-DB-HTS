@@ -102,12 +102,9 @@ Returns a string with the line from the tabix iterator
 
 =back
 
-=head1 COPYRIGHT
-
-Copyright 2015 Congenica Ltd.
-
 =head1 AUTHOR
 
 Alex Hodgkins
+Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 
 =cut
