@@ -15,6 +15,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+=head1 AUTHOR
+
+Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
+
 =head1 NAME
 
 Bio::DB::HTS::Query -- Object representing the query portion of a BAM/SAM alignment
@@ -40,10 +44,6 @@ part of a SAM alignment.
 =head2 Methods
 
 =over 4
-
-=head1 AUTHOR
-
-Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 
 =cut
 
