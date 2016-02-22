@@ -59,6 +59,8 @@ package Bio::DB::HTS::AlignWrapper;
 $Bio::DB::HTS::AlignWrapper::VERSION = '1.06';
 
 use strict;
+use warnings;
+
 use Bio::DB::HTS::Constants;
 
 our $AUTOLOAD;

@@ -73,6 +73,7 @@ package Bio::DB::HTS::Constants;
 $Bio::DB::HTS::Constants::VERSION = '1.06';
 
 use strict;
+use warnings;
 
 require Exporter;
 our @ISA    = qw(Exporter);

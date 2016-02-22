@@ -51,6 +51,8 @@ package Bio::DB::HTS::Query;
 $Bio::DB::HTS::Query::VERSION = '1.06';
 
 use strict;
+use warnings;
+
 use Bio::DB::HTS;
 use Bio::DB::HTS::Constants
   qw(CIGAR_SYMBOLS BAM_CREF_SKIP BAM_CSOFT_CLIP BAM_CHARD_CLIP);

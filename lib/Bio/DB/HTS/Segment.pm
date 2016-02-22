@@ -25,6 +25,7 @@ package Bio::DB::HTS::Segment;
 $Bio::DB::HTS::Segment::VERSION = '1.06';
 
 use strict;
+use warnings;
 
 sub new {
     my $class = shift;

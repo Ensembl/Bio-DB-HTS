@@ -36,6 +36,7 @@ package Bio::DB::HTS::Target;
 $Bio::DB::HTS::Target::VERSION = '1.06';
 
 use strict;
+use warnings;
 
 use base 'Bio::DB::HTS::Query';
 

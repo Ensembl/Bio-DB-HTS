@@ -25,6 +25,7 @@ package Bio::DB::HTS::ReadIterator;
 $Bio::DB::HTS::ReadIterator::VERSION = '1.06';
 
 use strict;
+use warnings;
 
 sub new {
     my $self = shift;

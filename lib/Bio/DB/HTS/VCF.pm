@@ -25,6 +25,7 @@ package Bio::DB::HTS::VCF;
 
 use Bio::DB::HTS; #load XS
 use strict;
+use warnings;
 
 sub new {
   my $class         = shift;

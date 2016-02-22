@@ -22,6 +22,7 @@ package Bio::DB::HTS::Tabix;
 use Bio::DB::HTS; #load the XS
 use Bio::DB::HTS::Tabix::Iterator;
 use strict;
+use warnings;
 
 
 sub new {

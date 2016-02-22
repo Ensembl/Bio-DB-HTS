@@ -44,6 +44,8 @@ package Bio::DB::HTS::PileupWrapper;
 $Bio::DB::HTS::PileupWrapper::VERSION = '1.06';
 
 use strict;
+use warnings;
+
 use Bio::DB::HTS::AlignWrapper;
 
 our $AUTOLOAD;
