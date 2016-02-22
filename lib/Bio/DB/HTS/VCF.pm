@@ -24,7 +24,7 @@ Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 package Bio::DB::HTS::VCF;
 
 use Bio::DB::HTS; #load XS
-
+use strict;
 
 sub new {
   my $class         = shift;

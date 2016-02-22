@@ -20,6 +20,8 @@ package Bio::DB::HTS::Tabix::Iterator;
 
 use Bio::DB::HTS; #load the XS
 
+use strict;
+
 #this class is just a wrapper around the tabix_iter_next method,
 #all the attributes it needs come from the main Tabix method
 
