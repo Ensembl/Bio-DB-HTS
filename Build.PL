@@ -1,51 +1,21 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
+
 use Module::Build;
-use Module::Load::Conditional qw(can_load);
 
-my $HeaderFile = "hts.h";
-my $LibFile    = "libhts.a";
-my $ReadLine;
-
-my ( $hts_include, $hts_lib );
-my $htslib_base_dir = $ARGV[0];
-
-if( $htslib_base_dir )
-{
-  printf("Using HTSlib in $htslib_base_dir\n") ;
-  $hts_include = "$htslib_base_dir/htslib" if -e "$htslib_base_dir/htslib/$HeaderFile";
-  $hts_lib     = $htslib_base_dir     if -e "$htslib_base_dir/$LibFile";
-  unless ( $hts_include && $hts_lib ) {
-        die <<END;
-Can\'t find $LibFile and/or $HeaderFile in the specifed HTSlib dir $htslib_base_dir!
-
-If you haven\'t done so already, please compile htslib from
-http://htslib.org and set the distribution directory
-containing the compiled $LibFile and $HeaderFile files as either
-1. the first parameter in the call to this script, or
-2. as the HTSLIB_DIR environment variable.
-END
-   }
-}
-else
-{
-  ( $hts_include, $hts_lib ) = find_hts();  # may exit with error here
-}
-
-my $class = Module::Build->subclass(code => <<EOF);
-
-
-EOF
+my $class = Module::Build->subclass(
+    class => 'Module::Build::HTS',
+    );
 
 my $build = $class->new(
+
     module_name        => 'Bio::DB::HTS',
     dist_version_from  => 'lib/Bio/DB/HTS.pm',
     dist_author        => 'Rishi Nag',
     dist_abstract      => 'Perl interface to HTS library for DNA sequencing',
     license            => 'Apache_2_0',
-    include_dirs       => [$hts_include],
-    extra_linker_flags => [ "-L$hts_lib", '-lhts', '-lpthread', '-lz' ],
 
     extra_compiler_flags => [
 
@@ -61,102 +31,108 @@ my $build = $class->new(
     #    create_makefile_pl => 'passthrough',
 );
 
+$build->find_hts;
+$build->set_include_and_compiler_flags;
 $build->create_build_script;
 
 exit 0;
 
+
+package Module::Build::HTS;
+
+use Module::Load::Conditional qw(can_load);
+use base 'Module::Build';
+
 sub find_hts {
-    my ( $hts_include, $hts_lib );
+    my ($self) = @_;
 
-    if ( my $htslib_dir = _htstools() ) {
-        $hts_include = $htslib_dir if -e "$htslib_dir/$HeaderFile";
-        $hts_include = "$htslib_dir/include"
-          if -e "$htslib_dir/include/$HeaderFile";
-        $hts_include = "$htslib_dir/htslib" if -e "$htslib_dir/htslib/$HeaderFile";
-        $hts_lib     = $htslib_dir          if -e "$htslib_dir/$LibFile";
-        $hts_lib     = "$htslib_dir/lib"    if -e "$htslib_dir/lib/$LibFile";
+    # If either of these are set, we expect to find the htslib files there:
+    # (They're explicitly set by the user, so we shouldn't fall back to
+    # finding another copy somewhere else.)
+    if (my $dir = $self->args('htslib')) {
+        return 1 if $self->find_hts_in_dir($dir);
+        $self->die_hts_not_found(
+            "--htslib '$dir' command line parameter does not contain expected files\n"
+        );
+    }    
+    elsif ($dir = $ENV{'HTSLIB_DIR'}) {
+        return 1 if $self->find_hts_in_dir($dir);
+        $self->die_hts_not_found(
+            "HTSLIB_DIR=$ENV{HTSLIB_DIR} environment variable does not contain expected files\n"
+        );
     }
 
-    my @search_path = qw(/ /usr /usr/share /usr/local);
-
-    unless ($hts_include) {
-        for my $p (@search_path) {
-            $hts_include ||= "$p/include" if -e "$p/include/$HeaderFile";
+    # Search through remaining possible (but not fatal) locations:
+    my $found = 0;
+    foreach my $dir (
+        $self->prefix,
+        from_Alien(),
+        scalar `pkg-config --variable=libdir htslib 2>/dev/null`,
+        qw{ /usr/local /usr/share /usr/opt },
+    ) {
+        if ($dir and $self->find_hts_in_dir($dir)) {
+            $found = 1;
+            last;
         }
     }
+    return 1 if $found;
 
-    unless ($hts_lib) {
-        for my $p (@search_path) {
-            $hts_lib ||= "$p/lib" if -e "$p/lib/$LibFile";
-        }
-    }
-
-    unless ( $hts_include && $hts_lib ) {
-        print STDOUT "This module requires htslib (http://htslib.org).\n";
-        my $prompt =
-"Please enter the location of the $HeaderFile and compiled $LibFile files: ";
-        my $found;
-        while ( !$found ) {
-            my $path = prompt($prompt);
-            print STDOUT "\n";
-            last unless $path;
-            $hts_include = $path           if -e "$path/$HeaderFile";
-            $hts_include = "$path/include" if -e "$path/include/$HeaderFile";
-            $hts_include = "$path/htslib"  if -e "$path/htslib/$HeaderFile";
-            $hts_lib     = $path           if -e "$path/$LibFile";
-            $hts_lib     = "$path/lib"     if -e "$path/lib/$LibFile";
-            $found = $hts_include && $hts_lib;
-
-            unless ($found) {
-                print STDOUT "That didn't seem to be right.\n";
-                $prompt = "Try again, or hit <enter> to cancel: ";
-            }
-        }
-    }
-
-    unless ( $hts_include && $hts_lib ) {
-        die <<END;
-Can\'t find $LibFile and/or $HeaderFile!
-
-If you haven\'t done so already, please compile htslib from
-http://htslib.org and set the distribution directory
-containing the compiled $LibFile and $HeaderFile files as either
-1. the first parameter in the call to this script, or
-2. as the HTSLIB_DIR environment variable.
-END
-    }
-
-    print STDOUT "Found $hts_include/$HeaderFile and $hts_lib/$LibFile\n";
-    return ( $hts_include, $hts_lib );
-} ## end sub find_hts
-
-sub prompt {
-    my $msg = shift;
-
-    unless ( defined $ReadLine ) {
-        eval "require Term::ReadLine";
-        $ReadLine = Term::ReadLine->can('new') || 0;
-        $ReadLine &&= Term::ReadLine->new( \*STDOUT );
-        eval { readline::rl_set( 'TcshCompleteMode', 'On' ) };
-    }
-
-    unless ($ReadLine) {
-        print STDOUT $msg;
-        chomp( my $in = <> );
-        return $in;
-    }
-
-    my $in = $ReadLine->readline($msg);
-    chomp $in;
-    $in =~ s/\s+//;
-    $ReadLine->addhistory($in) if $in =~ /\S/;
-    return $in;
+    $self->die_hts_not_found();
 }
 
-sub _htstools {
-    $ENV{HTSLIB_DIR} || (
-        can_load(
-            modules => { 'Alien::HTSlib' => undef, 'File::ShareDir' => undef }
-        ) &&
-        File::ShareDir::dist_dir('Alien-HTSlib') );
+sub set_include_and_compiler_flags {
+    my ($self) = @_;
+
+    my $hts_include = $self->config_data('hts_include');
+    my $hts_lib     = $self->config_data('hts_lib');
+
+    $self->include_dirs([$hts_include]);
+    $self->extra_linker_flags("-L$hts_lib", "-Wl,-rpath,$hts_lib", '-lhts', '-lpthread', '-lz');
+}
+
+sub find_hts_in_dir {
+    my ($self, $root) = @_;
+
+    chomp($root);
+    $root =~ s{/$}{};
+    $root =~ s{/(lib|include|include/htslib)$}{};
+
+    my $hts_lib     = "$root/lib";
+    my $hts_include = "$root/include/htslib";
+    if (-f "$hts_lib/libhts.a" && -f "$hts_include/hts.h") {
+        $self->config_data('hts_lib'     => $hts_lib);
+        $self->config_data('hts_include' => $hts_include);
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+sub die_hts_not_found {
+    my ($self, $msg) = @_;
+
+    $msg ||= '';
+    die $msg, <<END;
+
+This module requires htslib (http://htslib/org)
+Install it if you have not done so already.
+
+This script will attempt to locate htslib by looking for hts.h and libhts.a in:
+
+  1. --htslib command line argument
+  2. HTSLIB_DIR environment variable
+  3. --prefix command line argument (which also sets installation location)
+  4. Alien::HTSlib dependency resolver
+  5. pkg-config (extra directories can be set in PKG_CONFIG_PATH environment variable)
+  6. common library locations: /usr/local, /usr/share, /usr/opt
+ 
+END
+
+}
+
+sub from_Alien {
+    can_load(
+        modules => { 'Alien::HTSlib' => undef, 'File::ShareDir' => undef }
+    ) && File::ShareDir::dist_dir('Alien-HTSlib');
 }
