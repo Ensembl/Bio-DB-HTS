@@ -50,13 +50,15 @@ sub find_hts {
     # (They're explicitly set by the user, so we shouldn't fall back to
     # finding another copy somewhere else.)
     if (my $dir = $self->args('htslib')) {
-        return 1 if $self->find_hts_in_dir($dir);
+        return 1 if $self->find_hts_in_build_dir($dir);
+        return 1 if $self->find_hts_in_install_dir($dir);
         $self->die_hts_not_found(
             "--htslib '$dir' command line parameter does not contain expected files\n"
         );
     }    
     elsif ($dir = $ENV{'HTSLIB_DIR'}) {
-        return 1 if $self->find_hts_in_dir($dir);
+        return 1 if $self->find_hts_in_build_dir($dir);
+        return 1 if $self->find_hts_in_install_dir($dir);
         $self->die_hts_not_found(
             "HTSLIB_DIR=$ENV{HTSLIB_DIR} environment variable does not contain expected files\n"
         );
@@ -70,7 +72,7 @@ sub find_hts {
         scalar `pkg-config --variable=libdir htslib 2>/dev/null`,
         qw{ /usr/local /usr/share /opt/local },
     ) {
-        if ($dir and $self->find_hts_in_dir($dir)) {
+        if ($dir and $self->find_hts_in_install_dir($dir)) {
             $found = 1;
             last;
         }
@@ -90,7 +92,27 @@ sub set_include_and_compiler_flags {
     $self->extra_linker_flags("-L$hts_lib", "-Wl,-rpath,$hts_lib", '-lhts', '-lpthread', '-lz');
 }
 
-sub find_hts_in_dir {
+sub find_hts_in_build_dir {
+    my ($self, $root) = @_;
+
+    chomp($root);
+    $root =~ s{/$}{};
+    $root =~ s{/(lib|include|include/htslib)$}{};
+
+    my $hts_lib     = "$root";
+    my $hts_include = "$root/htslib";
+    if (-f "$hts_lib/libhts.a" && -f "$hts_include/hts.h") {
+        $self->config_data('hts_lib'     => $hts_lib);
+        $self->config_data('hts_include' => $hts_include);
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+sub find_hts_in_install_dir {
     my ($self, $root) = @_;
 
     chomp($root);
