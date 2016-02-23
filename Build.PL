@@ -92,6 +92,7 @@ sub set_include_and_compiler_flags {
     $self->extra_linker_flags("-L$hts_lib", "-Wl,-rpath,$hts_lib", '-lhts', '-lpthread', '-lz');
 }
 
+# Look for the library and header in the location where htslib was compiled
 sub find_hts_in_build_dir {
     my ($self, $root) = @_;
 
