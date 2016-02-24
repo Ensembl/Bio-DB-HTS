@@ -48,7 +48,7 @@ part of a SAM alignment.
 =cut
 
 package Bio::DB::HTS::Query;
-$Bio::DB::HTS::Query::VERSION = '1.06';
+$Bio::DB::HTS::Query::VERSION = '1.07';
 
 use strict;
 use warnings;

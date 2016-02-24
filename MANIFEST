@@ -12,11 +12,14 @@ lib/Bio/DB/HTS/Pileup.pm
 lib/Bio/DB/HTS/PileupWrapper.pm
 lib/Bio/DB/HTS/Query.pm
 lib/Bio/DB/HTS/ReadIterator.pm
+lib/Bio/DB/HTS/Tabix.pm
 lib/Bio/DB/HTS/Target.pm
 lib/Bio/DB/HTS.pm
 lib/Bio/DB/HTS.xs
 lib/Bio/DB/HTS/Constants.pm
 lib/Bio/DB/HTS/Segment.pm
+lib/Bio/DB/HTS/VCF.pm
+lib/Bio/DB/HTS/Tabix/Iterator.pm
 LICENSE
 MANIFEST			This list of files
 META.json
