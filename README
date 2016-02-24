@@ -5,19 +5,33 @@ This is a Perl interface to the HTS Library. See http://htslib.org
 In the root directory of this distribution you will find the script
 INSTALL.pl. Running this will download the latest versions of this
 module and HTSlib into a temporary directory, compile them, test and
-install Bio-HTSTools. Note that HTSlib will need to be installed
-on your system, or the LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on Mac OSX)
-includes the location of libhts.a
+install Bio-DB-HTS. It will not install HTSlib at the system level - 
+if desired this can be accomplished by changing into the downloaded
+htslib sub-directory and typing
+```
+  #may need sudo...
+  make install
+```
+
+When invoked, Bio::DB::HTS will try to use htslib from its downloaded location. If this is 
+removed it with require htslib to be installed on the system, or LD_LIBRARY_PATH should
+contain the directory containing libhts.a
+
+If running on Mac OSX you will need to have HTSlib installed at the system level or DYLD_LIBRARY_PATH
+should contain the directory containing libhts.a.
 
 Simply run:
   perl INSTALL.pl
 
 ## MULTI-STEP INSTALLATION
 
-The more traditional install requires you to separately download,
-unpack and compile HTSlib.
+The more traditional install requires you to separately download, unpack and compile HTSlib.
+See notes on changing compilation options as detailed below.
 
-Then set the environment variable HTSLIB_DIR to point to this directory.
+Then set the environment variable HTSLIB_DIR to point to this directory. 
+
+You can install htslib at the system level if required. 
+Or use the --prefix location can be used if the htslib has been installed elsewhere.
 
 You will also need to install Bio::Perl from CPAN.
 
@@ -28,11 +42,12 @@ Now run:
   ./Build test
   (sudo) ./Build install
 ```
-
 You may also pass in HTSLIB_DIR as the parameter to Build.PL
 ```
-  perl Build.PL $HTSLIB_DIR
+  perl Build.PL --htslib $HTSLIB_DIR
 ```
+
+
 
 ### TROUBLESHOOTING
 
@@ -73,8 +88,7 @@ feel free to submit bug reports, patches, etc. via GitHub.
 
 Rishi Nag <rishi@ebi.ac.uk>
 based on Bio::DB::Sam by Lincoln Stein
-and further contributions gratefully accepted from 
-Alex Hodgkins, Congenica Ltd for Tabix, VCF work
+
 
 ### COPYRIGHT
 

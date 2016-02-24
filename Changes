@@ -1,4 +1,8 @@
 
+1.07
+   * Build.PL updated, courtesy of James Gilbert.
+   * TABIX bindings added, courtesy of Alex Hodgkins, Congenica Ltd.
+
 1.06
    * htslib directory parameter added for perl Build.PL
    * faidx include directory bug fix added
