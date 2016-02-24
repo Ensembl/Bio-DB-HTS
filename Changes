@@ -1,4 +1,7 @@
 
+1.08
+   * Added missing test files
+
 1.07
    * Build.PL updated, courtesy of James Gilbert.
    * TABIX bindings added, courtesy of Alex Hodgkins, Congenica Ltd.

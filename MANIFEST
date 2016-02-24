@@ -29,6 +29,8 @@ README
 t/01bam.t
 t/02faidx.t
 t/03cram.t
+t/04tabix.t  
+t/05vcf.t
 t/data/00README.txt
 t/data/dm3_3R_4766911_4767130.sam
 t/data/dm3_3R_4766911_4767130.sam.bam
@@ -41,4 +43,9 @@ t/data/ex2.sam.gz
 t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz
 t/data/yeast.fasta
 t/data/yeast.sorted.cram
+t/data/no_index.tsv.gz
+t/data/test.tsv.gz
+t/data/test.tsv.gz.tbi
+t/data/test.vcf.gz
+t/data/test.vcf.gz.tbi
 typemap
