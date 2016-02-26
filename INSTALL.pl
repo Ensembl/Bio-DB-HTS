@@ -3,8 +3,6 @@
 use strict;
 use File::Temp 'tempdir';
 
-prompt_yn("This will install Bio-HTSTools and its dependencies. Continue?") or exit 0;
-
 # STEP 0: various dependencies
 my $git = `which git`;
 $git or die <<END;
