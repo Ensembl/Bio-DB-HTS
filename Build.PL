@@ -28,7 +28,11 @@ my $build = $class->new(
     build_requires => { 'ExtUtils::CBuilder' => 0, },
     configure_requires => { 'Module::Build' => 0.42, },
     requires => { 'perl' => '5.008', 'Bio::Root::Version' => '1.006009001', },
-    #    create_makefile_pl => 'passthrough',
+    meta_merge => {
+        'resources' => {
+            'repository' => 'https://github.com/Ensembl/Bio-HTS',
+            },
+        },
 );
 
 $build->find_hts;
