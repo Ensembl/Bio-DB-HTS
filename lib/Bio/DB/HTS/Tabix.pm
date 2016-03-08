@@ -95,6 +95,12 @@ sub seqnames {
     return tbx_seqnames($self->{_tabix_index});
 }
 
+sub header {
+    my $self = shift;
+    return $self->{_header};
+}
+
+
 #free up memory allocated in XS code
 sub DEMOLISH {
     my $self = shift;
