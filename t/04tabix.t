@@ -1,5 +1,5 @@
-use Test::More tests => 9, 'die';
-
+use Test::More tests => 10, 'die';
+use feature qw( say );
 use FindBin qw( $Bin );
 
 use_ok 'Bio::DB::HTS::Tabix';
@@ -7,6 +7,8 @@ use_ok 'Bio::DB::HTS::Tabix';
 my $test_file = $Bin . '/data/test.tsv.gz';
 
 my $tbx = Bio::DB::HTS::Tabix->new( filename => $test_file, warnings => 0 );
+my $h = $tbx->header ;
+ok( $h, "#CHROM  FROM    TO      GERP" ) ;
 ok my $iter = $tbx->query("12:8000000-8000008"), "can query a region";
 
 #make sure we can call next
