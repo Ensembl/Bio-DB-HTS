@@ -5,7 +5,7 @@ This is a Perl interface to the HTS Library. See http://htslib.org
 In the root directory of this distribution you will find the script
 INSTALL.pl. Running this will download the latest versions of this
 module and HTSlib into a temporary directory, compile them, test and
-install Bio-DB-HTS. It will not install HTSlib at the system level - 
+install Bio-DB-HTS. It will not install HTSlib at the system level -
 if desired this can be accomplished by changing into the downloaded
 htslib sub-directory and typing
 ```
@@ -13,7 +13,7 @@ htslib sub-directory and typing
   make install
 ```
 
-When invoked, Bio::DB::HTS will try to use htslib from its downloaded location. If this is 
+When invoked, Bio::DB::HTS will try to use htslib from its downloaded location. If this is
 removed it with require htslib to be installed on the system, or LD_LIBRARY_PATH should
 contain the directory containing libhts.a
 
@@ -28,10 +28,11 @@ Simply run:
 The more traditional install requires you to separately download, unpack and compile HTSlib.
 See notes on changing compilation options as detailed below.
 
-Then set the environment variable HTSLIB_DIR to point to this directory. 
+Then set the environment variable HTSLIB_DIR to point to this directory.
 
-You can install htslib at the system level if required. 
-Or use the --prefix location can be used if the htslib has been installed elsewhere.
+You can install htslib at the system level if required.
+
+The --prefix location can be used if the htslib has been installed elsewhere. This will also set the install location of the Perl modules. Note that the shared object modules (items in blib) will still be installed in the architecture dependent library tree.
 
 You will also need to install Bio::Perl from CPAN.
 
