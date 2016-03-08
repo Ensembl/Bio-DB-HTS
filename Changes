@@ -1,4 +1,9 @@
 
+1.09
+   * Tabix header subroutine, test added
+   * README clarifications
+   * prompt removed from install script
+
 1.08
    * Added missing test files
 

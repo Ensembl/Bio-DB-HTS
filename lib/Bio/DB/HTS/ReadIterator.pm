@@ -22,7 +22,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::ReadIterator;
-$Bio::DB::HTS::ReadIterator::VERSION = '1.08';
+$Bio::DB::HTS::ReadIterator::VERSION = '1.09';
 
 use strict;
 use warnings;

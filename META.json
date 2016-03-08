@@ -3,8 +3,8 @@
    "author" : [
       "Rishi Nag"
    ],
-   "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.421",
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.4216",
    "license" : [
       "apache_2_0"
    ],
@@ -21,7 +21,7 @@
       },
       "configure" : {
          "requires" : {
-            "Module::Build" : "0.42"
+            "Module::Build" : 0.42
          }
       },
       "runtime" : {
@@ -122,5 +122,6 @@
          "http://www.apache.org/licenses/LICENSE-2.0.txt"
       ]
    },
-   "version" : "1.08"
+   "version" : "1.08",
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }
