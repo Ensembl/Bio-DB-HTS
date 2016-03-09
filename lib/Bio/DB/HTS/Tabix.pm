@@ -42,7 +42,7 @@ sub new {
   my $header = tbx_header($htsfile, $tabix_index);
   if( $header )
   {
-    $header = join "", @{ $header } ;
+    $header = join "\n", @{ $header } ;
   }
 
   my $self = bless {
@@ -98,6 +98,12 @@ sub seqnames {
 sub header {
     my $self = shift;
     return $self->{_header};
+}
+
+sub header_array {
+    my $self = shift;
+    my @lines = split(/\n/,$self->{_header});
+    return @lines ;
 }
 
 
