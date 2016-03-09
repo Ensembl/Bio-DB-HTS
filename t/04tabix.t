@@ -29,6 +29,7 @@ is_deeply $seqnames, [1, 12, 'X'], 'seqnames are correct';
 
 ok $iter = $tbx->query("fake"), 'non existent chrom works fine';
 is $iter->next, undef, 'iterator for missing chrom is fine';
+$tbx->close;
 
 #More in depth header tests
 $test_file = $Bin . '/data/data.vcf.gz';
@@ -36,5 +37,6 @@ $tbx = Bio::DB::HTS::Tabix->new( filename => $test_file, warnings => 0 );
 @ha = $tbx->header_array ;
 ok( @ha[0], "##fileformat=VCFv4.2" ) ;
 ok( @ha[5], "##reference=human_b36_both.fasta" ) ;
+$tbx->close;
 
 done_testing;

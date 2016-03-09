@@ -56,7 +56,7 @@ sub next {
     return tbx_iter_next($self->{_tabix_iter}, $self->{_htsfile}, $self->{_tabix_index});
 }
 
-sub DEMOLISH {
+sub close {
     my $self = shift;
 
     #xs method

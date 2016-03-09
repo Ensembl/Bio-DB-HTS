@@ -108,14 +108,14 @@ sub header_array {
 
 
 #free up memory allocated in XS code
-sub DEMOLISH {
+sub close {
     my $self = shift;
 
     if ( $self->{_htsfile} ) {
-        Bio::DB::HTSfile->close($self->{_htsfile});
+        Bio::DB::HTSfile::close($self->{_htsfile});
     }
 
-    if ( $self->tabix_index ) {
+    if ( $self->{_tabix_index} ) {
         tbx_close($self->{_tabix_index});
     }
 }
