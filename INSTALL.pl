@@ -2,11 +2,13 @@
 
 use strict;
 use File::Temp 'tempdir';
+use Cwd;
+use File::Path qw(make_path);
 
-my $use_prefix = shift @ARGV if(@ARGV > 0);
+my $prefix_path;
+$prefix_path = prefix_install(shift @ARGV) if(@ARGV > 0);
 
 prompt_yn("This will install Bio-HTSTools and its dependencies. Continue?") or exit 0;
-my $prefix_path = prompt_prefix($use_prefix);
 
 # STEP 0: various dependencies
 my $git = `which git`;
@@ -92,7 +94,7 @@ while (<$in>) {
 close $in;
 close $out;
 rename 'Makefile.new','Makefile' or die "Couldn't rename Makefile.new to Makefile: $!";
-if($use_prefix) {
+if(defined $prefix_path) {
   system "make";
   system "make install prefix=$prefix_path";
 }
@@ -104,7 +106,7 @@ else {
 # Step 5: Build Bio::DB::HTSlib
 info("Building Bio::DB::HTSlib");
 chdir "$install_dir/Bio-HTS";
-if($use_prefix) {
+if(defined $prefix_path) {
   system "env HTSLIB_DIR=$prefix_path/lib perl Build.PL --install_base=$prefix_path";
 }
 else {
@@ -115,7 +117,7 @@ system "./Build";
 `./Build test` =~ /Result: PASS/ or die "Build test failed. Not continuing";
 
 # Step 6: Install
-if($use_prefix) {
+if(defined $prefix_path) {
   info("Installing Bio-HTSTools to $prefix_path.");
   system "./Build install";
 }
@@ -131,16 +133,6 @@ chdir '/';
 
 exit 0;
 
-sub prompt_prefix {
-  my $run = shift;
-  return 0 unless($run);
-  print STDERR "Install to local/custom path requested [~/local/]: ";
-  my $input = <>;
-  chomp $input;
-  $input= "$ENV{HOME}/local/" unless($input);
-  return $input;
-}
-
 sub prompt_yn {
     my $msg = shift;
     print STDERR "$msg [Y/n]: ";
@@ -154,4 +146,27 @@ sub info {
     my $msg = shift;
     chomp $msg;
     print STDERR "\n*** $msg ***\n";
+}
+
+sub prefix_install {
+  my $prefix_path = shift;
+  if($prefix_path =~ s/^\~//) {
+    $prefix_path = $ENV{HOME}.$prefix_path
+  }
+  elsif($prefix_path !~ m|^/|) {
+    $prefix_path = getcwd().'/'.$prefix_path;
+  }
+  my $err;
+  unless(-e $prefix_path) {
+    make_path($prefix_path, {verbose => 1, error => \$err});
+    if (@$err) {
+      for my $diag (@$err) {
+        my ($dir, $message) = %$diag;
+        if ($dir eq '') { print "general error: $message\n"; }
+        else { print "problem creating dir $dir: $message\n"; }
+      }
+    }
+  }
+  warn $prefix_path;
+  return $prefix_path;
 }
