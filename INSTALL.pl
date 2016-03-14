@@ -8,8 +8,6 @@ use File::Path qw(make_path);
 my $prefix_path;
 $prefix_path = prefix_install(shift @ARGV) if(@ARGV > 0);
 
-prompt_yn("This will install Bio-HTSTools and its dependencies. Continue?") or exit 0;
-
 # STEP 0: various dependencies
 my $git = `which git`;
 $git or die <<END;
@@ -133,14 +131,6 @@ chdir '/';
 
 exit 0;
 
-sub prompt_yn {
-    my $msg = shift;
-    print STDERR "$msg [Y/n]: ";
-    my $input = <>;
-    chomp $input;
-    return 1 unless $input;
-    return $input =~ /^[yY]/;
-}
 
 sub info {
     my $msg = shift;
