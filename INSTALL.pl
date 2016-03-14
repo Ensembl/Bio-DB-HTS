@@ -116,17 +116,17 @@ system "./Build";
 
 # Step 6: Install
 if(defined $prefix_path) {
-  info("Installing Bio-HTSTools to $prefix_path.");
+  info("Installing Bio::DB::HTS to $prefix_path.");
   system "./Build install";
 }
 else {
-  info("Installing Bio-HTSTools using sudo. You will be asked for your password.");
+  info("Installing Bio::DB::HTS using sudo. You will be asked for your password.");
   info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
   system "sudo ./Build install";
 }
 
 # Step 7: Yay!
-info("Bio-HTSTools is now installed.");
+info("Bio::DB::HTS is now installed.");
 chdir '/';
 
 exit 0;
