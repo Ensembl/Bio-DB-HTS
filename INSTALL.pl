@@ -2,6 +2,13 @@
 
 use strict;
 use File::Temp 'tempdir';
+use Cwd;
+use File::Path qw(make_path);
+
+my $prefix_path;
+$prefix_path = prefix_install(shift @ARGV) if(@ARGV > 0);
+
+prompt_yn("This will install Bio-HTSTools and its dependencies. Continue?") or exit 0;
 
 # STEP 0: various dependencies
 my $git = `which git`;
@@ -87,21 +94,38 @@ while (<$in>) {
 close $in;
 close $out;
 rename 'Makefile.new','Makefile' or die "Couldn't rename Makefile.new to Makefile: $!";
-system "make";
+if(defined $prefix_path) {
+  system "make";
+  system "make install prefix=$prefix_path";
+}
+else {
+  system "make";
+}
 -e 'libhts.a' or die "Compile didn't complete. No libhts.a library file found";
 
 # Step 5: Build Bio::DB::HTSlib
 info("Building Bio::DB::HTSlib");
 chdir "$install_dir/Bio-HTS";
-system "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
+if(defined $prefix_path) {
+  system "env HTSLIB_DIR=$prefix_path/lib perl Build.PL --install_base=$prefix_path";
+}
+else {
+  system "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
+}
 -e "./Build" or die "Build.PL didn't execute properly: no Build file found";
 system "./Build";
 `./Build test` =~ /Result: PASS/ or die "Build test failed. Not continuing";
 
 # Step 6: Install
-info("Installing Bio-HTSTools using sudo. You will be asked for your password.");
-info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
-system "sudo ./Build install";
+if(defined $prefix_path) {
+  info("Installing Bio-HTSTools to $prefix_path.");
+  system "./Build install";
+}
+else {
+  info("Installing Bio-HTSTools using sudo. You will be asked for your password.");
+  info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
+  system "sudo ./Build install";
+}
 
 # Step 7: Yay!
 info("Bio-HTSTools is now installed.");
@@ -122,4 +146,27 @@ sub info {
     my $msg = shift;
     chomp $msg;
     print STDERR "\n*** $msg ***\n";
+}
+
+sub prefix_install {
+  my $prefix_path = shift;
+  if($prefix_path =~ s/^\~//) {
+    $prefix_path = $ENV{HOME}.$prefix_path
+  }
+  elsif($prefix_path !~ m|^/|) {
+    $prefix_path = getcwd().'/'.$prefix_path;
+  }
+  my $err;
+  unless(-e $prefix_path) {
+    make_path($prefix_path, {verbose => 1, error => \$err});
+    if (@$err) {
+      for my $diag (@$err) {
+        my ($dir, $message) = %$diag;
+        if ($dir eq '') { print "general error: $message\n"; }
+        else { print "problem creating dir $dir: $message\n"; }
+      }
+    }
+  }
+  warn $prefix_path;
+  return $prefix_path;
 }
