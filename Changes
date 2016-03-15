@@ -1,4 +1,9 @@
 
+1.11
+   * FAIDX memory leak fix, courtesy Andy Yates & Keiran Rayne
+   * INSTALL.pl to local directory, courtesy Keiran Rayne
+   * documentation updates
+
 1.10
    * Tabix header_array subroutine added
    * Tabix DEMOLISH routines renamed close for consistency

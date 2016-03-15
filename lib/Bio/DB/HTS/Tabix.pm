@@ -21,7 +21,7 @@ package Bio::DB::HTS::Tabix;
 
 use Bio::DB::HTS; #load the XS
 use Bio::DB::HTS::Tabix::Iterator;
-$Bio::DB::HTS::Tabix::VERSION = '1.10';
+$Bio::DB::HTS::Tabix::VERSION = '1.11';
 use strict;
 use warnings;
 

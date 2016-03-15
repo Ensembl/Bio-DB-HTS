@@ -22,7 +22,7 @@ Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 =cut
 
 package Bio::DB::HTS::VCF;
-$Bio::DB::HTS::VCF::VERSION = '1.10';
+$Bio::DB::HTS::VCF::VERSION = '1.11';
 
 use Bio::DB::HTS; #load XS
 use strict;
