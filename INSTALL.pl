@@ -94,7 +94,7 @@ close $out;
 rename 'Makefile.new','Makefile' or die "Couldn't rename Makefile.new to Makefile: $!";
 if(defined $prefix_path) {
   system "make";
-  system "make install prefix=$prefix_path";
+  system "rm -f $install_dir/htslib/libhts.so*";
 }
 else {
   system "make";
@@ -105,7 +105,7 @@ else {
 info("Building Bio::DB::HTSlib");
 chdir "$install_dir/Bio-HTS";
 if(defined $prefix_path) {
-  system "env HTSLIB_DIR=$prefix_path/lib perl Build.PL --install_base=$prefix_path";
+  system "env HTSLIB_DIR=$install_dir/htslib perl Build.PL --install_base=$prefix_path";
 }
 else {
   system "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
