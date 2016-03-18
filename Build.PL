@@ -59,7 +59,7 @@ sub find_hts {
         $self->die_hts_not_found(
             "--htslib '$dir' command line parameter does not contain expected files\n"
         );
-    }    
+    }
     elsif ($dir = $ENV{'HTSLIB_DIR'}) {
         return 1 if $self->find_hts_in_build_dir($dir);
         return 1 if $self->find_hts_in_install_dir($dir);
@@ -91,9 +91,13 @@ sub set_include_and_compiler_flags {
 
     my $hts_include = $self->config_data('hts_include');
     my $hts_lib     = $self->config_data('hts_lib');
-
+    my $static      = $self->args('static');
     $self->include_dirs([$hts_include]);
-    $self->extra_linker_flags("-L$hts_lib", "-Wl,-rpath,$hts_lib", '-lhts', '-lpthread', '-lz');
+    if($static){
+      $self->extra_linker_flags("-L$hts_lib", '-lhts', '-lpthread', '-lz');
+    }else{
+      $self->extra_linker_flags("-L$hts_lib", "-Wl,-rpath,$hts_lib", '-lhts', '-lpthread', '-lz');
+    }
 }
 
 # Look for the library and header in the location where htslib was compiled
@@ -153,7 +157,7 @@ This script will attempt to locate htslib by looking for hts.h and libhts.a in:
   4. Alien::HTSlib dependency resolver
   5. pkg-config (extra directories can be set in PKG_CONFIG_PATH environment variable)
   6. common library locations: /usr/local, /usr/share, /opt/local
- 
+
 END
 
 }

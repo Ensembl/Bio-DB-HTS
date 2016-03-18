@@ -4,9 +4,21 @@ use strict;
 use File::Temp 'tempdir';
 use Cwd;
 use File::Path qw(make_path);
+use Getopt::Long;
 
+my $help = "INSTALL.pl [-h|--help] [--prefix=filepath] [--static] [~/prefix/path]\n";
+$help .= "--help (-h)  - this help message\n";
+$help .= "--prefix     - Path to install Bio::DB::HTS.\n";
+$help .= "                  Alternative to providing a path at the end of comandline\n";
+$help .= "                  If neither are provided defaults to root install (requires root access)\n";
+$help .= "--static     - Build Bio::DB::HTS using the static libhts.a library and do not install htslib\n";
+
+my $cwd = system 'pwd';
+
+my $opts = parse_options();
 my $prefix_path;
-$prefix_path = prefix_install(shift @ARGV) if(@ARGV > 0);
+$prefix_path = $opts->{'prefix'} if(exists($opts->{'prefix'}) && defined($opts->{'prefix'}));
+
 
 # STEP 0: various dependencies
 my $git = `which git`;
@@ -92,24 +104,35 @@ while (<$in>) {
 close $in;
 close $out;
 rename 'Makefile.new','Makefile' or die "Couldn't rename Makefile.new to Makefile: $!";
-if(defined $prefix_path) {
-  system "make";
+warn "***MAKE***\n";
+system "make";
+if(defined $prefix_path && !$opts->{'static'}) {
+  warn "***MAKE INSTALL***\n";
   system "make install prefix=$prefix_path";
 }
-else {
-  system "make";
+if($opts->{'static'}){
+  system "rm -f $install_dir/htslib/libhts.so*";
 }
 -e 'libhts.a' or die "Compile didn't complete. No libhts.a library file found";
 
 # Step 5: Build Bio::DB::HTSlib
 info("Building Bio::DB::HTSlib");
 chdir "$install_dir/Bio-HTS";
+my $cmd;
 if(defined $prefix_path) {
-  system "env HTSLIB_DIR=$prefix_path/lib perl Build.PL --install_base=$prefix_path";
+  if(!$opts->{'static'}){
+    $cmd = "env HTSLIB_DIR=$prefix_path/lib perl Build.PL --install_base=$prefix_path";
+  }else{
+    $cmd = "env HTSLIB_DIR=$install_dir/htslib perl Build.PL --install_base=$prefix_path";
+  }
+}else{
+  $cmd = "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
 }
-else {
-  system "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
+if($opts->{'static'}){
+  $cmd .= " --static=1";
 }
+warn "***CMD*** : $cmd\n";
+system $cmd;
 -e "./Build" or die "Build.PL didn't execute properly: no Build file found";
 system "./Build";
 `./Build test` =~ /Result: PASS/ or die "Build test failed. Not continuing";
@@ -124,6 +147,9 @@ else {
   info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
   system "sudo ./Build install";
 }
+if($opts->{'static'}){
+  system "rm -f $install_dir/htslib/libhts.a";
+}
 
 # Step 7: Yay!
 info("Bio::DB::HTS is now installed.");
@@ -131,6 +157,37 @@ chdir '/';
 
 exit 0;
 
+sub parse_options {
+  my ($factory) = @_;
+	my %opts = ();
+
+  my $result = &GetOptions (
+    'static' => \$opts{'static'},
+    'prefix=s' => \$opts{'prefix'},
+    'h|help' => \$opts{'h'},
+  );
+
+  if($opts{'h'}){
+    warn $help,"\n";
+    exit(0);
+  }
+
+  if(defined($opts{'prefix'})){
+    $opts{'prefix'} = prefix_install($opts{'prefix'});
+  }elsif(!defined($opts{'prefix'}) && @ARGV > 0){
+    $opts{'prefix'} = prefix_install(shift(@ARGV));
+  }elsif(exists($ENV{PERL_LOCAL_LIB_ROOT}) && defined($ENV{PERL_LOCAL_LIB_ROOT})){
+    $opts{'prefix'} = prefix_install($ENV{PERL_LOCAL_LIB_ROOT});
+  }
+
+  $opts{'static'} = 0 if(!defined($opts{'static'}));
+
+  $opts{'static'} = $ENV{STATIC_HTS} if((!$opts{'static'}) &&
+                                      exists($ENV{STATIC_HTS}) && defined($ENV{STATIC_HTS}));
+
+
+  return \%opts;
+}
 
 sub info {
     my $msg = shift;
@@ -157,6 +214,5 @@ sub prefix_install {
       }
     }
   }
-  warn $prefix_path;
   return $prefix_path;
 }
