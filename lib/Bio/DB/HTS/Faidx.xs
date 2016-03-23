@@ -71,6 +71,7 @@ void get_sequence(SV* obj, SV* location, SV** seq, int* seq_len)
 
   //Push into a SV
   sv_catpv(*seq, char_seq);
+  sv_2mortal(*seq);
   //Free the buffer created by faidx
   free(char_seq);
 }
@@ -89,6 +90,7 @@ void get_sequence2(SV* obj, SV* seq_id, int start, int end, SV** seq, int* seq_l
 
   //Push into a SV
   sv_catpv(*seq, char_seq);
+  sv_2mortal(*seq);
   //Free the buffer created by faidx
   free(char_seq);
 }

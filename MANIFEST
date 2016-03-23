@@ -29,9 +29,11 @@ README
 t/01bam.t
 t/02faidx.t
 t/03cram.t
-t/04tabix.t  
+t/04tabix.t
 t/05vcf.t
 t/data/00README.txt
+t/data/data.vcf.gz
+t/data/data.vcf.gz.tbi
 t/data/dm3_3R_4766911_4767130.sam
 t/data/dm3_3R_4766911_4767130.sam.bam
 t/data/dm3_3R_4766911_4767130.sam.sorted.bam

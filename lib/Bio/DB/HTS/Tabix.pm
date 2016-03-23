@@ -21,7 +21,7 @@ package Bio::DB::HTS::Tabix;
 
 use Bio::DB::HTS; #load the XS
 use Bio::DB::HTS::Tabix::Iterator;
-$Bio::DB::HTS::Tabix::VERSION = '1.08';
+$Bio::DB::HTS::Tabix::VERSION = '1.11';
 use strict;
 use warnings;
 
@@ -42,7 +42,7 @@ sub new {
   my $header = tbx_header($htsfile, $tabix_index);
   if( $header )
   {
-    $header = join "", @{ $header } ;
+    $header = join "\n", @{ $header } ;
   }
 
   my $self = bless {
@@ -95,15 +95,27 @@ sub seqnames {
     return tbx_seqnames($self->{_tabix_index});
 }
 
+sub header {
+    my $self = shift;
+    return $self->{_header};
+}
+
+sub header_array {
+    my $self = shift;
+    my @lines = split(/\n/,$self->{_header});
+    return @lines ;
+}
+
+
 #free up memory allocated in XS code
-sub DEMOLISH {
+sub close {
     my $self = shift;
 
     if ( $self->{_htsfile} ) {
-        Bio::DB::HTSfile->close($self->{_htsfile});
+        Bio::DB::HTSfile::close($self->{_htsfile});
     }
 
-    if ( $self->tabix_index ) {
+    if ( $self->{_tabix_index} ) {
         tbx_close($self->{_tabix_index});
     }
 }

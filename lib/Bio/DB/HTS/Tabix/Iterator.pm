@@ -19,7 +19,7 @@ limitations under the License.
 package Bio::DB::HTS::Tabix::Iterator;
 
 use Bio::DB::HTS; #load the XS
-$Bio::DB::HTS::Tabix::Iterator::VERSION = '1.08';
+$Bio::DB::HTS::Tabix::Iterator::VERSION = '1.11';
 
 use strict;
 use warnings;
@@ -56,7 +56,7 @@ sub next {
     return tbx_iter_next($self->{_tabix_iter}, $self->{_htsfile}, $self->{_tabix_index});
 }
 
-sub DEMOLISH {
+sub close {
     my $self = shift;
 
     #xs method
