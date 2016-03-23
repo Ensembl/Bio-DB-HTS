@@ -1177,6 +1177,7 @@ array returned by target_len():
  $length = $header->target_len->[$tid];
 
 =item $text = $header->text
+
 =item $header->text("new value")
 
 Read the text portion of the header. The text can be replaced by
