@@ -11,7 +11,7 @@ services:
 env:
 
 
-sudo: true
+sudo: false
 
 addons:
     apt:
@@ -22,7 +22,7 @@ before_install:
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
     - git clone -b master --depth=1 https://github.com/samtools/htslib.git
     - cd htslib
-    - sudo make install
+    - make
     - cd ..
 
 install:
@@ -31,7 +31,7 @@ install:
     # install the modules just used here
     - cpanm --notest Perl::Tidy
     - cpanm --notest Test::Code::TidyAll
-    - sudo perl INSTALL.pl
+    - perl INSTALL.pl --htslib=~/htslib
 
 
 
