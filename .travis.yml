@@ -1,0 +1,44 @@
+language: "perl"
+
+perl:
+  - "5.22"
+  - "5.14"
+
+
+services:
+
+
+env:
+
+
+sudo: false
+
+addons:
+    apt:
+        packages:
+        - unzip
+
+before_install:
+    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
+    - git clone -b master --depth=1 https://github.com/samtools/htslib.git
+    - cd htslib
+    - make install
+    - cd ..
+
+install:
+    # install the modules that are part of standard ensembl
+    - cpanm -v --installdeps --with-recommends --notest --cpanfile cpanfile .
+    # install the modules just used here
+    - cpanm --notest Perl::Tidy
+    - cpanm --notest Test::Code::TidyAll
+    - perl INSTALL.pl
+
+
+
+script: "./travisci/harness.sh"
+
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
