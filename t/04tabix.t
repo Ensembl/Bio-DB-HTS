@@ -2,7 +2,7 @@ use Test::More tests => 13, 'die';
 use feature qw( say );
 use FindBin qw( $Bin );
 
-use_ok 'Bio::DB::HTS::Tabix';
+BEGIN { use_ok 'Bio::DB::HTS::Tabix'; }
 
 my $test_file = $Bin . '/data/test.tsv.gz';
 

@@ -1,8 +1,8 @@
 use Test::More tests => 3;
 
-use_ok 'Bio::DB::HTS';
-use_ok 'Bio::DB::HTS::Tabix';
-use_ok 'Bio::DB::HTS::Tabix::Iterator';
+BEGIN { use_ok 'Bio::DB::HTS'; } 
+BEGIN { use_ok 'Bio::DB::HTS::Tabix'; }
+BEGIN { use_ok 'Bio::DB::HTS::Tabix::Iterator'; }
 
 done_testing;
 
