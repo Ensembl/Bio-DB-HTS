@@ -1,6 +1,6 @@
 
 1.12
-   * Build procedure static option added
+   * Build procedure static option added, courtesy of David Jones
    * TravisCI tests added
    * build_options script added to demonstrate build options
    * cpanfile updates
