@@ -1,7 +1,13 @@
 
+1.12
+   * Build procedure static option added, courtesy of David Jones
+   * TravisCI tests added
+   * build_options script added to demonstrate build options
+   * cpanfile updates
+
 1.11
-   * FAIDX memory leak fix, courtesy Andy Yates & Keiran Rayne
-   * INSTALL.pl to local directory, courtesy Keiran Rayne
+   * FAIDX memory leak fix, courtesy Andy Yates & Keiran Raine
+   * INSTALL.pl to local directory, courtesy Keiran Raine
    * documentation updates
 
 1.10
