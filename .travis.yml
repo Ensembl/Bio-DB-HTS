@@ -22,10 +22,6 @@ before_install:
     - wget http://bioperl.org/DIST/BioPerl-1.6.1.tar.gz
     - mkdir bioperl-live && tar zxvf BioPerl-1.6.1.tar.gz -C bioperl-live --strip-components 1
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
-    - git clone -b master --depth=1 https://github.com/samtools/htslib.git
-    - cd htslib
-    - make
-    - cd ..
 
 install:
     # manually install items from cpanfile so we can skip BioPerl
@@ -38,7 +34,7 @@ install:
     - cpanm --notest Perl::Tidy
     - cpanm --notest Test::Code::TidyAll
     - export PERL5LIB=$PERL5LIB:$PWD/bioperl-live
-    - perl INSTALL.pl --htslib=~/htslib
+    - perl INSTALL.pl --prefix=~/biodbhts
 
 script: "./travisci/harness.sh"
 
