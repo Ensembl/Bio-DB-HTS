@@ -1,5 +1,5 @@
 #!/bin/bash
-export PERL5LIB=$PERL5LIB:$PWD/ensembl-test/modules:~/biodbhts/lib/perl5/x86_64-linux-gnu-thread-multi/
+export PERL5LIB=$PERL5LIB:$PWD/ensembl-test/modules:~/biodbhts/lib/perl5/x86_64-linux/
 
 export TEST_AUTHOR=$USER
 
