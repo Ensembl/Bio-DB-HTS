@@ -1,15 +1,17 @@
 #!/bin/bash
-export PERL5LIB=$PERL5LIB:$PWD/ensembl-test/modules:~/biodbhts/lib/perl5/x86_64-linux/
+export PERL5LIB=$PERL5LIB:$PWD/ensembl-test/modules:$PWD/lib:$PWD/blib/arch/auto/Bio/DB/HTS/:$PWD/blib/arch/auto/Bio/DB/HTS/Faidx
 
 export TEST_AUTHOR=$USER
 
 export WORK_DIR=$PWD
 
 echo "Running test suite"
-echo "Using $PERL5LIB"
+echo "Using PERL5LIB:$PERL5LIB"
+echo "Current Directory list"
+pwd
+ls
 
 echo "Test list"
-pwd
 ls -l t
 
 echo "COVERALLS value=$COVERALLS"

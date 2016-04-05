@@ -42,7 +42,6 @@ install:
     - perl Build.PL --prefix=~/biodbhts
     - ./Build
     - ./Build test
-    - ./Build install
 
 script: "./travisci/harness.sh"
 
