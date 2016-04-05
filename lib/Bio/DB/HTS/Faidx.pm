@@ -81,7 +81,7 @@ our @EXPORT = qw(
 
 );
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 require XSLoader;
 XSLoader::load('Bio::DB::HTS::Faidx', $VERSION);
