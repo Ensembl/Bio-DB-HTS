@@ -1,19 +1,21 @@
 This is a Perl interface to the HTS Library. See http://htslib.org
 
-## ONE-STEP INSTALLATION
+Bio::DB::HTS supports a wide range of install configurations, with two scripts - Build.PL and INSTALL.pl.
 
-In the root directory of this distribution you will find the script
-INSTALL.pl. Running this will download the latest versions of this
-module and HTSlib into a temporary directory, compile them, test and
-install Bio-DB-HTS.
+For a list of the ways it can be used, with examples in action see
+https://github.com/Ensembl/Bio-HTS/blob/master/scripts/build_options.sh
+(link to scripts/build_options.sh in the Bio::DB::HTS GitHub repo at https://github.com/Ensembl/Bio-HTS)
+
+## ONE-STEP INSTALLATION (INSTALL.pl)
+
+In the root directory of this distribution you will find the script INSTALL.pl. Running this will download the latest released version of this module (from CPAN) and HTSlib (from GitHub) into a temporary directory, compile them, test and install Bio::DB::HTS. If you wish to install a version of Bio::DB::HTS downloaded (and possibly edited) from GitHub please use Build.PL as documented in the Multi-Step Installations section below.
 
 Simply run:
 ```
   perl INSTALL.pl
 ```
 
-It will not install HTSlib at the system level - if desired this can be accomplished by changing into the downloaded
-htslib sub-directory and typing
+It will not install HTSlib at the system level - if desired this can be accomplished by changing into the downloaded htslib sub-directory and typing
 ```
   #These commands may need sudo...
   #make and install the program
@@ -22,29 +24,19 @@ htslib sub-directory and typing
   ldconfig
 ```
 
-When invoked, Bio::DB::HTS will try to use htslib from its downloaded location. If this is
-removed it requires htslib to be installed on the system, or LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on Mac OSX) should
-contain the directory containing libhts.so.
+When invoked, Bio::DB::HTS will try to use HTSlib from its downloaded location. If this is removed it requires htslib to be installed on the system, or LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on Mac OSX) should contain the directory containing libhts.so.
 
 Alternatively
 ```
   perl INSTALL.pl --static
 ```
-will install a version of Bio::DB::HTS. Be aware that this option depends on your system supporting it, and upgrades to HTSlib will require a
-rebuild of Bio::DB::HTS.
+will install a version of Bio::DB::HTS. Be aware that this option depends on your system supporting it, and upgrades to HTSlib will require a rebuild of Bio::DB::HTS.
 
-## MULTI-STEP INSTALLATIONS
+## MULTI-STEP INSTALLATIONS (Build.PL)
 
-You may require a more custom install e.g. htslib in a specific directory or statically included, or Bio::DB::HTS installed in a specific location.
+You may require a more custom install e.g. htslib in a specific directory or statically included, or Bio::DB::HTS installed in a specific location. Typically these will involve downloading, compiling and installing htslib, followed by downloading compiling and installing Bio::DB:HTS.
 
-Bio::DB::HTS supports a wide range of install configurations, with two scripts - Build.PL and INSTALL.pl.
-
-For a list of the ways it can be used, with examples in action see
-https://github.com/Ensembl/Bio-HTS/blob/master/scripts/build_options.sh
-(link to scripts/build_options.sh in the Bio::DB::HTS GitHub repo at https://github.com/Ensembl/Bio-HTS)
-
-Typically these will involve downloading, compiling and installing htslib, followed by downloading compiling and installing Bio::DB:HTS.
-
+You can see various examples of installing HTSlib and then Bio::DB::HTS using Build.PL by examining scripts/build_options.sh
 
 ### TROUBLESHOOTING
 
