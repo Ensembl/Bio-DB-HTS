@@ -1,4 +1,7 @@
 
+1.13 (underway)
+   * removed file existence Tabix check as it prevents remote access
+
 1.12
    * Build procedure static option added, courtesy of David Jones
    * TravisCI tests added
