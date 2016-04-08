@@ -34,7 +34,6 @@ sub new {
 
   # filename checks
   die "Tabix region lookup requires a gzipped, tabixed bedfile" unless $filename =~ /gz$/;
-  die "Filename " . $filename . " does not exist" unless -e $filename;
 
   my $htsfile = Bio::DB::HTSfile->open($filename);
   my $tabix_index = tbx_open($filename);
