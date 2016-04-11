@@ -19,10 +19,9 @@ addons:
         - unzip
 
 before_install:
-    - wget http://bioperl.org/DIST/BioPerl-1.6.1.tar.gz
-    - mkdir bioperl-live && tar zxvf BioPerl-1.6.1.tar.gz -C bioperl-live --strip-components 1
+    - git clone -b bioperl-release-1-6-1 --depth 1 https://github.com/bioperl/bioperl-live.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
-    - git clone -b master --depth=1 https://github.com/samtools/htslib.git
+    - git clone --branch master --depth=1 https://github.com/samtools/htslib.git
     - cd htslib
     - make prefix=~/biodbhts install
     - export HTSLIB_DIR=
