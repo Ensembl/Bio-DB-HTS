@@ -66,7 +66,7 @@ typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
 typedef bcf_srs_t*      Bio__DB__HTS__VCF;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
-
+typedef bcf_sweep_t*    Bio__DB__HTS__VCF__Sweep;
 
 typedef struct {
   SV* callback;
@@ -1382,4 +1382,25 @@ vcf_bcf_sr_close(vcf)
     Bio::DB::HTS::VCF vcf
     CODE:
         bcf_sr_destroy(vcf);
+  OUTPUT:
+
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcf_
+
+Bio::DB::HTS::VCFSweep
+vcf_bcf_sweep_open(filename)
+    char* filename
+    CODE:
+        bcf_sweep_t* sweep = bcf_sweep_init(filename);
+        RETVAL = sweep;
+    OUTPUT:
+        RETVAL
+
+
+
+void
+vcf_bcf_sweep_close(vcf)
+    Bio::DB::HTS::VCFSweep sweep
+    CODE:
+        bcf_sweep_destroy(sweep);
   OUTPUT:
