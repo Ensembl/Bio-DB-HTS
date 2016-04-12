@@ -50,6 +50,8 @@ limitations under the License.
 #include "tbx.h"
 #include "bgzf.h"
 #include "vcf.h"
+#include "vcfutils.h"
+#include "vcf_sweep.h"
 #include "synced_bcf_reader.h"
 
 /* stolen from bam_aux.c */
