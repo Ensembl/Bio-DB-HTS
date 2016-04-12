@@ -1390,18 +1390,53 @@ vcf_bcf_sr_close(vcf)
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcf_
 
 Bio::DB::HTS::VCFSweep
-vcf_bcf_sweep_open(filename)
+vcf_sweep_open(filename)
     char* filename
+    PREINIT:
+        bcf_sweep_t* h;
     CODE:
-        bcf_sweep_t* sweep = bcf_sweep_init(filename);
+        sweep = bcf_sweep_init(filename);
         RETVAL = sweep;
     OUTPUT:
         RETVAL
 
 
+Bio::DB::HTS::VCF::Header
+vcf_get_header(sweep)
+    Bio::DB::HTS::VCFSweep sweep
+    PREINIT:
+        bcf_hdr_t* h;
+    CODE:
+        h = bcf_sweep_hdr(sweep);
+        RETVAL = h;
+    OUTPUT:
+        RETVAL
+
+
+Bio::DB::HTS::VCF::Row
+vcf_sweep_next(sweep)
+    Bio::DB::HTS::VCFSweep sweep
+    PREINIT:
+        bcf1_t* line;
+    CODE:
+        line = bcf_sweep_fwd(sweep);
+        RETVAL = line;
+    OUTPUT:
+        RETVAL
+
+Bio::DB::HTS::VCF::Row
+vcf_sweep_previous(sweep)
+    Bio::DB::HTS::VCFSweep sweep
+    PREINIT:
+        bcf1_t* line;
+    CODE:
+        line = bcf_sweep_bwd(sweep);
+        RETVAL = line;
+    OUTPUT:
+        RETVAL
 
 void
-vcf_bcf_sweep_close(vcf)
+vcf_sweep_close(sweep)
     Bio::DB::HTS::VCFSweep sweep
     CODE:
         bcf_sweep_destroy(sweep);
