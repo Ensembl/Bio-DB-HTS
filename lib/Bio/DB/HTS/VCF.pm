@@ -24,7 +24,7 @@ Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 package Bio::DB::HTS::VCF;
 $Bio::DB::HTS::VCF::VERSION = '1.12';
 
-use Bio::DB::HTS; #load XS
+use Bio::DB::HTS;
 use strict;
 use warnings;
 
