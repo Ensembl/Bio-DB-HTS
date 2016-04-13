@@ -1399,9 +1399,8 @@ vcfs_sweep_open(filename)
     OUTPUT:
         RETVAL
 
-
 Bio::DB::HTS::VCF::Header
-vcfs_get_header(sweep)
+vcfs_header_read(sweep)
     Bio::DB::HTS::VCFSweep sweep
     PREINIT:
         bcf_hdr_t* h;
@@ -1410,7 +1409,6 @@ vcfs_get_header(sweep)
         RETVAL = h;
     OUTPUT:
         RETVAL
-
 
 Bio::DB::HTS::VCF::Row
 vcfs_sweep_next(sweep)
