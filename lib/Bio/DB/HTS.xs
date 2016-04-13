@@ -1388,12 +1388,11 @@ vcf_bcf_sr_close(vcf)
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
 
-
 Bio::DB::HTS::VCFSweep
 vcfs_sweep_open(filename)
     char* filename
     PREINIT:
-        bcf_sweep_t* sweep
+        bcf_sweep_t* sweep;
     CODE:
         sweep = bcf_sweep_init(filename);
         RETVAL = sweep;

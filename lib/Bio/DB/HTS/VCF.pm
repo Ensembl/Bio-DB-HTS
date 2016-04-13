@@ -58,4 +58,31 @@ sub DEMOLISH {
     }
 }
 
+package Bio::DB::HTS::VCFSweep ;
+$Bio::DB::HTS::VCFSweep::VERSION = '1.12';
+
+sub new {
+  my $class         = shift;
+  my (%args) = @_;
+  my $filename = $args{filename};
+  my $warnings = $args{warnings};
+
+  my $reader = sweep_open($filename);
+  die "Error getting sweep" unless $reader;
+
+  my $self = bless {
+                    sweep => $reader,
+                    filename => $filename,
+                   }, ref $class || $class;
+  return $self;
+}
+
+sub DEMOLISH {
+    my $self = shift;
+
+    if ( $self->{sweep} ) {
+        sweep_close($self->{sweep});
+    }
+}
+
 1;
