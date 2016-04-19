@@ -33,7 +33,7 @@ sub new {
   my (%args) = @_;
   my $filename = $args{filename};
   my $warnings = $args{warnings};
-
+  die "Filename needed for VCF access" unless $filename;
   my $reader = bcf_sr_open($filename);
   die "Error getting reader" unless $reader;
 
@@ -61,12 +61,18 @@ sub DEMOLISH {
 package Bio::DB::HTS::VCFSweep ;
 $Bio::DB::HTS::VCFSweep::VERSION = '1.12';
 
+use Bio::DB::HTS;
+use strict;
+use warnings;
+
 sub new
 {
   my $class         = shift;
   my (%args) = @_;
   my $filename = $args{filename};
   my $warnings = $args{warnings};
+
+  die "Filename needed for VCF sweep access" unless $filename;
 
   my $reader = sweep_open($filename);
   die "Error opening file for VCF sweep" unless $reader;
@@ -98,7 +104,7 @@ sub previous_row
     return $b->sweep_previous();
 }
 
-sub DEMOLISH {
+sub close {
     my $self = shift;
 
     if ( $self->{sweep} ) {
