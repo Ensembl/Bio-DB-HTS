@@ -1389,10 +1389,20 @@ vcf_bcf_sr_close(vcf)
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Row PREFIX = vcfrow_
 
 void
-vcfrow_print(row)
+vcfrow_print(row,header)
   Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
   CODE:
      printf("VCF data line:\n");
+     printf("chromosome:%s\n", bcf_hdr_id2name(header,row->rid));
+     printf("position:%d\n", (row->pos+1));
+     printf("QUAL:%f\n", row->qual);
+     //require dereferencing of the d (bcf_dec_t) field
+     printf("ID:%s\n", row->d.id);
+//     printf("REF Reference Bases:%d\n", row->pos);
+//     printf("ALT allele bases:%d\n", row->pos);
+//     printf("Filter:%d\n", row->flt);
+//     printf("INFO:%d\n", row->d->info);
   OUTPUT:
 
 
