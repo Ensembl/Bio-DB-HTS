@@ -1383,7 +1383,18 @@ vcf_bcf_sr_close(vcf)
     Bio::DB::HTS::VCF vcf
     CODE:
         bcf_sr_destroy(vcf);
+    OUTPUT:
+
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Row PREFIX = vcfrow_
+
+void
+vcfrow_print(row)
+  Bio::DB::HTS::VCF::Row row
+  CODE:
+     printf("VCF data line:\n");
   OUTPUT:
+
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
