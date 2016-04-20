@@ -1392,18 +1392,27 @@ void
 vcfrow_print(row,header)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
+  PREINIT:
+     int i ;
   CODE:
-     printf("VCF data line:\n");
-     printf("chromosome:%s\n", bcf_hdr_id2name(header,row->rid));
-     printf("position:%d\n", (row->pos+1));
-     printf("QUAL:%f\n", row->qual);
-     //require dereferencing of the d (bcf_dec_t) field
-     printf("ID:%s\n", row->d.id);
-//     printf("REF Reference Bases:%d\n", row->pos);
-//     printf("ALT allele bases:%d\n", row->pos);
-//     printf("Filter:%d\n", row->flt);
-//     printf("INFO:%d\n", row->d->info);
+     printf("\n\nVCF data line:\n");
+     printf("chromosome:%s\t", bcf_hdr_id2name(header,row->rid));
+     printf("position:%d\t", (row->pos+1));
+     printf("QUAL:%f\t", row->qual);
+     printf("ID:%s\t", row->d.id );
+     printf("REF:%s\n", row->d.als);
+     printf("Num Alleles:%d\n", row->n_allele);
+     for( i=1 ; i<row->n_allele ; i++ )
+     {
+       printf("ALT[%d]=%s\t", i, row->d.allele[i]);
+     }
+     printf("\nNum Filters:%d\n", row->d.n_flt);       
+
+#     printf("\nfilter:%s\t", row->d.id );
+#     printf("\info:%s\n", row->d.als); 
   OUTPUT:
+
+
 
 
 
