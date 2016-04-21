@@ -1412,6 +1412,7 @@ vcfrow_print(row,header)
 #     printf("\info:%s\n", row->d.als);
   OUTPUT:
 
+
 SV*
 vcfrow_chromosome(row,header)
   Bio::DB::HTS::VCF::Row row
@@ -1423,6 +1424,42 @@ vcfrow_chromosome(row,header)
      RETVAL
 
 
+int
+vcfrow_position(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->pos+1;
+  OUTPUT:
+     RETVAL
+
+float
+vcfrow_quality(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->qual;
+  OUTPUT:
+     RETVAL
+
+
+SV*
+vcfrow_id(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = newSVpv(row->d.id, 0) ;
+  OUTPUT:
+     RETVAL
+
+SV*
+vcfrow_reference(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = newSVpv(row->d.als, 0) ;
+  OUTPUT:
+     RETVAL
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
