@@ -1417,12 +1417,8 @@ vcfrow_chromosome(row,header)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
   PREINIT:
-     int i ;
-     AV* avref;
   CODE:
-     avref = (AV*) sv_2mortal((SV*)newAV());
-     av_push(avref, newSVpv(bcf_hdr_id2name(header,row->rid))) ;
-     RETVAL = (SV*) newRV((SV*)avref);
+     RETVAL = newSVpv(bcf_hdr_id2name(header,row->rid),0) ;
   OUTPUT:
      RETVAL
 
