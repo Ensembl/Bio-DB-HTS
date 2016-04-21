@@ -1406,12 +1406,25 @@ vcfrow_print(row,header)
      {
        printf("ALT[%d]=%s\t", i, row->d.allele[i]);
      }
-     printf("\nNum Filters:%d\n", row->d.n_flt);       
+     printf("\nNum Filters:%d\n", row->d.n_flt);
 
 #     printf("\nfilter:%s\t", row->d.id );
-#     printf("\info:%s\n", row->d.als); 
+#     printf("\info:%s\n", row->d.als);
   OUTPUT:
 
+SV*
+vcfrow_chromosome(row,header)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+     int i ;
+     AV* avref;
+  CODE:
+     avref = (AV*) sv_2mortal((SV*)newAV());
+     av_push(avref, newSVpv(bcf_hdr_id2name(header,row->rid))) ;
+     RETVAL = (SV*) newRV((SV*)avref);
+  OUTPUT:
+     RETVAL
 
 
 
