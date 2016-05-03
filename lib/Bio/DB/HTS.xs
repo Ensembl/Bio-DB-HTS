@@ -1471,6 +1471,23 @@ vcfrow_num_alleles(row)
   OUTPUT:
      RETVAL
 
+SV*
+vcfrow_get_alleles(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+     int i;
+     AV *av_ref;
+  CODE:
+     av_ref = newAV();
+     for (i = 1; i < row->n_allele; ++i) {
+        SV *sv_ref = newSVpv(row->d.allele[i], 0);
+        av_push(av_ref, sv_ref);
+     }
+     RETVAL = newRV_noinc((SV*)av_ref);
+  OUTPUT:
+     RETVAL
+
+
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
 
