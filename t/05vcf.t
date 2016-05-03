@@ -1,4 +1,4 @@
-use Test::More tests => 8, 'die';
+use Test::More tests => 9, 'die';
 
 use FindBin qw( $Bin );
 
@@ -25,6 +25,7 @@ is $v->num_variants, 9, 'correct number of variants identified in file';
 
   $row = $sweep->previous_row();
   is $row->id(), "microsat1", "ID value read" ;
+  is $row->num_alleles(), 2, "Number of alleles value read" ;
 
   $sweep->close() ;
 }

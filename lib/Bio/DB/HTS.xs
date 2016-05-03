@@ -1462,6 +1462,16 @@ vcfrow_reference(row)
      RETVAL
 
 
+int
+vcfrow_num_alleles(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->n_allele-1 ;
+  OUTPUT:
+     RETVAL
+
+
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
 
 Bio::DB::HTS::VCFSweep
