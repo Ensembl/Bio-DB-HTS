@@ -166,11 +166,51 @@ Returns all the header lines as a single scalar from the tabixed file
 
 =item C<query>
 
-Takes a single region like: '1:4000005-4000009' or '12:5000000'
-Note: this works exactly the same way as the tabix executable,
-so '12:5000000' actually means get all results from position 5,000,000
-up to the very end of the chromosome. To get results only at position
-5,000,000 you should do '12:5000000-5000001'
+Takes a single region like: '1:4000005-4000009' or '12:5000000'. The coordinate format is 0 or 1-based for start and stop positions depending on how the Tabix index file was created - by default this is 1.
+
+Here are some examples showing Tabix.
+
+    use Bio::DB::HTS::Tabix;
+
+    my $tabix = Bio::DB::HTS::Tabix->new(filename => $file);
+
+    # Calling region 1
+
+    $iter = $tabix->query("1");
+    printf("Calling region 1\n" );
+    while(my $l = $iter->next) {
+      print $l, "\n";
+    }
+Gives:
+    1       4000000 4000000 -0.972
+    1       4000001 4000001 -0.153
+    1       4000002 4000002 -2.15
+    1       4000003 4000003 -1.17
+    1       4000003 4000006 -3.6
+    1       4000006 4000007 -6.7
+    1       4000007 4000009 -7.9
+
+
+    #Calling a range
+    $iter = $tabix->query("1:4000003-4000006");
+gives
+    1       4000003 4000003 -1.17
+    1       4000003 4000006 -3.6
+    1       4000006 4000007 -6.7
+
+    #Calling region 1:4000003 to end of region 1
+    $iter = $tabix->query("1:4000003");
+gives
+    1       4000003 4000003 -1.17
+    1       4000003 4000006 -3.6
+    1       4000006 4000007 -6.7
+    1       4000007 4000009 -7.9
+
+    #Calling single location 1:4000002
+    $iter = $tabix->query("1:4000002-4000002");
+gives
+    1       4000002 4000002 -2.15
+
 
 Returns a L<Bio::DB::HTS::Tabix::Iterator> for the specified region
 
