@@ -14,6 +14,7 @@ is $v->num_variants, 9, 'correct number of variants identified in file';
 
   my $row = $sweep->next_row();
   is $row->chromosome($h), "19", "Chromosome value read" ;
+  is $row->num_filters(), "2", "Number of filters read" ;
 
   $row = $sweep->previous_row();
   is $row->chromosome($h), "X", "Chromosome value read" ;

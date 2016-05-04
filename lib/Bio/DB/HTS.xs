@@ -1487,6 +1487,17 @@ vcfrow_get_alleles(row)
   OUTPUT:
      RETVAL
 
+int
+vcfrow_num_filters(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->d.n_flt ;
+  OUTPUT:
+     RETVAL
+
+
+
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
