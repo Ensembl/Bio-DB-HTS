@@ -1404,7 +1404,7 @@ vcfrow_print(row,header)
      printf("Num Alleles:%d\n", row->n_allele);
      for( i=1 ; i<row->n_allele ; i++ )
      {
-       printf("ALT[%d]=%s\t", i, row->d.allele[i]);
+#       printf("ALT[%d]=%s\t", i, row->d.allele[i]);
      }
      printf("\nNum Filters:%d\n", row->d.n_flt);
 
