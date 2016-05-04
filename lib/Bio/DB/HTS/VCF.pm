@@ -47,7 +47,9 @@ forwards through the file.
 Open the file and process using sweeps. Note that the two methods maintain pointers that are
 independant of one another. Using the next_row() will start at the first row in the file
 and go on to the next row in subsequent reads. This is independant of previous_row() calls.
-Similarly previous_row() will start at the last row and read backwards.
+
+Similarly previous_row() will start at the last row and read backwards. However a call to next_row()
+is needed beforehand as the read fails otherwise.
 
   use Bio::DB::HTS::VCF ;
 
