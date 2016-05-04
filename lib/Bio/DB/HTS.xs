@@ -1520,7 +1520,14 @@ vcfs_sweep_next(sweep)
         bcf1_t* line;
     CODE:
         line = bcf_sweep_fwd(sweep);
-        RETVAL = line;
+        if( line )
+        {
+          RETVAL = line;
+        }
+        else
+        {
+          XSRETURN_EMPTY ;
+        }
     OUTPUT:
         RETVAL
 
@@ -1531,7 +1538,14 @@ vcfs_sweep_previous(sweep)
         bcf1_t* line;
     CODE:
         line = bcf_sweep_bwd(sweep);
-        RETVAL = line;
+        if( line )
+        {
+          RETVAL = line;
+        }
+        else
+        {
+          XSRETURN_EMPTY ;
+        }
     OUTPUT:
         RETVAL
 

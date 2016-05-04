@@ -1,4 +1,4 @@
-use Test::More tests => 11, 'die';
+use Test::More tests => 12, 'die';
 
 use FindBin qw( $Bin );
 
@@ -12,9 +12,9 @@ is $v->num_variants, 9, 'correct number of variants identified in file';
   my $sweep = Bio::DB::HTS::VCFSweep->new(filename => $Bin . "/data/test.vcf.gz");
   my $h = $sweep->header ;
 
-  #At time of writing these tests with HTSlib v.1.3 there appears to be an issue
-  #with the forward sweep function. Hence the tests use the reverse sweep
   my $row = $sweep->next_row();
+  is $row->chromosome($h), "19", "Chromosome value read" ;
+
   $row = $sweep->previous_row();
   is $row->chromosome($h), "X", "Chromosome value read" ;
   is $row->position(), 10, "Position value read" ;
