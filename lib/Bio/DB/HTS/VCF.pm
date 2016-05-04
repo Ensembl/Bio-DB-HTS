@@ -19,6 +19,47 @@ limitations under the License.
 Alex Hodgkins
 Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 
+=head1 NAME
+
+Bio::DB::HTS::VCF -- Read VCF/BCF data files
+
+=head1 DESCRIPTION
+
+This module provides a Perl interface to the HTSlib library for
+reading variant calls stored in VCF and BCF file databases.
+
+Individual rows can be read in and fields accessed.
+
+A sweep set of methods allows running through rows one by one, either backwards or
+forwards through the file.
+
+=head1 SYNOPSIS
+
+=head2 VCF Row Objects
+
+  use Bio::DB::HTS::VCF ;
+
+  # VCF Row objects
+
+
+=head2 VCF Sweep Objects
+
+Open the file and process using sweeps. Note that the two methods maintain pointers that are
+independant of one another. Using the next_row() will start at the first row in the file
+and go on to the next row in subsequent reads. This is independant of previous_row() calls.
+Similarly previous_row() will start at the last row and read backwards.
+
+  use Bio::DB::HTS::VCF ;
+
+  my $sweep = Bio::DB::HTS::VCFSweep->new(filename => "data/test.vcf.gz");
+  $sweep->header;
+  my $row_forwards = $sweep->next_row(); #returns first row in file
+  my $row_backwards = $sweep->previous_row(); #returns last row in file
+  my $row_forwards = $sweep->next_row(); # returns second row in file
+  my $row_backwards = $sweep->previous_row(); #returns penultimate row in file
+
+
+
 =cut
 
 package Bio::DB::HTS::VCF;
