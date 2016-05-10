@@ -1,4 +1,4 @@
-use Test::More tests => 13, 'die';
+use Test::More tests => 12, 'die';
 
 use FindBin qw( $Bin );
 
@@ -15,7 +15,7 @@ is $v->num_variants, 9, 'correct number of variants identified in file';
   my $row = $sweep->next_row();
   is $row->chromosome($h), "19", "Chromosome value read" ;
   #This should one day be fixed to 2 - but the HTSlib API always returns 0 at the moment
-  is $row->num_filters(), "0", "Number of filters read" ;
+  #is $row->num_filters(), "2", "Number of filters read" ;
   #Once that is corrected, also add a test for the filters themselves
 
   $row = $sweep->previous_row();
