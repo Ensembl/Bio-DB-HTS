@@ -1395,16 +1395,16 @@ vcfrow_print(row,header)
   PREINIT:
      int i ;
   CODE:
-     printf("\n\nVCF data line:\n");
+     printf("\nVCF data line:\n");
      printf("chromosome:%s\t", bcf_hdr_id2name(header,row->rid));
      printf("position:%d\t", (row->pos+1));
      printf("QUAL:%f\t", row->qual);
      printf("ID:%s\t", row->d.id );
      printf("REF:%s\n", row->d.als);
-     printf("Num Alleles:%d\n", row->n_allele);
+     printf("Num Alleles:%d\n", row->n_allele-1);
      for( i=1 ; i<row->n_allele ; i++ )
      {
-#       printf("ALT[%d]=%s\t", i, row->d.allele[i]);
+       printf("ALT[%d]=%s\t", i, row->d.allele[i]);
      }
      printf("\nNum Filters:%d\n", row->d.n_flt);
 
