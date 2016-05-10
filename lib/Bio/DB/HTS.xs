@@ -1497,9 +1497,6 @@ vcfrow_num_filters(row)
      RETVAL
 
 
-
-
-
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
 
 Bio::DB::HTS::VCFSweep
