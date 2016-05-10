@@ -72,18 +72,18 @@ info("Performing build in $install_dir");
 # STEP 2: Check out HTSlib
 info("Checking out HTSlib");
 chdir $install_dir;
-system "git clone https://github.com/samtools/htslib.git";
+system "git clone -b master --depth=1 https://github.com/samtools/htslib.git";
 -d './htslib' or die "git clone seems to have failed. Could not find $install_dir/htslib directory";
 chdir './htslib';
-system "git checkout master";
+
 
 # STEP 3: Check out Bio-HTS
 info("Checking out Bio-HTS");
 chdir $install_dir;
-system "git clone https://github.com/Ensembl/Bio-HTS.git";
+system "git clone -b master --depth=1 https://github.com/Ensembl/Bio-HTS.git";
 -d './Bio-HTS' or die "git clone seems to have failed. Could not find $install_dir/Bio-HTS directory";
 chdir "./Bio-HTS";
-system "git checkout master";
+
 
 # Step 4: Build libhts.a
 info("Building HTSlib");
