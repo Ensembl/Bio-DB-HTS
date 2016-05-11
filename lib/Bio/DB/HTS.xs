@@ -1335,13 +1335,12 @@ vcf_file_open(packname, filename, mode="r")
 
 
 Bio::DB::HTS::VCF::Header
-vcf_file_header_read(vcf)
-    Bio::DB::HTS::VCFfile vcf
-    PROTOTYPE: $$
+vcf_file_header_read(vfile)
+    Bio::DB::HTS::VCFfile vfile
     PREINIT:
         bcf_hdr_t* h;
     CODE:
-        h = bcf_hdr_read(vcf);
+        h = bcf_hdr_read(vfile);
         RETVAL = h;
     OUTPUT:
         RETVAL
@@ -1349,7 +1348,8 @@ vcf_file_header_read(vcf)
 
 Bio::DB::HTS::VCF::Row
 vcf_file_read1(vfile,header)
-    Bio::DB::HTS::VCF vcf
+    Bio::DB::HTS::VCFfile vfile
+    Bio::DB::HTS::VCF::Header header
     PREINIT:
         bcf1_t *rec;
     CODE:
@@ -1378,7 +1378,7 @@ vcf_file_num_variants(packname,filename)
         bcf_hdr_t* h;
         bcf1_t *rec;
     CODE:
-        vfile = bcf_open(filename, mode);
+        vfile = bcf_open(filename, "r");
         h = bcf_hdr_read(vcf);
         rec = bcf_init();
         //loop through all the lines but don't do anything with them
@@ -1393,12 +1393,12 @@ vcf_file_num_variants(packname,filename)
 
 
 void
-vcf_file_vcf_close(vcf,h)
-    Bio::DB::HTS::VCF vcf
+vcf_file_vcf_close(vfile,h)
+    Bio::DB::HTS::VCFfile vfile
     Bio::DB::HTS::VCF::Header h
     CODE:
         bcf_hdr_destroy(h);
-        bcf_close(vcf);
+        bcf_close(vfile);
     OUTPUT:
 
 
