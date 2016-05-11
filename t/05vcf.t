@@ -42,9 +42,19 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   ok my $row = $v->next();
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "111", "Position value read" ;
+  is $row->id(), "testid", "ID value read" ;
+  is $row->num_filters(), 2, "Num Filters OK" ;
+
   ok $row = $v->next();
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "112", "Position value read" ;
+  is $row->quality(), "10", "Quality value read" ;
+  is $row->reference(), "A", "Reference value read" ;
+  is $row->num_alleles(), 1, "Num Alleles" ;
+  my $a_team = $row->get_alleles() ;
+  isa_ok($a_team, 'ARRAY');
+  is_deeply $a_team, ['G'], 'alleles are correct';
+
 
   $v->close();
 }
