@@ -1513,6 +1513,48 @@ vcfrow_num_filters(row)
   OUTPUT:
      RETVAL
 
+int
+vcfrow_has_filter(row,header,filter)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* filter
+  PREINIT:
+  CODE:
+     RETVAL = bcf_has_filter(header,row,filter) ;
+  OUTPUT:
+     RETVAL
+
+SV*
+vcfrow_get_filters(row,header)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+     int i;
+     int f;
+     AV *av_ref;
+  CODE:
+     av_ref = newAV();
+     for (i = 1; i < row->n_flt; ++i)
+     {
+        f = row->d.flt[i];
+        SV *sv_ref = newSVpv(, 0);
+        av_push(av_ref, sv_ref);
+     }
+     RETVAL = newRV_noinc((SV*)av_ref);
+  OUTPUT:
+     RETVAL
+
+
+int
+vcfrow_is_snp(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = bcf_is_snp(row) ;
+  OUTPUT:
+     RETVAL
+
+
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Sweep PREFIX = vcfs_
 

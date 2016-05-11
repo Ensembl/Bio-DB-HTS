@@ -1,4 +1,4 @@
-use Test::More tests => 14, 'die';
+use Test::More tests => 18, 'die';
 
 use FindBin qw( $Bin );
 
@@ -44,6 +44,8 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->position(), "111", "Position value read" ;
   is $row->id(), "testid", "ID value read" ;
   is $row->num_filters(), 2, "Num Filters OK" ;
+  is $row->has_filter($h,"DP50"), 1, "Actual Filter present" ;
+  is $row->has_filter($h,"."), 0, "PASS filter absent" ;
 
   ok $row = $v->next();
   is $row->chromosome($h), "19", "Chromosome value read" ;
@@ -51,10 +53,14 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->quality(), "10", "Quality value read" ;
   is $row->reference(), "A", "Reference value read" ;
   is $row->num_alleles(), 1, "Num Alleles" ;
+  is $row->is_snp(), 1, "Is SNP" ;
   my $a_team = $row->get_alleles() ;
   isa_ok($a_team, 'ARRAY');
   is_deeply $a_team, ['G'], 'alleles are correct';
-
+  is $row->num_filters(), 1, "Num Filters OK" ;
+  is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
+  is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
+  is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
 
   $v->close();
 }
