@@ -68,9 +68,9 @@ package Bio::DB::HTS::VCF;
 $Bio::DB::HTS::VCF::VERSION = '1.12';
 
 use Bio::DB::HTS;
-use Bio::DB::HTS::VCFfile;
 use strict;
 use warnings;
+use Carp 'croak';
 
 sub new {
   my $class         = shift;
@@ -116,8 +116,8 @@ sub close {
     }
 }
 
-package Bio::DB::HTS::VCFSweep ;
-$Bio::DB::HTS::VCFSweep::VERSION = '1.12';
+package Bio::DB::HTS::VCF::Sweep ;
+$Bio::DB::HTS::VCF::Sweep::VERSION = '1.12';
 
 use Bio::DB::HTS;
 use strict;

@@ -10,4 +10,4 @@ Bio::DB::HTS::Tabix::Iterator T_PTROBJ
 Bio::DB::HTS::VCFfile         T_PTROBJ
 Bio::DB::HTS::VCF::Header     T_PTROBJ
 Bio::DB::HTS::VCF::Row        T_PTROBJ
-Bio::DB::HTS::VCFSweep        T_PTROBJ
+Bio::DB::HTS::VCF::Sweep      T_PTROBJ

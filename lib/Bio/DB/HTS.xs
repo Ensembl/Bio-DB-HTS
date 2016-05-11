@@ -68,7 +68,7 @@ typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
 typedef vcfFile*        Bio__DB__HTS__VCFfile;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
-typedef bcf_sweep_t*    Bio__DB__HTS__VCFSweep;
+typedef bcf_sweep_t*    Bio__DB__HTS__VCF__Sweep;
 
 typedef struct {
   SV* callback;
@@ -1513,9 +1513,9 @@ vcfrow_num_filters(row)
      RETVAL
 
 
-MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFSweep PREFIX = vcfs_
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Sweep PREFIX = vcfs_
 
-Bio::DB::HTS::VCFSweep
+Bio::DB::HTS::VCF::Sweep
 vcfs_sweep_open(filename)
     char* filename
     PREINIT:
@@ -1528,7 +1528,7 @@ vcfs_sweep_open(filename)
 
 Bio::DB::HTS::VCF::Header
 vcfs_header_read(sweep)
-    Bio::DB::HTS::VCFSweep sweep
+    Bio::DB::HTS::VCF::Sweep sweep
     PREINIT:
         bcf_hdr_t* h;
     CODE:
@@ -1539,7 +1539,7 @@ vcfs_header_read(sweep)
 
 Bio::DB::HTS::VCF::Row
 vcfs_sweep_next(sweep)
-    Bio::DB::HTS::VCFSweep sweep
+    Bio::DB::HTS::VCF::Sweep sweep
     PREINIT:
         bcf1_t* line;
     CODE:
@@ -1557,7 +1557,7 @@ vcfs_sweep_next(sweep)
 
 Bio::DB::HTS::VCF::Row
 vcfs_sweep_previous(sweep)
-    Bio::DB::HTS::VCFSweep sweep
+    Bio::DB::HTS::VCF::Sweep sweep
     PREINIT:
         bcf1_t* line;
     CODE:
@@ -1575,7 +1575,7 @@ vcfs_sweep_previous(sweep)
 
 void
 vcfs_sweep_close(sweep)
-    Bio::DB::HTS::VCFSweep sweep
+    Bio::DB::HTS::VCF::Sweep sweep
     CODE:
         bcf_sweep_destroy(sweep);
   OUTPUT:

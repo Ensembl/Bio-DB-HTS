@@ -1,15 +1,12 @@
-use Test::More tests => 12, 'die';
+use Test::More tests => 13, 'die';
 
 use FindBin qw( $Bin );
 
 BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
 
-ok my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" );
-is $v->num_variants, 9, 'correct number of variants identified in file';
-
 {
   # Test sweep functions
-  my $sweep = Bio::DB::HTS::VCFSweep->new(filename => $Bin . "/data/test.vcf.gz");
+  my $sweep = Bio::DB::HTS::VCF::Sweep->new(filename => $Bin . "/data/test.vcf.gz");
   my $h = $sweep->header ;
 
   my $row = $sweep->next_row();
@@ -34,4 +31,11 @@ is $v->num_variants, 9, 'correct number of variants identified in file';
   is_deeply $a_team, ['GA', 'GAC'], 'alleles are correct';
 
   $sweep->close() ;
+}
+
+{
+  # Test standard functions
+  ok my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" );
+  is $v->num_variants(), 9, 'correct number of variants identified in file';
+  ok my $v->close();
 }
