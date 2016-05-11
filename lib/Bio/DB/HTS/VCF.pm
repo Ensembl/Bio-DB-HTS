@@ -102,7 +102,7 @@ sub header
 sub next
 {
     my $self = shift;
-    return bcf_num_variants($self->{vcf_file});
+    return $self->{vcf_file}->read1($self->{header});
 }
 
 sub num_variants
@@ -116,7 +116,7 @@ sub close
     my $self = shift;
     if ( $self->{vcf_file} )
     {
-        vcf_close($self->{vcf_file},$self->{header});
+        $self->{vcf_file}->vcf_close($self->{header});
     }
 }
 
