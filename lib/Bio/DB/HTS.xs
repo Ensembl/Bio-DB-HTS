@@ -65,7 +65,7 @@ typedef faidx_t*        Bio__DB__HTS__Fai;
 typedef bam_pileup1_t*  Bio__DB__HTS__Pileup;
 typedef tbx_t*          Bio__DB__HTS__Tabix;
 typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
-typedef bcf_srs_t*      Bio__DB__HTS__VCF;
+typedef vcfFile*        Bio__DB__HTS__VCFfile;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
 typedef bcf_sweep_t*    Bio__DB__HTS__VCFSweep;
@@ -1320,43 +1320,47 @@ tabix_tbx_iter_free(iter)
 	tbx_itr_destroy(iter);
 
 
-MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF PREFIX = vcf_
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFfile PREFIX = vcf_file_
 
-Bio::DB::HTS::VCF
-vcf_bcf_sr_open(filename)
+Bio::DB::HTS::VCFfile
+vcf_file_open(packname, filename, mode="r")
+    char* packname
     char* filename
-    PREINIT:
-        bcf_srs_t* sr = bcf_sr_init();
+    char* mode
+      PROTOTYPE: $$$
     CODE:
-        bcf_sr_add_reader(sr, filename);
-        RETVAL = sr;
+      RETVAL = bcf_open(filename, mode);
     OUTPUT:
-        RETVAL
+      RETVAL
 
 
 Bio::DB::HTS::VCF::Header
-vcf_bcf_header(vcf)
-    Bio::DB::HTS::VCF vcf
+vcf_file_header_read(vcf)
+    Bio::DB::HTS::VCFfile vcf
+    PROTOTYPE: $$
     PREINIT:
         bcf_hdr_t* h;
     CODE:
-        h = vcf->readers[0].header;
+        h = bcf_hdr_read(vcf);
         RETVAL = h;
     OUTPUT:
         RETVAL
 
 
 Bio::DB::HTS::VCF::Row
-vcf_bcf_next(vcf)
+vcf_file_read1(vfile,header)
     Bio::DB::HTS::VCF vcf
     PREINIT:
-        bcf1_t* line;
+        bcf1_t *rec;
     CODE:
-        if ( bcf_sr_next_line(vcf) ) {
-            line = bcf_sr_get_line(vcf, 0); //0 being the first and only reader
-            RETVAL = line;
+        rec = bcf_init();
+        if ( bcf_read(vfile, header, rec) != 0 )
+        {
+            bcf_unpack(rec, BCF_UN_ALL) ;
+            RETVAL = rec ;
         }
-        else {
+        else
+        {
             XSRETURN_EMPTY;
         }
     OUTPUT:
@@ -1364,7 +1368,7 @@ vcf_bcf_next(vcf)
 
 
 SV*
-vcf_bcf_num_variants(vcf)
+vcf_file_num_variants(vcf)
     Bio::DB::HTS::VCF vcf
     PREINIT:
         int n_records = 0;
@@ -1379,10 +1383,12 @@ vcf_bcf_num_variants(vcf)
 
 
 void
-vcf_bcf_sr_close(vcf)
+vcf_file_vcf_close(vcf,h)
     Bio::DB::HTS::VCF vcf
+    Bio::DB::HTS::VCF::Header h
     CODE:
-        bcf_sr_destroy(vcf);
+        bcf_hdr_destroy(h);
+        bcf_close(vcf);
     OUTPUT:
 
 

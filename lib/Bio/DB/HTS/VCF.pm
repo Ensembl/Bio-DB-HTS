@@ -68,6 +68,7 @@ package Bio::DB::HTS::VCF;
 $Bio::DB::HTS::VCF::VERSION = '1.12';
 
 use Bio::DB::HTS;
+use Bio::DB::HTS::VCFfile;
 use strict;
 use warnings;
 
@@ -77,27 +78,40 @@ sub new {
   my $filename = $args{filename};
   my $warnings = $args{warnings};
   die "Filename needed for VCF access" unless $filename;
-  my $reader = bcf_sr_open($filename);
-  die "Error getting reader" unless $reader;
+  my $reader = Bio::DB::HTS::VCFfile->open($filename) or
+    croak "Error getting VCF file reader: $!" ;
+  my $h = $reader->header_read() or
+    croak "Error getting VCF file header: $!" ;
 
   my $self = bless {
-                    bcf_reader => $reader,
+                    vcf_file => $reader,
                     filename => $filename,
+                    header => $h,
                    }, ref $class || $class;
   return $self;
 }
 
 
-sub num_variants {
+sub header {
     my $self = shift;
-    return bcf_num_variants($self->{bcf_reader});
+    return $self->{header};
 }
 
-sub DEMOLISH {
+sub next {
     my $self = shift;
+    return bcf_num_variants($self->{vcf_file});
+}
 
-    if ( $self->{bcf_reader} ) {
-        bcf_sr_close($self->{bcf_reader});
+sub num_variants {
+    my $self = shift;
+    return bcf_num_variants($self->{vcf_file});
+}
+
+sub close {
+    my $self = shift;
+    if ( $self->{vcf_file} )
+    {
+        vcf_close($self->{vcf_file},$self->{header});
     }
 }
 
