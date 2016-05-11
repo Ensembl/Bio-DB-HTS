@@ -72,7 +72,8 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-sub new {
+sub new
+{
   my $class         = shift;
   my (%args) = @_;
   my $filename = $args{filename};
@@ -92,12 +93,14 @@ sub new {
 }
 
 
-sub header {
+sub header
+{
     my $self = shift;
     return $self->{header};
 }
 
-sub next {
+sub next
+{
     my $self = shift;
     return bcf_num_variants($self->{vcf_file});
 }
@@ -105,10 +108,11 @@ sub next {
 sub num_variants
 {
     my $self = shift;
-    return Bio::DB::HTS::VCFfile->num_variants($self->{filename});
+    return $self->{vcf_file}->num_variants($self->{filename});
 }
 
-sub close {
+sub close
+{
     my $self = shift;
     if ( $self->{vcf_file} )
     {
@@ -162,10 +166,12 @@ sub previous_row
     return $b->sweep_previous();
 }
 
-sub close {
+sub close
+{
     my $self = shift;
 
-    if ( $self->{sweep} ) {
+    if ( $self->{sweep} )
+    {
         sweep_close($self->{sweep});
     }
 }

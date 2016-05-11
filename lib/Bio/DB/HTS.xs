@@ -1379,8 +1379,9 @@ vcf_file_num_variants(packname,filename)
         bcf1_t *rec;
     CODE:
         vfile = bcf_open(filename, "r");
-        h = bcf_hdr_read(vcf);
+        h = bcf_hdr_read(vfile);
         rec = bcf_init();
+
         //loop through all the lines but don't do anything with them
         while(bcf_read(vfile, h, rec) == 0)
         {
