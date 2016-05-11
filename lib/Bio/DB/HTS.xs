@@ -1354,7 +1354,7 @@ vcf_file_read1(vfile,header)
         bcf1_t *rec;
     CODE:
         rec = bcf_init();
-        if ( bcf_read(vfile, header, rec) != 0 )
+        if ( bcf_read(vfile, header, rec) == 0 )
         {
             bcf_unpack(rec, BCF_UN_ALL) ;
             RETVAL = rec ;
