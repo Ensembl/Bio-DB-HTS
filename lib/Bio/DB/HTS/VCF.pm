@@ -102,9 +102,10 @@ sub next {
     return bcf_num_variants($self->{vcf_file});
 }
 
-sub num_variants {
+sub num_variants
+{
     my $self = shift;
-    return bcf_num_variants($self->{vcf_file});
+    return Bio::DB::HTS::VCFfile->num_variants($self->{filename});
 }
 
 sub close {
