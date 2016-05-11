@@ -1327,7 +1327,7 @@ vcf_file_open(packname, filename, mode="r")
     char* packname
     char* filename
     char* mode
-      PROTOTYPE: $$$
+    PROTOTYPE: $$$
     CODE:
       RETVAL = bcf_open(filename, mode);
     OUTPUT:
@@ -1368,15 +1368,25 @@ vcf_file_read1(vfile,header)
 
 
 SV*
-vcf_file_num_variants(vcf)
-    Bio::DB::HTS::VCF vcf
+vcf_file_num_variants(packname,filename)
+    char* packname
+    char* filename
+    PROTOTYPE: $$$
     PREINIT:
         int n_records = 0;
+        vcfFile* vfile;
+        bcf_hdr_t* h;
+        bcf1_t *rec;
     CODE:
+        vfile = bcf_open(filename, mode);
+        h = bcf_hdr_read(vcf);
+        rec = bcf_init();
         //loop through all the lines but don't do anything with them
-        while ( bcf_sr_next_line(vcf) ) {
+        while(bcf_read(vfile, h, rec) == 0)
+        {
             ++n_records;
         }
+        bcf_close(vfile) ;
         RETVAL = newSViv(n_records);
     OUTPUT:
         RETVAL
