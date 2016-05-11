@@ -38,8 +38,13 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   ok my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" );
   is $v->num_variants(), 9, 'correct number of variants identified in file';
 
+  my $h = $v->header();
   ok my $row = $v->next();
   is $row->chromosome($h), "19", "Chromosome value read" ;
+  is $row->position(), "111", "Position value read" ;
+  ok $row = $v->next();
+  is $row->chromosome($h), "19", "Chromosome value read" ;
+  is $row->position(), "112", "Position value read" ;
 
   $v->close();
 }
