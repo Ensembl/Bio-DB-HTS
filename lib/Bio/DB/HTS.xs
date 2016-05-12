@@ -1524,26 +1524,6 @@ vcfrow_has_filter(row,header,filter)
   OUTPUT:
      RETVAL
 
-SV*
-vcfrow_get_filters(row,header)
-  Bio::DB::HTS::VCF::Row row
-  Bio::DB::HTS::VCF::Header header
-  PREINIT:
-     int i;
-     int f;
-     AV *av_ref;
-  CODE:
-     av_ref = newAV();
-     for (i = 1; i < row->n_flt; ++i)
-     {
-        f = row->d.flt[i];
-        SV *sv_ref = newSVpv(, 0);
-        av_push(av_ref, sv_ref);
-     }
-     RETVAL = newRV_noinc((SV*)av_ref);
-  OUTPUT:
-     RETVAL
-
 
 int
 vcfrow_is_snp(row)
