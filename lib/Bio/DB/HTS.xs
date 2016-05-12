@@ -1402,6 +1402,20 @@ vcf_file_vcf_close(vfile,h)
         bcf_close(vfile);
     OUTPUT:
 
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Header PREFIX = vcfh_
+
+
+SV*
+vcfh_version(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+  CODE:
+     RETVAL = newSVpv(bcf_hdr_get_version(header),0) ;
+  OUTPUT:
+     RETVAL
+
+
+
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Row PREFIX = vcfrow_
 

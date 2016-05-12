@@ -39,6 +39,8 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $v->num_variants(), 9, 'correct number of variants identified in file';
 
   my $h = $v->header();
+  is $h->version(), "VCFv4.0", "VCF Header version matches" ;
+
   ok my $row = $v->next();
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "111", "Position value read" ;
