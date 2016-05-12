@@ -61,6 +61,6 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
-
+  Bio::DB::HTS::VCF::Row->destroy($row) ;
   $v->close();
 }

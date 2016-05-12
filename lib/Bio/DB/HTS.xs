@@ -1535,6 +1535,15 @@ vcfrow_is_snp(row)
      RETVAL
 
 
+void
+vcfrow_destroy(packname, row)
+    char* packname
+    Bio::DB::HTS::VCF::Row row
+    CODE:
+      bcf_destroy(row);
+    OUTPUT:
+
+
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Sweep PREFIX = vcfs_
 
