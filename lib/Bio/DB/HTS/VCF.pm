@@ -41,6 +41,15 @@ forwards through the file.
 
   # VCF Row objects
 
+The variant types as defined in htslib.
+#define VCF_REF   0
+#define VCF_SNP   1
+#define VCF_MNP   2
+#define VCF_INDEL 4
+#define VCF_OTHER 8
+
+Note the index starts from 1 for the first allele.
+
 
 =head2 VCF Sweep Objects
 

@@ -1502,6 +1502,7 @@ vcfrow_num_alleles(row)
   OUTPUT:
      RETVAL
 
+
 SV*
 vcfrow_get_alleles(row)
   Bio::DB::HTS::VCF::Row row
@@ -1545,6 +1546,16 @@ vcfrow_is_snp(row)
   PREINIT:
   CODE:
      RETVAL = bcf_is_snp(row) ;
+  OUTPUT:
+     RETVAL
+
+
+int
+vcfrow_get_variant_type(row, allele_index)
+  Bio::DB::HTS::VCF::Row row
+  int allele_index
+  CODE:
+     RETVAL = bcf_get_variant_type(row, allele_index);
   OUTPUT:
      RETVAL
 
