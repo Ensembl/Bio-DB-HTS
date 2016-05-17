@@ -1,4 +1,4 @@
-use Test::More tests => 36, 'die';
+use Test::More tests => 38, 'die';
 
 use FindBin qw( $Bin );
 
@@ -35,16 +35,17 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
 
 {
   # Test standard functions
-  ok my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" );
+  ok my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" ), "file open";
   is $v->num_variants(), 9, 'correct number of variants identified in file';
 
   my $h = $v->header();
   is $h->version(), "VCFv4.0", "VCF Header version matches" ;
   is $h->num_samples(), 3, "Number of samples" ;
+  is_deeply $h->get_sample_names(), ['NA00001','NA00002','NA00003'], "sample names correct" ;
   is $h->num_seqnames(), 3, "Number of seqnames" ;
   is_deeply $h->get_seqnames(), ['19','20','X'], "sequence names correct" ;
 
-  ok my $row = $v->next();
+  ok my $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "111", "Position value read" ;
   is $row->id(), "testid", "ID value read" ;
@@ -54,7 +55,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->get_variant_type(1),1, "Variant type matches" ;
   Bio::DB::HTS::VCF::Row->destroy($row) ;
 
-  ok $row = $v->next();
+  ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "112", "Position value read" ;
   is $row->quality(), "10", "Quality value read" ;

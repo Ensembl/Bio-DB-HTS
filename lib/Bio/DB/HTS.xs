@@ -1426,6 +1426,25 @@ vcfh_num_samples(header)
      RETVAL
 
 
+SV*
+vcfh_get_sample_names(header)
+    Bio::DB::HTS::VCF::Header header
+    PREINIT:
+        int nsamples = 0 ;
+        int i ;
+        AV *av_ref;
+    CODE:
+        av_ref = newAV();
+        nsamples = bcf_hdr_nsamples(header) ;
+        for (i=0 ; i<nsamples ; i++)
+        {
+            SV *sv_ref = newSVpv(header->samples[i], 0);
+            av_push(av_ref, sv_ref);
+        }
+        RETVAL = newRV_noinc((SV*)av_ref);
+   OUTPUT:
+        RETVAL
+
 int
 vcfh_num_seqnames(header)
   Bio::DB::HTS::VCF::Header header
