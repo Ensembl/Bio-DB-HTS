@@ -1393,6 +1393,7 @@ vcf_file_num_variants(packname,filename)
         RETVAL
 
 
+
 void
 vcf_file_vcf_close(vfile,h)
     Bio::DB::HTS::VCFfile vfile
@@ -1413,6 +1414,18 @@ vcfh_version(header)
      RETVAL = newSVpv(bcf_hdr_get_version(header),0) ;
   OUTPUT:
      RETVAL
+
+
+int
+vcfh_num_samples(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+  CODE:
+     RETVAL = bcf_hdr_nsamples(header) ;
+  OUTPUT:
+     RETVAL
+
+
 
 
 

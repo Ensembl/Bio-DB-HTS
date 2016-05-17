@@ -40,6 +40,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
 
   my $h = $v->header();
   is $h->version(), "VCFv4.0", "VCF Header version matches" ;
+  is $h->num_samples(), 3, "Number of samples" ;
 
   ok my $row = $v->next();
   is $row->chromosome($h), "19", "Chromosome value read" ;
