@@ -1633,38 +1633,51 @@ vcfrow_get_variant_type(row, allele_index)
      RETVAL
 
 
-SV*
+void
 vcfrow_get_info(row,header,id)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
   char* id
   PREINIT:
       bcf_info_t* info ;
+      int i ;
   CODE:
+      printf( "rn6DEBUG: info entered\n" ) ;
       info = bcf_get_info(header, row, id);
       if( info == NULL )
       {
-          XSRETURN_EMPTY;
+          printf( "rn6DEBUG: info null\n" ) ;
+          XSRETURN_EMPTY ;
       }
-      if( info->type = BCF_BT_NULL )
+      if( info->type == BCF_BT_NULL )
       {
-          XSRETURN_EMPTY;
+          printf( "rn6DEBUG: info type null\n" ) ;
       }
-      if( info->type == BCF_BT_FLOAT && info->len == 1 )
+      printf( "rn6DEBUG: key %d\n", info->key ) ;
+      printf( "rn6DEBUG: type %d\n", info->type ) ;
+      printf( "rn6DEBUG: len %d\n", info->len ) ;
+      if( info->type == BCF_BT_FLOAT )
       {
-          RETVAL = info->v1.f ;
+          printf( "rn6DEBUG:info field is float %f, length %d\n", info->v1.f, info->len ) ;
       }
-      else if( info->type != NULL && info->len == 1 )
+      if( info->type == BCF_BT_INT8 )
       {
-          RETVAL = info->v1.i ;
+          printf( "rn6DEBUG:info field is int8 %d, length %d\n", info->v1.i, info->len ) ;
       }
-      else if( info->len > 1 )
+      if( info->type == BCF_BT_INT16 )
       {
-          //TODO - return a vector for the info fields
-          XSRETURN_EMPTY;
+          printf( "rn6DEBUG:info field is int16 %d, length %d\n", info->v1.i, info->len ) ;
       }
+      if( info->type == BCF_BT_INT32 )
+      {
+          printf( "rn6DEBUG:info field is int32 %d, length %d\n", info->v1.i, info->len ) ;
+      }
+      if( info->type == BCF_BT_CHAR )
+      {
+          printf( "rn6DEBUG:info field is char\n" ) ;
+      }
+      printf( "rn6DEBUG: exiting\n" ) ;
   OUTPUT:
-      RETVAL
 
 
 
