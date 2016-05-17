@@ -1633,6 +1633,41 @@ vcfrow_get_variant_type(row, allele_index)
      RETVAL
 
 
+SV*
+vcfrow_get_info(row,header,id)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* id
+  PREINIT:
+      bcf_info_t* info ;
+  CODE:
+      info = bcf_get_info(header, row, id);
+      if( info == NULL )
+      {
+          XSRETURN_EMPTY;
+      }
+      if( info->type = BCF_BT_NULL )
+      {
+          XSRETURN_EMPTY;
+      }
+      if( info->type == BCF_BT_FLOAT && info->len == 1 )
+      {
+          RETVAL = info->v1.f ;
+      }
+      else if( info->type != NULL && info->len == 1 )
+      {
+          RETVAL = info->v1.i ;
+      }
+      else if( info->len > 1 )
+      {
+          //TODO - return a vector for the info fields
+          XSRETURN_EMPTY;
+      }
+  OUTPUT:
+      RETVAL
+
+
+
 void
 vcfrow_destroy(packname, row)
     char* packname

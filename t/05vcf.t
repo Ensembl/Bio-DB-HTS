@@ -53,6 +53,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->has_filter($h,"DP50"), 1, "Actual Filter present" ;
   is $row->has_filter($h,"."), 0, "PASS filter absent" ;
   is $row->get_variant_type(1),1, "Variant type matches" ;
+  is $row->get_info(header,"NS"),3,"info integer field" ;
   Bio::DB::HTS::VCF::Row->destroy($row) ;
 
   ok $row = $v->next(), "Next row";
