@@ -1426,6 +1426,47 @@ vcfh_num_samples(header)
      RETVAL
 
 
+int
+vcfh_num_seqnames(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+        int nseq = 0 ;
+  CODE:
+     bcf_hdr_seqnames(header, &nseq);
+     RETVAL = nseq;
+  OUTPUT:
+     RETVAL
+
+
+SV*
+vcfh_get_seqnames(header)
+    Bio::DB::HTS::VCF::Header header
+    PREINIT:
+        char **seqnames = NULL;
+        int nseq = 0 ;
+        int i ;
+        AV *av_ref;
+    CODE:
+        av_ref = newAV();
+        seqnames = bcf_hdr_seqnames(header, &nseq);
+        for (i = 0; i < nseq; i++)
+        {
+            SV *sv_ref = newSVpv(seqnames[i], 0);
+            av_push(av_ref, sv_ref);
+        }
+        RETVAL = newRV_noinc((SV*)av_ref);
+   OUTPUT:
+        RETVAL
+
+
+void
+vcfh_free_seqnames(header,seqnames)
+    Bio::DB::HTS::VCF::Header header
+    char **seqnames
+    CODE:
+        free(seqnames);
+    OUTPUT:
+        RETVAL
 
 
 
