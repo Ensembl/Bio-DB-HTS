@@ -62,7 +62,14 @@ sub close {
     #xs method
     if ( defined $self->{_tabix_iter} ) {
         tbx_iter_free($self->{_tabix_iter});
+        delete $self->{_tabix_iter}; # delete once you've removed it. Prevents bad re-issuing of code
     }
+}
+
+sub DESTROY {
+     my $self = shift;
+     $self->close();
+     return;
 }
 
 1;

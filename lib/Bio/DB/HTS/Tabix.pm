@@ -112,11 +112,19 @@ sub close {
 
     if ( $self->{_htsfile} ) {
         Bio::DB::HTSfile::close($self->{_htsfile});
+        delete $self->{_htsfile};
     }
 
     if ( $self->{_tabix_index} ) {
         tbx_close($self->{_tabix_index});
+        delete $self->{_tabix_index};
     }
+}
+
+sub DESTROY {
+     my $self = shift;
+     $self->close();
+     return;
 }
 
 1;
