@@ -119,6 +119,12 @@ sub close {
     }
 }
 
+sub DESTROY {
+     my $self = shift;
+     $self->close();
+     return;
+}
+
 1;
 
 __END__
