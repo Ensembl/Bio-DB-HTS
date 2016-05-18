@@ -1308,6 +1308,7 @@ tabix_tbx_iter_next(iter, fp, t)
         XSRETURN_EMPTY;
 
     RETVAL = newSVpv(str.s, str.l);
+    free(str.s);
   OUTPUT:
     RETVAL
 
