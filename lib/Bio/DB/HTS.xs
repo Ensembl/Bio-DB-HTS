@@ -1633,7 +1633,7 @@ vcfrow_get_variant_type(row, allele_index)
      RETVAL
 
 
-void
+SV*
 vcfrow_get_info(row,header,id)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
@@ -1641,44 +1641,53 @@ vcfrow_get_info(row,header,id)
   PREINIT:
       bcf_info_t* info ;
       int i ;
+      int* buf_i;
+      float* buf_f;
+      char* buf_c;
+      AV* av_ref;
+      int result;
   CODE:
-      printf( "rn6DEBUG: info entered\n" ) ;
       info = bcf_get_info(header, row, id);
       if( info == NULL )
       {
-          printf( "rn6DEBUG: info null\n" ) ;
+          // info null, nothing to return
           XSRETURN_EMPTY ;
       }
+      av_ref = newAV();
       if( info->type == BCF_BT_NULL )
       {
-          printf( "rn6DEBUG: info type null\n" ) ;
+          buf_i = calloc(info->len, sizeof(int));
+          result = bcf_get_info_flag(header,row,id,buf_i,&(info->len)) ;
       }
-      printf( "rn6DEBUG: key %d\n", info->key ) ;
-      printf( "rn6DEBUG: type %d\n", info->type ) ;
-      printf( "rn6DEBUG: len %d\n", info->len ) ;
-      if( info->type == BCF_BT_FLOAT )
+      else if( info->type == BCF_BT_FLOAT )
       {
-          printf( "rn6DEBUG:info field is float %f, length %d\n", info->v1.f, info->len ) ;
+          buf_f = calloc(info->len, sizeof(int));
+          result = bcf_get_info_float(header,row,id,buf_f,&(info->len)) ;
       }
-      if( info->type == BCF_BT_INT8 )
+      else if( info->type == BCF_BT_CHAR )
       {
-          printf( "rn6DEBUG:info field is int8 %d, length %d\n", info->v1.i, info->len ) ;
+          buf_c = calloc(info->len+1, sizeof(char));
+          result = bcf_get_info_string(header,row,id,buf_c,&(info->len)) ;
       }
-      if( info->type == BCF_BT_INT16 )
+      else if( info->type == BCF_BT_INT32 )
       {
-          printf( "rn6DEBUG:info field is int16 %d, length %d\n", info->v1.i, info->len ) ;
+          buf_i = calloc(info->len, sizeof(int));
+          result = bcf_get_info_int32(header,row,id,buf_i,&(info->len)) ;
       }
-      if( info->type == BCF_BT_INT32 )
+      else if( info->type == BCF_BT_INT16 )
       {
-          printf( "rn6DEBUG:info field is int32 %d, length %d\n", info->v1.i, info->len ) ;
+          buf_i = calloc(info->len, sizeof(int));
+          result = bcf_get_info_int32(header,row,id,buf_i,&(info->len)) ;
       }
-      if( info->type == BCF_BT_CHAR )
+      else if( info->type == BCF_BT_INT32 )
       {
-          printf( "rn6DEBUG:info field is char\n" ) ;
+          buf_i = calloc(info->len, sizeof(int));
+          result = bcf_get_info_int32(header,row,id,buf_i,&(info->len)) ;
       }
-      printf( "rn6DEBUG: exiting\n" ) ;
+      //return a reference to our array
+      RETVAL = newRV_noinc((SV*)av_ref);
   OUTPUT:
-
+      RETVAL
 
 
 void
