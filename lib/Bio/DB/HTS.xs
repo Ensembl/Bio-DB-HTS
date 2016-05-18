@@ -1650,24 +1650,35 @@ vcfrow_get_info(row,header,id)
       info = bcf_get_info(header, row, id);
       if( info == NULL )
       {
+          printf("Null info item returned\n") ;
           // info null, nothing to return
           XSRETURN_EMPTY ;
       }
       av_ref = newAV();
+      printf("info type=%d, len=%d, tag=%s\n", info->type, info->len,id) ;
       if( info->type == BCF_BT_NULL )
       {
           buf_i = calloc(info->len, sizeof(int));
           result = bcf_get_info_flag(header,row,id,buf_i,&(info->len)) ;
+          for( i=0 ; i<info->len ; i++ )
+          {
+
+          }
       }
       else if( info->type == BCF_BT_FLOAT )
       {
-          buf_f = calloc(info->len, sizeof(int));
+          printf("Processing a float\n");
+          buf_f = calloc(info->len+1, sizeof(float)) ;
+          printf("Memory allocated\n");
           result = bcf_get_info_float(header,row,id,buf_f,&(info->len)) ;
+          printf("Result %d\n", result);
       }
       else if( info->type == BCF_BT_CHAR )
       {
           buf_c = calloc(info->len+1, sizeof(char));
-          result = bcf_get_info_string(header,row,id,buf_c,&(info->len)) ;
+          result = bcf_get_info_string(header,row,id,&buf_c,&(info->len)) ;
+          printf("Read in String %s\n", buf_c);
+          av_push(av_ref, newSVpv(buf_c, info->len+1));
       }
       else if( info->type == BCF_BT_INT32 )
       {

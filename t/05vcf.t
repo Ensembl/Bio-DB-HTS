@@ -53,10 +53,13 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->has_filter($h,"DP50"), 1, "Actual Filter present" ;
   is $row->has_filter($h,"."), 0, "PASS filter absent" ;
   is $row->get_variant_type(1),1, "Variant type matches" ;
+  my $info_result ;
   $row->get_info($h,"DB") ;
   $row->get_info($h,"NS") ;
-  $row->get_info($h,"AF") ;
-  $row->get_info($h,"AA") ;
+  #$row->get_info($h,"AF") ;
+  $info_result = $row->get_info($h,"TT") ;
+  isa_ok($info_result, 'ARRAY');
+  is_deeply $info_result, ['STR1,STR2'], 'info strings read correctly';
   Bio::DB::HTS::VCF::Row->destroy($row) ;
 
   ok $row = $v->next(), "Next row";
