@@ -121,11 +121,7 @@ sub close {
     }
 }
 
-sub DESTROY {
-     my $self = shift;
-     $self->close();
-     return;
-}
+
 
 1;
 
@@ -148,6 +144,7 @@ Bio::DB::HTS::Tabix - Object oriented access to the underlying tbx C methods
     while ( my $n = $iter->next ) {
         say $n;
     }
+    $tabix->close;
 
 =head1 DESCRIPTION
 
