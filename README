@@ -34,7 +34,7 @@ will install a version of Bio::DB::HTS. Be aware that this option depends on you
 
 ## MULTI-STEP INSTALLATIONS (Build.PL)
 
-You may require a more custom install e.g. htslib in a specific directory or statically included, or Bio::DB::HTS installed in a specific location. Typically these will involve downloading, compiling and installing htslib, followed by downloading compiling and installing Bio::DB:HTS.
+You may require a more custom install e.g. a specific or customised version of HTSlib, HTSlib installed in a specific directory, or statically included, or Bio::DB::HTS installed in a specific location. Typically these will involve downloading, compiling and installing HTSlib first, followed by downloading compiling and installing Bio::DB:HTS.
 
 You can see various examples of installing HTSlib and then Bio::DB::HTS using Build.PL by examining scripts/build_options.sh
 
