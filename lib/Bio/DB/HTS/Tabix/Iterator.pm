@@ -67,9 +67,10 @@ sub close {
 }
 
 sub DESTROY {
-     my $self = shift;
-     $self->close();
-     return;
+    my $self = shift;
+    return if ref($self) ne 'HASH';
+    $self->close();
+    return;
 }
 
 1;
