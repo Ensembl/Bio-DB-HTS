@@ -1,6 +1,8 @@
 
-1.13 (underway)
+1.13
    * removed file existence Tabix check as it prevents remote access
+   * Tabix bugfix
+   * Build git clone commands use branch and depth options
 
 1.12
    * Build procedure static option added, courtesy of David Jones
