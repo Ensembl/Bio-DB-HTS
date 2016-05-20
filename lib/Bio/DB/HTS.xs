@@ -51,6 +51,7 @@ limitations under the License.
 #include "bgzf.h"
 #include "vcf.h"
 #include "synced_bcf_reader.h"
+#include <zlib.h>
 
 /* stolen from bam_aux.c */
 #define BAM_MAX_REGION 1<<29
@@ -66,7 +67,11 @@ typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
 typedef bcf_srs_t*      Bio__DB__HTS__VCF;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
-
+KSEQ_INIT(gzFile, gzread)
+typedef gzFile          Bio__DB__HTS__Kseq;
+typedef kseq_t*         Bio__DB__HTS__Kseq__Iterator;
+typedef kstream_t*      Bio__DB__HTS__Kseq__Kstream;
+typedef kstring_t*      Bio__DB__HTS__Kseq__Kstring;
 
 typedef struct {
   SV* callback;
@@ -1388,3 +1393,237 @@ vcf_bcf_sr_close(vcf)
     CODE:
         bcf_sr_destroy(vcf);
   OUTPUT:
+
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Kseq PREFIX = kseq_
+
+Bio::DB::HTS::Kseq
+kseq_new(package, filename, mode="r")
+  char *package
+  char *filename
+  char *mode
+  PROTOTYPE: $$$
+  CODE:
+      RETVAL = gzopen(filename, mode);
+  OUTPUT:
+      RETVAL
+
+Bio::DB::HTS::Kseq
+kseq_newfh(pack, fh, mode="r")
+  char *pack
+  PerlIO* fh
+  char *mode
+  PROTOTYPE: $$$
+  CODE:
+      RETVAL = gzdopen(PerlIO_fileno(fh), mode);
+  OUTPUT:
+      RETVAL
+
+Bio::DB::HTS::Kseq::Iterator
+kseq_iterator(fp)
+  Bio::DB::HTS::Kseq fp
+  PROTOTYPE: $
+  CODE:
+      RETVAL = kseq_init(fp);
+  OUTPUT:
+      RETVAL
+
+void
+kseq_DESTROY(fp)
+  Bio::DB::HTS::Kseq fp
+  PROTOTYPE: $
+  CODE:
+      gzclose(fp);
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Kseq::Kstream   PREFIX=kstream_
+
+Bio::DB::HTS::Kseq::Kstream
+kstream_new(package, fh)
+  char *package
+  Bio::DB::HTS::Kseq fh
+  PROTOTYPE: $$
+  CODE:
+      RETVAL = ks_init(fh);
+  OUTPUT:
+      RETVAL
+
+int
+kstream_begin(kstr)
+  Bio::DB::HTS::Kseq::Kstream kstr
+  PROTOTYPE: $
+  CODE:
+      RETVAL = kstr->begin;
+  OUTPUT:
+      RETVAL
+
+int
+kstream_end(kstr)
+  Bio::DB::HTS::Kseq::Kstream kstr
+  PROTOTYPE: $
+  CODE:
+      RETVAL = kstr->end;
+  OUTPUT:
+      RETVAL
+
+int
+kstream_is_eof(kstr)
+  Bio::DB::HTS::Kseq::Kstream kstr
+  PROTOTYPE: $
+  CODE:
+      RETVAL = kstr->is_eof;
+  OUTPUT:
+      RETVAL
+
+char *
+kstream_buffer(kstr)
+  Bio::DB::HTS::Kseq::Kstream kstr
+  PROTOTYPE: $
+  CODE:
+      RETVAL = (char *)kstr->buf;
+  OUTPUT:
+      RETVAL
+
+Bio::DB::HTS::Kseq
+kstream_fh(kstr)
+  Bio::DB::HTS::Kseq::Kstream kstr
+  PROTOTYPE: $
+  CODE:
+      RETVAL = kstr->f;
+  OUTPUT:
+      RETVAL
+
+void
+kstream_DESTROY(kstr)
+  Bio::DB::HTS::Kseq::Kstream kstr
+  PROTOTYPE: $
+  CODE:
+      ks_destroy(kstr);
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Kseq::Iterator   PREFIX=kseqit_
+
+SV *
+kseqit_next_seq_hash(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  INIT:
+      HV * results;
+  CODE:
+      results = (HV *)sv_2mortal((SV *)newHV());
+      if (kseq_read(it) >= 0) {
+          hv_stores(results, "name", newSVpvn(it->name.s, it->name.l));
+          hv_stores(results, "desc", newSVpvn(it->comment.s, it->comment.l));
+          hv_stores(results, "seq", newSVpvn(it->seq.s, it->seq.l));
+          hv_stores(results, "qual", newSVpvn(it->qual.s, it->qual.l));
+          RETVAL = newRV((SV *)results);
+      } else {
+          XSRETURN_UNDEF;
+      }
+  OUTPUT:
+      RETVAL
+
+SV *
+kseqit_next_seq(it)
+Bio::DB::HTS::Kseq::Iterator it
+PROTOTYPE: $
+INIT:
+    HV * results;
+    HV * class_stash;
+    SV * ref;
+CODE:
+    results = (HV *)sv_2mortal((SV *)newHV());
+    class_stash = gv_stashpv("Bio::DB::HTS::Kseq::Record", 0);
+    if (kseq_read(it) >= 0) {
+        hv_stores(results, "name", newSVpvn(it->name.s, it->name.l));
+        hv_stores(results, "desc", newSVpvn(it->comment.s, it->comment.l));
+        hv_stores(results, "seq", newSVpvn(it->seq.s, it->seq.l));
+        hv_stores(results, "qual", newSVpvn(it->qual.s, it->qual.l));
+        ref = newRV((SV *)results);
+        sv_bless(ref, class_stash);
+        RETVAL = ref;
+    } else {
+        XSRETURN_UNDEF;
+    }
+OUTPUT:
+    RETVAL
+
+int
+kseqit_read(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  INIT:
+  CODE:
+      RETVAL = kseq_read(it);
+  OUTPUT:
+      RETVAL
+
+void
+kseqit_rewind(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      /* kseq_rewind() doesn't completely rewind the file,
+        just resets markers */
+      kseq_rewind(it);
+      /* use zlib to do so */
+      gzrewind(it->f->f);
+
+Bio::DB::HTS::Kseq::Kstream
+kseqit_kstream(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      RETVAL = it->f;
+  OUTPUT:
+      RETVAL
+
+char *
+kseqit_name(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      RETVAL = it->name.s;
+  OUTPUT:
+      RETVAL
+
+char *
+kseqit_comment(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      RETVAL = it->comment.s;
+  OUTPUT:
+      RETVAL
+
+char *
+kseqit_seq(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      RETVAL = it->seq.s;
+  OUTPUT:
+      RETVAL
+
+char *
+kseqit_qual(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      RETVAL = it->qual.s;
+  OUTPUT:
+      RETVAL
+
+int
+kseqit_last_char(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      RETVAL = it->last_char;
+  OUTPUT:
+      RETVAL
+
+void
+kseqit_DESTROY(it)
+  Bio::DB::HTS::Kseq::Iterator it
+  PROTOTYPE: $
+  CODE:
+      kseq_destroy(it);
