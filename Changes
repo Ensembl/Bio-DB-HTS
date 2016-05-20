@@ -1,3 +1,5 @@
+1.14 (in progress)
+   * Tabix bugfix: see GitHub issue #17
 
 1.13
    * removed file existence Tabix check as it prevents remote access
