@@ -23,6 +23,7 @@ $Bio::DB::HTS::Tabix::Iterator::VERSION = '1.13';
 
 use strict;
 use warnings;
+use Scalar::Util qw/reftype/;
 
 #this class is just a wrapper around the tabix_iter_next method,
 #all the attributes it needs come from the main Tabix method
@@ -68,7 +69,7 @@ sub close {
 
 sub DESTROY {
     my $self = shift;
-    return if ref($self) ne 'HASH';
+    return if reftype($self) ne 'HASH';
     $self->close();
     return;
 }
