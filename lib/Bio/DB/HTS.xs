@@ -1658,20 +1658,22 @@ vcfrow_get_info(row,header,id)
       printf("info type=%d, len=%d, tag=%s\n", info->type, info->len,id) ;
       if( info->type == BCF_BT_NULL )
       {
+          printf("Processing a BCF_BT_NULL\n");
           buf_i = calloc(info->len, sizeof(int));
           result = bcf_get_info_flag(header,row,id,buf_i,&(info->len)) ;
           for( i=0 ; i<info->len ; i++ )
           {
-
+            av_push(av_ref, newSViv(buf_i[i])) ;
           }
       }
       else if( info->type == BCF_BT_FLOAT )
       {
-          printf("Processing a float\n");
-          buf_f = calloc(info->len+1, sizeof(float)) ;
-          printf("Memory allocated\n");
-          result = bcf_get_info_float(header,row,id,buf_f,&(info->len)) ;
-          printf("Result %d\n", result);
+          buf_f = calloc(info->len, sizeof(float));
+          result = bcf_get_info_float(header, row, id, &buf_f, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSVnv(buf_f[i])) ;
+          }
       }
       else if( info->type == BCF_BT_CHAR )
       {
@@ -1683,17 +1685,29 @@ vcfrow_get_info(row,header,id)
       else if( info->type == BCF_BT_INT32 )
       {
           buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header,row,id,buf_i,&(info->len)) ;
+          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
       }
       else if( info->type == BCF_BT_INT16 )
       {
           buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header,row,id,buf_i,&(info->len)) ;
+          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
       }
-      else if( info->type == BCF_BT_INT32 )
+      else if( info->type == BCF_BT_INT8 )
       {
           buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header,row,id,buf_i,&(info->len)) ;
+          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
       }
       //return a reference to our array
       RETVAL = newRV_noinc((SV*)av_ref);
