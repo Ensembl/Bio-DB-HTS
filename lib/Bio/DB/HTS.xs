@@ -1658,15 +1658,15 @@ vcfrow_get_info(row,header,id)
 
       if( info->type == BCF_BT_NULL )
       {
-          printf("info type=%d, len=%d, tag=%s\n", info->type, info->len,id);
-          buf_i = calloc(info->len, sizeof(int)) ;
+          buf_i = calloc(1, sizeof(int)) ;
           result = bcf_get_info_flag(header,row,id,&buf_i,&(info->len));
-          printf("flag result %d\n", result);
-          printf("flag value %d\n", buf_i[0]);
-          for( i=0 ; i<result ; i++ )
+          if( result == 1 )
           {
-            printf("copying into array value=%d\n", buf_i[i]);
-            av_push(av_ref, newSViv(buf_i[i]));
+            av_push(av_ref, newSViv(1));
+          }
+          else
+          {
+            av_push(av_ref, newSViv(0));
           }
       }
       else if( info->type == BCF_BT_FLOAT )
