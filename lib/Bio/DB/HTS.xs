@@ -1305,11 +1305,14 @@ tabix_tbx_iter_next(iter, fp, t)
   PREINIT:
     kstring_t str = {0,0,0};
   CODE:
-    if (tbx_itr_next(fp, t, iter, &str) < 0)
+    if (tbx_itr_next(fp, t, iter, &str) < 0) {
+        free(str.s);
         XSRETURN_EMPTY;
+    }
 
     RETVAL = newSVpv(str.s, str.l);
     free(str.s);
+
   OUTPUT:
     RETVAL
 
