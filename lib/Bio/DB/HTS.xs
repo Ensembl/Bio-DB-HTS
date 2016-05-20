@@ -1655,15 +1655,18 @@ vcfrow_get_info(row,header,id)
           XSRETURN_EMPTY ;
       }
       av_ref = newAV();
-      printf("info type=%d, len=%d, tag=%s\n", info->type, info->len,id) ;
+
       if( info->type == BCF_BT_NULL )
       {
-          printf("Processing a BCF_BT_NULL\n");
-          buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_flag(header,row,id,buf_i,&(info->len)) ;
-          for( i=0 ; i<info->len ; i++ )
+          printf("info type=%d, len=%d, tag=%s\n", info->type, info->len,id);
+          buf_i = calloc(info->len, sizeof(int)) ;
+          result = bcf_get_info_flag(header,row,id,&buf_i,&(info->len));
+          printf("flag result %d\n", result);
+          printf("flag value %d\n", buf_i[0]);
+          for( i=0 ; i<result ; i++ )
           {
-            av_push(av_ref, newSViv(buf_i[i])) ;
+            printf("copying into array value=%d\n", buf_i[i]);
+            av_push(av_ref, newSViv(buf_i[i]));
           }
       }
       else if( info->type == BCF_BT_FLOAT )
@@ -1679,7 +1682,6 @@ vcfrow_get_info(row,header,id)
       {
           buf_c = calloc(info->len+1, sizeof(char));
           result = bcf_get_info_string(header,row,id,&buf_c,&(info->len)) ;
-          printf("Read in String %s\n", buf_c);
           av_push(av_ref, newSVpv(buf_c, info->len+1));
       }
       else if( info->type == BCF_BT_INT32 )

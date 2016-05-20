@@ -55,7 +55,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->get_variant_type(1),1, "Variant type matches" ;
 
   my $info_result ;
-  $row->get_info($h,"AF") ;
+  $row->get_info($h,"DB") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [1], 'info flag read correctly';
 
