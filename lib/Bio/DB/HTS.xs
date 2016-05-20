@@ -1267,6 +1267,7 @@ tabix_tbx_header(fp, tabix)
         XSRETURN_EMPTY;
 
     RETVAL = newRV_noinc((SV*) av_ref);
+    free(str.s);
   OUTPUT:
     RETVAL
 
