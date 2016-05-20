@@ -25,6 +25,7 @@ $Bio::DB::HTS::Tabix::VERSION = '1.13';
 use strict;
 use warnings;
 
+use Scalar::Util qw/reftype/;
 
 sub new {
   my $class         = shift;
@@ -123,7 +124,7 @@ sub close {
 
 sub DESTROY {
     my $self = shift;
-    return if ref($self) ne 'HASH';
+    return if reftype($self) ne 'HASH';
     $self->close();
     return;
 }
