@@ -1484,8 +1484,8 @@ vcfh_free_seqnames(header,seqnames)
     char **seqnames
     CODE:
         free(seqnames);
-    OUTPUT:
-        RETVAL
+
+
 
 
 
@@ -1668,6 +1668,7 @@ vcfrow_get_info(row,header,id)
           {
             av_push(av_ref, newSViv(0));
           }
+          free(buf_i);
       }
       else if( info->type == BCF_BT_FLOAT )
       {
@@ -1677,12 +1678,14 @@ vcfrow_get_info(row,header,id)
           {
             av_push(av_ref, newSVnv(buf_f[i])) ;
           }
+          free(buf_f);
       }
       else if( info->type == BCF_BT_CHAR )
       {
           buf_c = calloc(info->len+1, sizeof(char));
           result = bcf_get_info_string(header,row,id,&buf_c,&(info->len)) ;
           av_push(av_ref, newSVpv(buf_c, info->len+1));
+          free(buf_c);
       }
       else if( info->type == BCF_BT_INT32 )
       {
@@ -1692,6 +1695,7 @@ vcfrow_get_info(row,header,id)
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
+          free(buf_i);
       }
       else if( info->type == BCF_BT_INT16 )
       {
@@ -1701,6 +1705,7 @@ vcfrow_get_info(row,header,id)
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
+          free(buf_i);
       }
       else if( info->type == BCF_BT_INT8 )
       {
@@ -1710,6 +1715,7 @@ vcfrow_get_info(row,header,id)
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
+          free(buf_i);
       }
       //return a reference to our array
       RETVAL = newRV_noinc((SV*)av_ref);
