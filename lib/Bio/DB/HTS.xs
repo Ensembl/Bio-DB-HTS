@@ -1645,23 +1645,24 @@ vcfrow_get_info_type(row,header,id)
       info = bcf_get_info(header, row, id);
       if( info == NULL )
       {
-        RETVAL = "ID_NOT_FOUND" ;
+        av_push(av_ref, newSVpv("", 1) ) ;
+        RETVAL = newRV_noinc((SV*) av_ref) ;
       }
       else
       {
         switch( info->type )
         {
           case BCF_BT_FLOAT:
-               = newSVpv("Float", 0);
+               av_push(av_ref, newSVpv("Float", 6) ) ;
                break ;
-          case BCF_BT_FLAG:
-               = newSVpv("Flag", 0);
+          case BCF_BT_NULL:
+               av_push(av_ref, newSVpv("Flag", 5));
                break ;
           case BCF_BT_CHAR:
-               = newSVpv("String", 0);
+               av_push(av_ref, newSVpv("String", 7));
                break ;
           default:
-               = newSVpv("Integer", 0);
+               av_push(av_ref, newSVpv("Integer", 8));
         }
         RETVAL = newRV_noinc((SV*) av_ref);
       }

@@ -58,6 +58,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   $info_result = $row->get_info($h,"DB") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [1], 'info flag read correctly';
+  is $row->get_info_type($h,"DB"), "Flag", "info flag type correct" ;
 
   $info_result = $row->get_info($h,"AF") ;
   isa_ok($info_result, 'ARRAY');
