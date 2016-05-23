@@ -1684,14 +1684,14 @@ vcfrow_get_info(row,header,id)
       info = bcf_get_info(header, row, id);
       if( info == NULL )
       {
-          printf("Null info item returned\n") ;
           // info null, nothing to return
-          XSRETURN_EMPTY ;
+          RETVAL = newSVpv("ID_NOT_FOUND",0);
       }
-      av_ref = newAV();
-
-      if( info->type == BCF_BT_NULL )
+      else
       {
+        av_ref = newAV();
+        if( info->type == BCF_BT_NULL )
+        {
           buf_i = calloc(1, sizeof(int)) ;
           result = bcf_get_info_flag(header,row,id,&buf_i,&(info->len));
           if( result == 1 )
@@ -1703,9 +1703,9 @@ vcfrow_get_info(row,header,id)
             av_push(av_ref, newSViv(0));
           }
           free(buf_i);
-      }
-      else if( info->type == BCF_BT_FLOAT )
-      {
+        }
+        else if( info->type == BCF_BT_FLOAT )
+        {
           buf_f = calloc(info->len, sizeof(float));
           result = bcf_get_info_float(header, row, id, &buf_f, &(info->len)) ;
           for( i=0 ; i<result ; i++ )
@@ -1713,16 +1713,16 @@ vcfrow_get_info(row,header,id)
             av_push(av_ref, newSVnv(buf_f[i])) ;
           }
           free(buf_f);
-      }
-      else if( info->type == BCF_BT_CHAR )
-      {
+        }
+        else if( info->type == BCF_BT_CHAR )
+        {
           buf_c = calloc(info->len+1, sizeof(char));
           result = bcf_get_info_string(header,row,id,&buf_c,&(info->len)) ;
           av_push(av_ref, newSVpv(buf_c, info->len+1));
           free(buf_c);
-      }
-      else if( info->type == BCF_BT_INT32 )
-      {
+        }
+        else if( info->type == BCF_BT_INT32 )
+        {
           buf_i = calloc(info->len, sizeof(int));
           result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
           for( i=0 ; i<result ; i++ )
@@ -1730,9 +1730,9 @@ vcfrow_get_info(row,header,id)
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
           free(buf_i);
-      }
-      else if( info->type == BCF_BT_INT16 )
-      {
+        }
+        else if( info->type == BCF_BT_INT16 )
+        {
           buf_i = calloc(info->len, sizeof(int));
           result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
           for( i=0 ; i<result ; i++ )
@@ -1740,9 +1740,9 @@ vcfrow_get_info(row,header,id)
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
           free(buf_i);
-      }
-      else if( info->type == BCF_BT_INT8 )
-      {
+        }
+        else if( info->type == BCF_BT_INT8 )
+        {
           buf_i = calloc(info->len, sizeof(int));
           result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
           for( i=0 ; i<result ; i++ )
@@ -1750,10 +1750,11 @@ vcfrow_get_info(row,header,id)
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
           free(buf_i);
+        }
+        //return a reference to our array
+        RETVAL = newRV_noinc((SV*)av_ref);
       }
 
-      //return a reference to our array
-      RETVAL = newRV_noinc((SV*)av_ref);
   OUTPUT:
       RETVAL
 
@@ -1809,57 +1810,59 @@ vcfrow_get_format(row,header,id)
       fmt = bcf_get_fmt(header, row, id);
       if( fmt == NULL )
       {
-          printf("Null format item returned\n") ;
           // info null, nothing to return
-          XSRETURN_EMPTY ;
+          RETVAL = newSVpv("ID_NOT_FOUND",0);
       }
-      av_ref = newAV();
-
-      if( fmt->type == BCF_BT_FLOAT )
+      else
       {
+        av_ref = newAV();
+
+        if( fmt->type == BCF_BT_FLOAT )
+        {
           result = bcf_get_format_float(header, row, id, &buf_f, &ndst) ;
           for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSVnv(buf_f[i])) ;
           }
           free(buf_f);
-      }
-      else if( fmt->type == BCF_BT_CHAR )
-      {
+        }
+        else if( fmt->type == BCF_BT_CHAR )
+        {
           result = bcf_get_format_char(header,row,id,&buf_c,&ndst) ;
           av_push(av_ref, newSVpv(buf_c, ndst+1));
           free(buf_c);
-      }
-      else if( fmt->type == BCF_BT_INT32 )
-      {
+        }
+        else if( fmt->type == BCF_BT_INT32 )
+        {
           result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
           for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
           free(buf_i);
-      }
-      else if( fmt->type == BCF_BT_INT16 )
-      {
+        }
+        else if( fmt->type == BCF_BT_INT16 )
+        {
           result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
           for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
           free(buf_i);
-      }
-      else if( fmt->type == BCF_BT_INT8 )
-      {
+        }
+        else if( fmt->type == BCF_BT_INT8 )
+        {
           result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
           for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
           free(buf_i);
+        }
+        //return a reference to our array
+        RETVAL = newRV_noinc((SV*)av_ref);
       }
 
-      //return a reference to our array
-      RETVAL = newRV_noinc((SV*)av_ref);
   OUTPUT:
       RETVAL
 

@@ -1,4 +1,4 @@
-use Test::More tests => 45, 'die';
+use Test::More tests => 58, 'die';
 
 use FindBin qw( $Bin );
 
@@ -107,7 +107,8 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   isa_ok($fmt_result, 'ARRAY');
   #TODO resolve how these translate to the strings in htslib
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
-
+  is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found ok';
+  is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found ok';
 
   $v->close();
 }
