@@ -1799,10 +1799,11 @@ vcfrow_get_format(row,header,id)
   PREINIT:
       bcf_fmt_t* fmt ;
       int i ;
-      int* buf_i;
-      float* buf_f;
-      char* buf_c;
+      int* buf_i = NULL ;
+      float* buf_f = NULL ;
+      char* buf_c = NULL ;
       AV* av_ref;
+      int ndst = 0 ;
       int result;
   CODE:
       fmt = bcf_get_fmt(header, row, id);
@@ -1816,9 +1817,8 @@ vcfrow_get_format(row,header,id)
 
       if( fmt->type == BCF_BT_FLOAT )
       {
-          buf_f = calloc(fmt->n, sizeof(float));
-          result = bcf_get_format_float(header, row, id, &buf_f, &(fmt->n)) ;
-          for( i=0 ; i<result ; i++ )
+          result = bcf_get_format_float(header, row, id, &buf_f, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSVnv(buf_f[i])) ;
           }
@@ -1826,40 +1826,36 @@ vcfrow_get_format(row,header,id)
       }
       else if( fmt->type == BCF_BT_CHAR )
       {
-          buf_c = calloc(fmt->n+1, sizeof(char));
-          result = bcf_get_format_char(header,row,id,&buf_c,&(fmt->n)) ;
-          av_push(av_ref, newSVpv(buf_c, fmt->n+1));
+          result = bcf_get_format_char(header,row,id,&buf_c,&ndst) ;
+          av_push(av_ref, newSVpv(buf_c, ndst+1));
           free(buf_c);
       }
       else if( fmt->type == BCF_BT_INT32 )
       {
-          buf_i = calloc(fmt->n, sizeof(int));
-          result = bcf_get_format_int32(header, row, id, &buf_i, &(fmt->n)) ;
-          for( i=0 ; i<result ; i++ )
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
-#          free(buf_i);
+          free(buf_i);
       }
       else if( fmt->type == BCF_BT_INT16 )
       {
-          buf_i = calloc(fmt->n, sizeof(int));
-          result = bcf_get_format_int32(header, row, id, &buf_i, &(fmt->n)) ;
-          for( i=0 ; i<result ; i++ )
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
-#          free(buf_i);
+          free(buf_i);
       }
       else if( fmt->type == BCF_BT_INT8 )
       {
-          buf_i = calloc(fmt->n, sizeof(int));
-          result = bcf_get_format_int32(header, row, id, &buf_i, &(fmt->n)) ;
-          for( i=0 ; i<result ; i++ )
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
           {
             av_push(av_ref, newSViv(buf_i[i])) ;
           }
-#          free(buf_i);
+          free(buf_i);
       }
 
       //return a reference to our array
