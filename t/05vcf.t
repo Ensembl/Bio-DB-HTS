@@ -100,9 +100,14 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "20", "Chromosome value read" ;
   is $row->get_format_type($h,"DP"), "Integer", "int format type correct" ;
-  $fmt_result = $row->get_format($h,"DP") ;
+  my $fmt_result = $row->get_format($h,"DP") ;
   isa_ok($fmt_result, 'ARRAY');
   is_deeply $fmt_result, [1,8,5], 'format ints read correctly' ;
+  my $fmt_result = $row->get_genotypes($h) ;
+  isa_ok($fmt_result, 'ARRAY');
+  #TODO resolve how these translate to the strings in htslib
+  is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
+
 
   $v->close();
 }

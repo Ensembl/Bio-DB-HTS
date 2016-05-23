@@ -1865,6 +1865,33 @@ vcfrow_get_format(row,header,id)
 
 
 
+SV*
+vcfrow_get_genotypes(row,header)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+      bcf_fmt_t* fmt ;
+      int ngt ;
+      int* gt_arr = NULL ;
+      int ngt_arr = 0;
+      AV* av_ref;
+      int i=0 ;
+  CODE:
+      av_ref = newAV();
+      /* Note the VCF header type treats this as a String but BCF treats as an int */
+      ngt = bcf_get_genotypes(header, row, &gt_arr, &ngt_arr);
+      for( i=0 ; i<ngt_arr ; i++ )
+      {
+        av_push(av_ref, newSViv(gt_arr[i])) ;
+      }
+      free(gt_arr);
+      RETVAL = newRV_noinc((SV*)av_ref);
+  OUTPUT:
+      RETVAL
+
+
+
+
 
 void
 vcfrow_destroy(packname, row)
