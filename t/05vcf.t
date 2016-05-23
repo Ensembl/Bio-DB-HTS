@@ -95,5 +95,14 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
   Bio::DB::HTS::VCF::Row->destroy($row) ;
+
+  #Format and genotype tests
+  ok $row = $v->next(), "Next row";
+  is $row->chromosome($h), "20", "Chromosome value read" ;
+  is $row->get_format_type($h,"DP"), "Integer", "int format type correct" ;
+  $fmt_result = $row->get_format($h,"HQ") ;
+  isa_ok($fmt_result, 'ARRAY');
+  is_deeply $fmt_result, [51,51], 'format ints read correctly' ;
+
   $v->close();
 }

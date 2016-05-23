@@ -1758,6 +1758,118 @@ vcfrow_get_info(row,header,id)
       RETVAL
 
 
+
+
+SV*
+vcfrow_get_format_type(row,header,id)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* id
+  PREINIT:
+      bcf_fmt_t* fmt ;
+  CODE:
+      fmt = bcf_get_fmt(header, row, id);
+      if( fmt == NULL )
+      {
+        RETVAL = newSVpv("",0);
+      }
+      else
+      {
+        switch( fmt->type )
+        {
+          case BCF_BT_FLOAT:
+               RETVAL = newSVpv("Float",0);
+               break ;
+          case BCF_BT_CHAR:
+               RETVAL = newSVpv("String",0);
+               break ;
+          default:
+               RETVAL = newSVpv("Integer",0);
+        }
+      }
+  OUTPUT:
+      RETVAL
+
+
+SV*
+vcfrow_get_format(row,header,id)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* id
+  PREINIT:
+      bcf_fmt_t* fmt ;
+      int i ;
+      int* buf_i;
+      float* buf_f;
+      char* buf_c;
+      AV* av_ref;
+      int result;
+  CODE:
+      fmt = bcf_get_fmt(header, row, id);
+      if( fmt == NULL )
+      {
+          printf("Null format item returned\n") ;
+          // info null, nothing to return
+          XSRETURN_EMPTY ;
+      }
+      av_ref = newAV();
+
+      if( fmt->type == BCF_BT_FLOAT )
+      {
+          buf_f = calloc(fmt->n, sizeof(float));
+          result = bcf_get_format_float(header, row, id, &buf_f, &(fmt->n)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSVnv(buf_f[i])) ;
+          }
+          free(buf_f);
+      }
+      else if( fmt->type == BCF_BT_CHAR )
+      {
+          buf_c = calloc(fmt->n+1, sizeof(char));
+          result = bcf_get_format_char(header,row,id,&buf_c,&(fmt->n)) ;
+          av_push(av_ref, newSVpv(buf_c, fmt->n+1));
+          free(buf_c);
+      }
+      else if( fmt->type == BCF_BT_INT32 )
+      {
+          buf_i = calloc(fmt->n, sizeof(int));
+          result = bcf_get_format_int32(header, row, id, &buf_i, &(fmt->n)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+#          free(buf_i);
+      }
+      else if( fmt->type == BCF_BT_INT16 )
+      {
+          buf_i = calloc(fmt->n, sizeof(int));
+          result = bcf_get_format_int32(header, row, id, &buf_i, &(fmt->n)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+#          free(buf_i);
+      }
+      else if( fmt->type == BCF_BT_INT8 )
+      {
+          buf_i = calloc(fmt->n, sizeof(int));
+          result = bcf_get_format_int32(header, row, id, &buf_i, &(fmt->n)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+#          free(buf_i);
+      }
+
+      //return a reference to our array
+      RETVAL = newRV_noinc((SV*)av_ref);
+  OUTPUT:
+      RETVAL
+
+
+
+
 void
 vcfrow_destroy(packname, row)
     char* packname
