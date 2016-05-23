@@ -54,6 +54,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->has_filter($h,"."), 0, "PASS filter absent" ;
   is $row->get_variant_type(1),1, "Variant type matches" ;
 
+  #info related tests
   my $info_result ;
   $info_result = $row->get_info($h,"DB") ;
   isa_ok($info_result, 'ARRAY');
@@ -63,16 +64,19 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   $info_result = $row->get_info($h,"AF") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [0.5], 'info float read correctly';
+  is $row->get_info_type($h,"AF"), "Float", "info float type correct" ;
 
   $info_result = $row->get_info($h,"TT") ;
   isa_ok($info_result, 'ARRAY');
   #This test is returning the test string but failing the test...
   #is $info_result->[0], "TESTSTRING", 'info strings read correctly';
   #is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
+  is $row->get_info_type($h,"TT"), "String", "info String type correct" ;
 
   $info_result = $row->get_info($h,"NS") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [3], 'info ints read correctly';
+  is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
 
   Bio::DB::HTS::VCF::Row->destroy($row) ;
 

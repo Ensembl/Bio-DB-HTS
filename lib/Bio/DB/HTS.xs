@@ -1633,38 +1633,35 @@ vcfrow_get_variant_type(row, allele_index)
      RETVAL
 
 
-int
+SV*
 vcfrow_get_info_type(row,header,id)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
   char* id
   PREINIT:
       bcf_info_t* info ;
-      AV *av_ref;
   CODE:
       info = bcf_get_info(header, row, id);
       if( info == NULL )
       {
-        av_push(av_ref, newSVpv("", 1) ) ;
-        RETVAL = newRV_noinc((SV*) av_ref) ;
+        RETVAL = newSVpv("",0);
       }
       else
       {
         switch( info->type )
         {
           case BCF_BT_FLOAT:
-               av_push(av_ref, newSVpv("Float", 6) ) ;
+               RETVAL = newSVpv("Float",0);
                break ;
           case BCF_BT_NULL:
-               av_push(av_ref, newSVpv("Flag", 5));
+               RETVAL = newSVpv("Flag",0);
                break ;
           case BCF_BT_CHAR:
-               av_push(av_ref, newSVpv("String", 7));
+               RETVAL = newSVpv("String",0);
                break ;
           default:
-               av_push(av_ref, newSVpv("Integer", 8));
+               RETVAL = newSVpv("Integer",0);
         }
-        RETVAL = newRV_noinc((SV*) av_ref);
       }
   OUTPUT:
       RETVAL
