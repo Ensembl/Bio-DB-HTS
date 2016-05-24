@@ -22,8 +22,8 @@ my $build = $class->new(
         # must match DFLAGS in HTSlib Makefile
         '-D_IOLIB=2', '-D_FILE_OFFSET_BITS=64',
 
-        # turn off warnings originatiNg in Perl's Newx* calls
-        '-Wformat=0', ],
+        # turn off warnings originating in Perl's Newx* calls
+        '-Wformat=0','-Wno-unused-result' ],
 
     build_requires => { 'ExtUtils::CBuilder' => 0, },
     configure_requires => { 'Module::Build' => 0.42, },
