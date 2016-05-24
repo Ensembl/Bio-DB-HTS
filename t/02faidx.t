@@ -67,7 +67,7 @@ ok($seq eq
 
 
 $length = $index->length('I');
-warn $length ;
+note $length ;
 ok($length eq 230218, "length of I");
 
 my $has_seq = $index->has_sequence('I');
