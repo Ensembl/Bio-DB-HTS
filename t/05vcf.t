@@ -43,7 +43,8 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $h->num_samples(), 3, "Number of samples" ;
   is_deeply $h->get_sample_names(), ['NA00001','NA00002','NA00003'], "sample names correct" ;
   is $h->num_seqnames(), 3, "Number of seqnames" ;
-  is_deeply $h->get_seqnames(), ['19','20','X'], "sequence names correct" ;
+  ok my $seqnames = $h->get_seqnames() ;
+  is_deeply $seqnames, ['19','20','X'], "sequence names correct" ;
 
   ok my $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;

@@ -1463,28 +1463,19 @@ vcfh_get_seqnames(header)
     PREINIT:
         char **seqnames = NULL;
         int nseq = 0 ;
-        int i ;
-        AV *av_ref;
+        int i = 0 ;
+        AV *av_ref = newAV() ;
     CODE:
-        av_ref = newAV();
         seqnames = bcf_hdr_seqnames(header, &nseq);
         for (i = 0; i < nseq; i++)
         {
             SV *sv_ref = newSVpv(seqnames[i], 0);
             av_push(av_ref, sv_ref);
         }
+        free(seqnames) ;
         RETVAL = newRV_noinc((SV*)av_ref);
    OUTPUT:
         RETVAL
-
-
-void
-vcfh_free_seqnames(header,seqnames)
-    Bio::DB::HTS::VCF::Header header
-    char **seqnames
-    CODE:
-        free(seqnames);
-
 
 
 
