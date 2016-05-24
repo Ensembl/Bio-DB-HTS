@@ -1461,8 +1461,8 @@ SV*
 vcfh_get_seqnames(header)
     Bio::DB::HTS::VCF::Header header
     PREINIT:
-        char **seqnames = NULL;
         int nseq = 0 ;
+        const char **seqnames ;
         int i = 0 ;
         AV *av_ref = newAV() ;
     CODE:
