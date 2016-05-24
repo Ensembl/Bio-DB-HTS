@@ -1,5 +1,3 @@
-package Bio::DB::HTS::Kseq::Record;
-
 =head1 LICENSE
 
 Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
@@ -16,12 +14,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+=cut
+
 =head1 NAME
 
-Bio::DB::HTS::Kseq::Record -- Entry from a Kseq iterator
+Bio::DB::HTS::Kseq::Iterator - The Kseq iterator
+
+=head1 DESCRIPTION
+
+An object for iterating through the available records. Other methods are available but are undocumented because you should be using the C<next_seq> methods as much as possible.
 
 =head1 SYNOPSIS
 
+  my $iter = $kseq->iterator();
   while(my $r = $iter->next_seq()) {
     say $r->name;
     say $r->desc;
@@ -33,40 +38,14 @@ Bio::DB::HTS::Kseq::Record -- Entry from a Kseq iterator
 
 =over 8
 
-=item C<name>
+=item C<next_seq>
 
-The name of a FASTA/Q record
+Returns a blessed C<Bio::DB::HTS::Kseq::Record> instance.
 
-=item C<desc>
+=item C<next_seq_hash>
 
-The description from a FASTA/Q record
-
-=item C<seq>
-
-The sequence from a FASTA/Q record
-
-=item C<qual>
-
-The quality string from a FASTA/Q record
+Returns a raw HashRef with the keys name, desc, seq and qual available.
 
 =back
 
 =cut
-
-sub name {
-  return $_[0]->{name};
-}
-
-sub desc {
-  return $_[0]->{desc};
-}
-
-sub seq {
-  return $_[0]->{seq};
-}
-
-sub qual {
-  return $_[0]->{qual};
-}
-
-1;

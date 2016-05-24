@@ -17,6 +17,55 @@ limitations under the License.
 
 =cut
 
+=head1 NAME
+
+Bio::DB::HTS::Kseq - Bindings to Kseq
+
+=head1 DESCRIPTION
+
+Bindings to the Kseq library for iterating through a locally held FASTA/FASTQ file very quickly. Supports compressed and uncompressed files alongside filehandles.
+
+=head1 SYNOPSIS
+
+  my $kseq = Bio::DB::HTS::Kseq->new('path/to/file');
+  my $iter = $kseq->iterator();
+  while(my $r = $iter->next_seq()) {
+    say $r->name;
+    say $r->desc;
+    say $r->seq;
+    say $r->qual;
+  }
+
+  # Allowing the object to go out of scope will close down all file handles
+
+=head2 METHODS
+
+=over 8
+
+=item C<new>
+
+  my $kseq = Bio::DB::HTS::Kseq->new('path/to/file');
+
+Returns an instance of this object from a file path.
+
+=item C<newfh>
+
+  open my $fh, '<', 'path' or die "Cannot open path: $!";
+  binmode $fh;
+  my $kseq = Bio::DB::HTS::Kseq->newfh($fh);
+
+Returns an instance of this object from an opened file handle. This supports any known Perl glob/filehandle type
+
+=item C<iterator>
+
+  my $iter = $kseq->iterator();
+
+Returns the kseq iterator object
+
+=back
+
+=cut
+
 package Bio::DB::HTS::Kseq;
 
 use Bio::DB::HTS; #load the XS
