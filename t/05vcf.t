@@ -118,7 +118,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   my $fmt_result = $row->get_format($h,"DP") ;
   isa_ok($fmt_result, 'ARRAY');
   is_deeply $fmt_result, [1,8,5], 'format ints read correctly' ;
-  my $fmt_result = $row->get_genotypes($h) ;
+  $fmt_result = $row->get_genotypes($h) ;
   isa_ok($fmt_result, 'ARRAY');
   #TODO resolve how these translate to the strings in htslib
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
@@ -197,7 +197,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   my $fmt_result = $row->get_format($h,"DP") ;
   isa_ok($fmt_result, 'ARRAY');
   is_deeply $fmt_result, [1,8,5], 'format ints read correctly' ;
-  my $fmt_result = $row->get_genotypes($h) ;
+  $fmt_result = $row->get_genotypes($h) ;
   isa_ok($fmt_result, 'ARRAY');
   #TODO resolve how these translate to the strings in htslib
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
