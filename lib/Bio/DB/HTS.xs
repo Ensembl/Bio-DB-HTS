@@ -1665,7 +1665,8 @@ vcfrow_get_info(row,header,id)
   char* id
   PREINIT:
       bcf_info_t* info ;
-      int i ;
+      int i=0 ;
+      int strlength=0 ;
       int* buf_i;
       float* buf_f;
       char* buf_c;
@@ -1707,9 +1708,11 @@ vcfrow_get_info(row,header,id)
         }
         else if( info->type == BCF_BT_CHAR )
         {
-          buf_c = calloc(info->len, sizeof(char));
-          result = bcf_get_info_string(header,row,id,&buf_c,&(info->len)) ;
-          av_push(av_ref, newSVpv(buf_c, 0));
+          strlength = info->len+1 ;
+          buf_c = calloc(strlength, sizeof(char));
+          result = bcf_get_info_string(header,row,id,&buf_c,&strlength) ;
+          buf_c[info->len] = '\0' ;
+          av_push(av_ref, newSVpv(buf_c,0));
           free(buf_c);
         }
         else if( info->type == BCF_BT_INT32 )
