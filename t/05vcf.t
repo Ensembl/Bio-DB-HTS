@@ -1,4 +1,4 @@
-use Test::More tests => 106, 'die';
+use Test::More tests => 110, 'die';
 
 use FindBin qw( $Bin );
 
@@ -69,8 +69,8 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   $info_result = $row->get_info($h,"TT") ;
   isa_ok($info_result, 'ARRAY');
   #This test is returning the test string but failing the test...
-  #is $info_result->[0], "TESTSTRING", 'info strings read correctly';
-  #is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
+  is $info_result->[0], "TESTSTRING", 'info strings read correctly';
+  is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
   is $row->get_info_type($h,"TT"), "String", "info String type correct" ;
 
   $info_result = $row->get_info($h,"NS") ;
@@ -150,8 +150,8 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   $info_result = $row->get_info($h,"TT") ;
   isa_ok($info_result, 'ARRAY');
   #This test is returning the test string but failing the test...
-  #is $info_result->[0], "TESTSTRING", 'info strings read correctly';
-  #is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
+  is $info_result->[0], "TESTSTRING", 'info strings read correctly';
+  is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
   is $row->get_info_type($h,"TT"), "String", "info String type correct" ;
 
   $info_result = $row->get_info($h,"NS") ;

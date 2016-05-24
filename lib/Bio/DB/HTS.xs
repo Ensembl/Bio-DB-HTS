@@ -1716,9 +1716,9 @@ vcfrow_get_info(row,header,id)
         }
         else if( info->type == BCF_BT_CHAR )
         {
-          buf_c = calloc(info->len+1, sizeof(char));
+          buf_c = calloc(info->len, sizeof(char));
           result = bcf_get_info_string(header,row,id,&buf_c,&(info->len)) ;
-          av_push(av_ref, newSVpv(buf_c, info->len+1));
+          av_push(av_ref, newSVpv(buf_c, 0));
           free(buf_c);
         }
         else if( info->type == BCF_BT_INT32 )
