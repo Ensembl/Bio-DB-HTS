@@ -34,7 +34,7 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
 }
 
 {
-  # Test standard functions
+  # Test standard functions on a VCF file
   ok my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" ), "VCF file open";
   is $v->num_variants(), 9, 'correct number of variants identified in file';
 
@@ -69,7 +69,6 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
 
   $info_result = $row->get_info($h,"TT") ;
   isa_ok($info_result, 'ARRAY');
-  #This test is returning the test string but failing the test...
   is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
   is $row->get_info_type($h,"TT"), "String", "info String type correct" ;
 
@@ -149,7 +148,6 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
 
   $info_result = $row->get_info($h,"TT") ;
   isa_ok($info_result, 'ARRAY');
-  #This test is returning the test string but failing the test...
   is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
   is $row->get_info_type($h,"TT"), "String", "info String type correct" ;
 

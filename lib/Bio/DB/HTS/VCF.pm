@@ -16,7 +16,6 @@ limitations under the License.
 
 =head1 AUTHOR
 
-Alex Hodgkins
 Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 
 =head1 NAME
@@ -41,14 +40,90 @@ forwards through the file.
 
   # VCF Row objects
 
-The variant types as defined in htslib.
-#define VCF_REF   0
-#define VCF_SNP   1
-#define VCF_MNP   2
-#define VCF_INDEL 4
-#define VCF_OTHER 8
 
-Note the index starts from 1 for the first allele.
+=head2 VCF use
+
+The functions provided are for opening a VCF/BCF file, reading header values and then reading row values.
+
+  use Bio::DB::HTS::VCF ;
+
+  # File Open and header read functions
+  my $v = Bio::DB::HTS::VCF->new( filename => "/path/to/myfile.vcf.gz" ) ;
+  my $h = $v->header();
+
+Once the file has been opened, various global values can be read from the header.
+
+  $h->get_seqnames() ;
+  $h->version() ;  # read the VCF file version
+
+  $h->num_samples() ;
+  $h->get_sample_names() ; #return an array of sample names
+
+  $h->num_seqnames() ;
+  $h->get_seqnames() ; # return an array of sequence names
+
+To read a row use the next function. Various other fields can then be read from the row object. Some
+of the functions to read these fields will need the header object supplied.
+
+  my $row = $v->next() ;
+
+  # row functions
+  $row->chromosome($h) ;
+  $row->position() ;
+  $row->id() ;
+  $row->num_filters() ;
+  $row->quality() ;
+
+The alleles can be retrieved with the following functions. get_alleles() will return the alleles in an array
+reference.
+  my $num_alleles = $row->num_alleles() ;
+  my $alleles_ref = $row->get_alleles() ;
+  my @alleles = @$alleles_ref ;
+  for my $a (@alleles)
+  {
+    print($a.",") ;
+  }
+
+The variant type of an allele can be determined using the index of the allele. The index starts
+from 1 for the first allele.
+   $row->get_variant_type($allele_index)
+
+This will return one of the values as defined in htslib. As of v1.3.1 these are as follows.
+   #define VCF_REF   0
+   #define VCF_SNP   1
+   #define VCF_MNP   2
+   #define VCF_INDEL 4
+   #define VCF_OTHER 8
+
+Each row object has filters that may or may not have been applied to it.
+has_filter will return 0 if the filter is not present, 1 if it is present.
+The PASS filter is represented by a dot.
+  $row->has_filter($h,"DP50") ;
+  $row->has_filter($h,".") ; #PASS filter check
+
+Each row may also have additional info fields associated with each allele in the row.
+Each info tag is specified as a string. If the row does not have an item of that info, or
+it does not exist in the file, a string ID_NOT_FOUND will be returned by the get_info() function.
+
+These are returned in an array reference. There
+will be one value per allele in the row. The get_info_type() function can be used to clarify
+the type of info. This will be the type of the info as specified in the VCF file header,
+one of String, Integer, Float or Flag). The flag will be signified by a value of 1.
+
+  $row->get_info_type($h,"INFO_ID") ;
+  $info_result = $row->get_info($h,"INFO_ID") ;
+
+Formats are dealt with similarly. A string ID_NOT_FOUND will be returned by the get_format() function
+if the specified format ID is not found.
+
+  $row->get_format_type($h,"FORMAT_ID") ;
+  $row->get_format($h,"FORMAT_ID") ;
+
+Genotype records are currently returned as a series of integers, across all the samples for the row.
+  $row->get_genotypes($h)
+
+Finally, free memory associated with the row.
+  Bio::DB::HTS::VCF::Row->destroy($row) ;
 
 
 =head2 VCF Sweep Objects
@@ -56,9 +131,11 @@ Note the index starts from 1 for the first allele.
 Open the file and process using sweeps. Note that the two methods maintain pointers that are
 independant of one another. Using the next_row() will start at the first row in the file
 and go on to the next row in subsequent reads. This is independant of previous_row() calls.
-
 Similarly previous_row() will start at the last row and read backwards. However a call to next_row()
 is needed beforehand as the read fails otherwise.
+
+At the time of writing there are issues which seem to be due to the underlying HTSlib API calls,
+so using the next() function is preferable to using sweeps.
 
   use Bio::DB::HTS::VCF ;
 
