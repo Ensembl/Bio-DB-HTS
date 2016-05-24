@@ -18,8 +18,13 @@ limitations under the License.
 
 package Bio::DB::HTS::Tabix::Iterator;
 
+<<<<<<< HEAD
 use Bio::DB::HTS; #load the XS
 $Bio::DB::HTS::Tabix::Iterator::VERSION = '1.13';
+=======
+use Bio::DB::HTS;
+$Bio::DB::HTS::Tabix::Iterator::VERSION = '1.12';
+>>>>>>> feature/bcf2016
 
 use strict;
 use warnings;

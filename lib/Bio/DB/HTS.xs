@@ -50,6 +50,8 @@ limitations under the License.
 #include "tbx.h"
 #include "bgzf.h"
 #include "vcf.h"
+#include "vcfutils.h"
+#include "vcf_sweep.h"
 #include "synced_bcf_reader.h"
 
 /* stolen from bam_aux.c */
@@ -63,10 +65,10 @@ typedef faidx_t*        Bio__DB__HTS__Fai;
 typedef bam_pileup1_t*  Bio__DB__HTS__Pileup;
 typedef tbx_t*          Bio__DB__HTS__Tabix;
 typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
-typedef bcf_srs_t*      Bio__DB__HTS__VCF;
+typedef vcfFile*        Bio__DB__HTS__VCFfile;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
-
+typedef bcf_sweep_t*    Bio__DB__HTS__VCF__Sweep;
 
 typedef struct {
   SV* callback;
@@ -1323,43 +1325,47 @@ tabix_tbx_iter_free(iter)
 	tbx_itr_destroy(iter);
 
 
-MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF PREFIX = vcf_
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCFfile PREFIX = vcf_file_
 
-Bio::DB::HTS::VCF
-vcf_bcf_sr_open(filename)
+Bio::DB::HTS::VCFfile
+vcf_file_open(packname, filename, mode="r")
+    char* packname
     char* filename
-    PREINIT:
-        bcf_srs_t* sr = bcf_sr_init();
+    char* mode
+    PROTOTYPE: $$$
     CODE:
-        bcf_sr_add_reader(sr, filename);
-        RETVAL = sr;
+      RETVAL = bcf_open(filename, mode);
     OUTPUT:
-        RETVAL
+      RETVAL
 
 
 Bio::DB::HTS::VCF::Header
-vcf_bcf_header(vcf)
-    Bio::DB::HTS::VCF vcf
+vcf_file_header_read(vfile)
+    Bio::DB::HTS::VCFfile vfile
     PREINIT:
         bcf_hdr_t* h;
     CODE:
-        h = vcf->readers[0].header;
+        h = bcf_hdr_read(vfile);
         RETVAL = h;
     OUTPUT:
         RETVAL
 
 
 Bio::DB::HTS::VCF::Row
-vcf_bcf_next(vcf)
-    Bio::DB::HTS::VCF vcf
+vcf_file_read1(vfile,header)
+    Bio::DB::HTS::VCFfile vfile
+    Bio::DB::HTS::VCF::Header header
     PREINIT:
-        bcf1_t* line;
+        bcf1_t *rec;
     CODE:
-        if ( bcf_sr_next_line(vcf) ) {
-            line = bcf_sr_get_line(vcf, 0); //0 being the first and only reader
-            RETVAL = line;
+        rec = bcf_init();
+        if ( bcf_read(vfile, header, rec) == 0 )
+        {
+            bcf_unpack(rec, BCF_UN_ALL) ;
+            RETVAL = rec ;
         }
-        else {
+        else
+        {
             XSRETURN_EMPTY;
         }
     OUTPUT:
@@ -1367,24 +1373,601 @@ vcf_bcf_next(vcf)
 
 
 SV*
-vcf_bcf_num_variants(vcf)
-    Bio::DB::HTS::VCF vcf
+vcf_file_num_variants(packname,filename)
+    char* packname
+    char* filename
+    PROTOTYPE: $$$
     PREINIT:
         int n_records = 0;
+        vcfFile* vfile;
+        bcf_hdr_t* h;
+        bcf1_t *rec;
     CODE:
+        vfile = bcf_open(filename, "r");
+        h = bcf_hdr_read(vfile);
+        rec = bcf_init();
+
         //loop through all the lines but don't do anything with them
-        while ( bcf_sr_next_line(vcf) ) {
+        while(bcf_read(vfile, h, rec) == 0)
+        {
             ++n_records;
         }
-
+        bcf_close(vfile) ;
         RETVAL = newSViv(n_records);
     OUTPUT:
         RETVAL
 
 
+
 void
-vcf_bcf_sr_close(vcf)
-    Bio::DB::HTS::VCF vcf
+vcf_file_vcf_close(vfile,h)
+    Bio::DB::HTS::VCFfile vfile
+    Bio::DB::HTS::VCF::Header h
     CODE:
-        bcf_sr_destroy(vcf);
+        bcf_hdr_destroy(h);
+        bcf_close(vfile);
+    OUTPUT:
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Header PREFIX = vcfh_
+
+
+SV*
+vcfh_version(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+  CODE:
+     RETVAL = newSVpv(bcf_hdr_get_version(header),0) ;
+  OUTPUT:
+     RETVAL
+
+
+int
+vcfh_num_samples(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+  CODE:
+     RETVAL = bcf_hdr_nsamples(header) ;
+  OUTPUT:
+     RETVAL
+
+
+SV*
+vcfh_get_sample_names(header)
+    Bio::DB::HTS::VCF::Header header
+    PREINIT:
+        int nsamples = 0 ;
+        int i ;
+        AV *av_ref;
+    CODE:
+        av_ref = newAV();
+        nsamples = bcf_hdr_nsamples(header) ;
+        for (i=0 ; i<nsamples ; i++)
+        {
+            SV *sv_ref = newSVpv(header->samples[i], 0);
+            av_push(av_ref, sv_ref);
+        }
+        RETVAL = newRV_noinc((SV*)av_ref);
+   OUTPUT:
+        RETVAL
+
+int
+vcfh_num_seqnames(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+        int nseq = 0 ;
+  CODE:
+     bcf_hdr_seqnames(header, &nseq);
+     RETVAL = nseq;
+  OUTPUT:
+     RETVAL
+
+
+SV*
+vcfh_get_seqnames(header)
+    Bio::DB::HTS::VCF::Header header
+    PREINIT:
+        int nseq = 0 ;
+        const char **seqnames ;
+        int i = 0 ;
+        AV *av_ref = newAV() ;
+    CODE:
+        seqnames = bcf_hdr_seqnames(header, &nseq);
+        for (i = 0; i < nseq; i++)
+        {
+            SV *sv_ref = newSVpv(seqnames[i], 0);
+            av_push(av_ref, sv_ref);
+        }
+        free(seqnames) ;
+        RETVAL = newRV_noinc((SV*)av_ref);
+   OUTPUT:
+        RETVAL
+
+
+
+
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Row PREFIX = vcfrow_
+
+void
+vcfrow_print(row,header)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+     int i ;
+  CODE:
+     printf("\nVCF data line:\n");
+     printf("chromosome:%s\t", bcf_hdr_id2name(header,row->rid));
+     printf("position:%d\t", (row->pos+1));
+     printf("QUAL:%f\t", row->qual);
+     printf("ID:%s\t", row->d.id );
+     printf("REF:%s\n", row->d.als);
+     printf("Num Alleles:%d\n", row->n_allele-1);
+     for( i=1 ; i<row->n_allele ; i++ )
+     {
+       printf("ALT[%d]=%s\t", i, row->d.allele[i]);
+     }
+     printf("\nNum Filters:%d\n", row->d.n_flt);
+
+#     printf("\nfilter:%s\t", row->d.id );
+#     printf("\info:%s\n", row->d.als);
+  OUTPUT:
+
+
+SV*
+vcfrow_chromosome(row,header)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+  CODE:
+     RETVAL = newSVpv(bcf_hdr_id2name(header,row->rid),0) ;
+  OUTPUT:
+     RETVAL
+
+
+int
+vcfrow_position(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->pos+1;
+  OUTPUT:
+     RETVAL
+
+float
+vcfrow_quality(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->qual;
+  OUTPUT:
+     RETVAL
+
+
+SV*
+vcfrow_id(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = newSVpv(row->d.id, 0) ;
+  OUTPUT:
+     RETVAL
+
+SV*
+vcfrow_reference(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = newSVpv(row->d.als, 0) ;
+  OUTPUT:
+     RETVAL
+
+
+int
+vcfrow_num_alleles(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->n_allele-1 ;
+  OUTPUT:
+     RETVAL
+
+
+SV*
+vcfrow_get_alleles(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+     int i;
+     AV *av_ref;
+  CODE:
+     av_ref = newAV();
+     for (i = 1; i < row->n_allele; ++i) {
+        SV *sv_ref = newSVpv(row->d.allele[i], 0);
+        av_push(av_ref, sv_ref);
+     }
+     RETVAL = newRV_noinc((SV*)av_ref);
+  OUTPUT:
+     RETVAL
+
+int
+vcfrow_num_filters(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = row->d.n_flt ;
+  OUTPUT:
+     RETVAL
+
+int
+vcfrow_has_filter(row,header,filter)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* filter
+  PREINIT:
+  CODE:
+     RETVAL = bcf_has_filter(header,row,filter) ;
+  OUTPUT:
+     RETVAL
+
+
+int
+vcfrow_is_snp(row)
+  Bio::DB::HTS::VCF::Row row
+  PREINIT:
+  CODE:
+     RETVAL = bcf_is_snp(row) ;
+  OUTPUT:
+     RETVAL
+
+
+int
+vcfrow_get_variant_type(row, allele_index)
+  Bio::DB::HTS::VCF::Row row
+  int allele_index
+  CODE:
+     RETVAL = bcf_get_variant_type(row, allele_index);
+  OUTPUT:
+     RETVAL
+
+
+SV*
+vcfrow_get_info_type(row,header,id)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* id
+  PREINIT:
+      bcf_info_t* info ;
+  CODE:
+      info = bcf_get_info(header, row, id);
+      if( info == NULL )
+      {
+        RETVAL = newSVpv("",0);
+      }
+      else
+      {
+        switch( info->type )
+        {
+          case BCF_BT_FLOAT:
+               RETVAL = newSVpv("Float",0);
+               break ;
+          case BCF_BT_NULL:
+               RETVAL = newSVpv("Flag",0);
+               break ;
+          case BCF_BT_CHAR:
+               RETVAL = newSVpv("String",0);
+               break ;
+          default:
+               RETVAL = newSVpv("Integer",0);
+        }
+      }
+  OUTPUT:
+      RETVAL
+
+
+SV*
+vcfrow_get_info(row,header,id)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* id
+  PREINIT:
+      bcf_info_t* info ;
+      int i=0 ;
+      int strlength=0 ;
+      int* buf_i;
+      float* buf_f;
+      char* buf_c;
+      AV* av_ref;
+      int result;
+  CODE:
+      info = bcf_get_info(header, row, id);
+      if( info == NULL )
+      {
+          // info null, nothing to return
+          RETVAL = newSVpv("ID_NOT_FOUND",0);
+      }
+      else
+      {
+        av_ref = newAV();
+        if( info->type == BCF_BT_NULL )
+        {
+          buf_i = calloc(1, sizeof(int)) ;
+          result = bcf_get_info_flag(header,row,id,&buf_i,&(info->len));
+          if( result == 1 )
+          {
+            av_push(av_ref, newSViv(1));
+          }
+          else
+          {
+            av_push(av_ref, newSViv(0));
+          }
+          free(buf_i);
+        }
+        else if( info->type == BCF_BT_FLOAT )
+        {
+          buf_f = calloc(info->len, sizeof(float));
+          result = bcf_get_info_float(header, row, id, &buf_f, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSVnv(buf_f[i])) ;
+          }
+          free(buf_f);
+        }
+        else if( info->type == BCF_BT_CHAR )
+        {
+          strlength = info->len+1 ;
+          buf_c = calloc(strlength, sizeof(char));
+          result = bcf_get_info_string(header,row,id,&buf_c,&strlength) ;
+          buf_c[info->len] = '\0' ;
+          av_push(av_ref, newSVpv(buf_c,0));
+          free(buf_c);
+        }
+        else if( info->type == BCF_BT_INT32 )
+        {
+          buf_i = calloc(info->len, sizeof(int));
+          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        else if( info->type == BCF_BT_INT16 )
+        {
+          buf_i = calloc(info->len, sizeof(int));
+          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        else if( info->type == BCF_BT_INT8 )
+        {
+          buf_i = calloc(info->len, sizeof(int));
+          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+          for( i=0 ; i<result ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        //return a reference to our array
+        RETVAL = newRV_noinc((SV*)av_ref);
+      }
+
+  OUTPUT:
+      RETVAL
+
+
+
+
+SV*
+vcfrow_get_format_type(row,header,id)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* id
+  PREINIT:
+      bcf_fmt_t* fmt ;
+  CODE:
+      fmt = bcf_get_fmt(header, row, id);
+      if( fmt == NULL )
+      {
+        RETVAL = newSVpv("",0);
+      }
+      else
+      {
+        switch( fmt->type )
+        {
+          case BCF_BT_FLOAT:
+               RETVAL = newSVpv("Float",0);
+               break ;
+          case BCF_BT_CHAR:
+               RETVAL = newSVpv("String",0);
+               break ;
+          default:
+               RETVAL = newSVpv("Integer",0);
+        }
+      }
+  OUTPUT:
+      RETVAL
+
+
+SV*
+vcfrow_get_format(row,header,id)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  char* id
+  PREINIT:
+      bcf_fmt_t* fmt ;
+      int i ;
+      int* buf_i = NULL ;
+      float* buf_f = NULL ;
+      char* buf_c = NULL ;
+      AV* av_ref;
+      int ndst = 0 ;
+      int result;
+  CODE:
+      fmt = bcf_get_fmt(header, row, id);
+      if( fmt == NULL )
+      {
+          // info null, nothing to return
+          RETVAL = newSVpv("ID_NOT_FOUND",0);
+      }
+      else
+      {
+        av_ref = newAV();
+
+        if( fmt->type == BCF_BT_FLOAT )
+        {
+          result = bcf_get_format_float(header, row, id, &buf_f, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSVnv(buf_f[i])) ;
+          }
+          free(buf_f);
+        }
+        else if( fmt->type == BCF_BT_CHAR )
+        {
+          result = bcf_get_format_char(header,row,id,&buf_c,&ndst) ;
+          av_push(av_ref, newSVpv(buf_c, ndst+1));
+          free(buf_c);
+        }
+        else if( fmt->type == BCF_BT_INT32 )
+        {
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        else if( fmt->type == BCF_BT_INT16 )
+        {
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        else if( fmt->type == BCF_BT_INT8 )
+        {
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        //return a reference to our array
+        RETVAL = newRV_noinc((SV*)av_ref);
+      }
+
+  OUTPUT:
+      RETVAL
+
+
+
+SV*
+vcfrow_get_genotypes(row,header)
+  Bio::DB::HTS::VCF::Row row
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+      bcf_fmt_t* fmt ;
+      int ngt ;
+      int* gt_arr = NULL ;
+      int ngt_arr = 0;
+      AV* av_ref;
+      int i=0 ;
+  CODE:
+      av_ref = newAV();
+      /* Note the VCF header type treats this as a String but BCF treats as an int */
+      ngt = bcf_get_genotypes(header, row, &gt_arr, &ngt_arr);
+      for( i=0 ; i<ngt_arr ; i++ )
+      {
+        av_push(av_ref, newSViv(gt_arr[i])) ;
+      }
+      free(gt_arr);
+      RETVAL = newRV_noinc((SV*)av_ref);
+  OUTPUT:
+      RETVAL
+
+
+
+
+
+void
+vcfrow_destroy(packname, row)
+    char* packname
+    Bio::DB::HTS::VCF::Row row
+    CODE:
+      bcf_destroy(row);
+    OUTPUT:
+
+
+
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Sweep PREFIX = vcfs_
+
+Bio::DB::HTS::VCF::Sweep
+vcfs_sweep_open(filename)
+    char* filename
+    PREINIT:
+        bcf_sweep_t* sweep;
+    CODE:
+        sweep = bcf_sweep_init(filename);
+        RETVAL = sweep;
+    OUTPUT:
+        RETVAL
+
+Bio::DB::HTS::VCF::Header
+vcfs_header_read(sweep)
+    Bio::DB::HTS::VCF::Sweep sweep
+    PREINIT:
+        bcf_hdr_t* h;
+    CODE:
+        h = bcf_sweep_hdr(sweep);
+        RETVAL = h;
+    OUTPUT:
+        RETVAL
+
+Bio::DB::HTS::VCF::Row
+vcfs_sweep_next(sweep)
+    Bio::DB::HTS::VCF::Sweep sweep
+    PREINIT:
+        bcf1_t* line;
+    CODE:
+        line = bcf_sweep_fwd(sweep);
+        if( line )
+        {
+          RETVAL = line;
+        }
+        else
+        {
+          XSRETURN_EMPTY ;
+        }
+    OUTPUT:
+        RETVAL
+
+Bio::DB::HTS::VCF::Row
+vcfs_sweep_previous(sweep)
+    Bio::DB::HTS::VCF::Sweep sweep
+    PREINIT:
+        bcf1_t* line;
+    CODE:
+        line = bcf_sweep_bwd(sweep);
+        if( line )
+        {
+          RETVAL = line;
+        }
+        else
+        {
+          XSRETURN_EMPTY ;
+        }
+    OUTPUT:
+        RETVAL
+
+void
+vcfs_sweep_close(sweep)
+    Bio::DB::HTS::VCF::Sweep sweep
+    CODE:
+        bcf_sweep_destroy(sweep);
   OUTPUT:

@@ -7,7 +7,7 @@ Bio::DB::HTS::Fai       T_PTROBJ
 Bio::DB::HTS::Pileup    T_PTROBJ
 Bio::DB::HTS::Tabix     T_PTROBJ
 Bio::DB::HTS::Tabix::Iterator T_PTROBJ
-Bio::DB::HTS::VCF             T_PTROBJ
+Bio::DB::HTS::VCFfile         T_PTROBJ
 Bio::DB::HTS::VCF::Header     T_PTROBJ
 Bio::DB::HTS::VCF::Row        T_PTROBJ
-
+Bio::DB::HTS::VCF::Sweep      T_PTROBJ
