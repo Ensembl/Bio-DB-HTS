@@ -2,7 +2,7 @@ package Bio::DB::HTS::Kseq::Record;
 
 =head1 LICENSE
 
-Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2016] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,6 +52,8 @@ The quality string from a FASTA/Q record
 =back
 
 =cut
+
+$Bio::DB::HTS::Kseq::Record::VERSION = '2.0';
 
 sub name {
   return $_[0]->{name};

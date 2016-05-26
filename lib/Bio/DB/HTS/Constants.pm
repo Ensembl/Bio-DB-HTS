@@ -1,7 +1,7 @@
 
 =head1 LICENSE
 
-Copyright [1999-2016] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
+Copyright [1999-2016] EMBL-European Bioinformatics Institute
 
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,7 +70,7 @@ L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::Bam::Alignment>
 =cut
 
 package Bio::DB::HTS::Constants;
-$Bio::DB::HTS::Constants::VERSION = '1.13';
+$Bio::DB::HTS::Constants::VERSION = '2.0';
 
 use strict;
 use warnings;
