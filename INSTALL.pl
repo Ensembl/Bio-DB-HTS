@@ -6,18 +6,24 @@ use Cwd;
 use File::Path qw(make_path);
 use Getopt::Long;
 
+my $htslib_version = "1.3.1";
+
 my $help = "INSTALL.pl [-h|--help] [--prefix=filepath] [--static] [~/prefix/path]\n";
 $help .= "--help (-h)  - this help message\n";
 $help .= "--prefix     - Path to install Bio::DB::HTS.\n";
 $help .= "                  Alternative to providing a path at the end of comandline\n";
 $help .= "                  If neither are provided defaults to root install (requires root access)\n";
 $help .= "--static     - Build Bio::DB::HTS using the static libhts.a library and do not install htslib\n";
+$help .= "--htslib_version     - Build Bio::DB::HTS using the specified HTSlib version (Default ".$htslib_version.")\n";
 
 my $cwd = system 'pwd';
+
 
 my $opts = parse_options();
 my $prefix_path;
 $prefix_path = $opts->{'prefix'} if(exists($opts->{'prefix'}) && defined($opts->{'prefix'}));
+$htslib_version = $opts->{'htslib_version'} if(exists($opts->{'htslib_version'})) ;
+
 
 
 # STEP 0: various dependencies
@@ -70,11 +76,15 @@ info("Performing build in $install_dir");
 
 
 # STEP 2: Check out HTSlib
-info("Checking out HTSlib");
+info("Checking out HTSlib v".$htslib_version);
 chdir $install_dir;
-system "git clone -b master --depth=1 https://github.com/samtools/htslib.git";
--d './htslib' or die "git clone seems to have failed. Could not find $install_dir/htslib directory";
-chdir './htslib';
+my $htslib_archive = $htslib_version.".zip" ;
+my $htslib_archive_url = "https://github.com/samtools/htslib/archive/".$htslib_version.".zip" ;
+system "wget ".$htslib_archive_url  ;
+-f './'.$htslib_archive or die "Could not fetch HTSlib archive ".$htslib_archive_url ;
+system "unzip ".$htslib_archive ;
+system "mv htslib-$htslib_version htslib" ;
+-d './htslib' or die "Unzip seems to have failed. Could not find $install_dir/htslib directory";
 
 
 # STEP 3: Check out Bio-HTS
@@ -164,6 +174,7 @@ sub parse_options {
   my $result = &GetOptions (
     'static' => \$opts{'static'},
     'prefix=s' => \$opts{'prefix'},
+    'htslib_version=s' => \$opts{'htslib_version'},
     'h|help' => \$opts{'h'},
   );
 
