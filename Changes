@@ -1,5 +1,8 @@
-1.14 (in progress)
+2.0
+   * BCF addition
+   * Kseq addition: courtesy of Andrew Yates
    * Tabix bugfixes: see GitHub issue #17
+   * licence updated
 
 1.13
    * removed file existence Tabix check as it prevents remote access
