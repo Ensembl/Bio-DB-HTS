@@ -1,6 +1,10 @@
+
+2.1
+   * add missing test file to manifest
+
 2.0
    * BCF addition
-   * Kseq addition: courtesy of Andrew Yates
+   * Kseq addition: courtesy of Andrew Yates and Chris Fields
    * Tabix bugfixes: see GitHub issue #17
    * licence updated
 
