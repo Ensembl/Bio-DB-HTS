@@ -53,7 +53,7 @@ The quality string from a FASTA/Q record
 
 =cut
 
-$Bio::DB::HTS::Kseq::Record::VERSION = '2.0';
+$Bio::DB::HTS::Kseq::Record::VERSION = '2.1';
 
 sub name {
   return $_[0]->{name};
