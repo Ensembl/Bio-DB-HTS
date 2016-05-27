@@ -67,6 +67,7 @@ t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz
 t/data/yeast.fasta
 t/data/yeast.sorted.cram
 t/data/no_index.tsv.gz
+t/data/test.bcf
 t/data/test.tsv.gz
 t/data/test.tsv.gz.tbi
 t/data/test.vcf.gz
