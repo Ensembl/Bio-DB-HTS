@@ -22,7 +22,7 @@ my $cwd = system 'pwd';
 my $opts = parse_options();
 my $prefix_path;
 $prefix_path = $opts->{'prefix'} if(exists($opts->{'prefix'}) && defined($opts->{'prefix'}));
-$htslib_version = $opts->{'htslib_version'} if(exists($opts->{'htslib_version'})) ;
+$htslib_version = $opts->{'htslib_version'} if($opts->{'htslib_version'}) ;
 
 
 
