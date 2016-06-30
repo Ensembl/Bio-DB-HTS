@@ -67,6 +67,12 @@ looks like this:
 
   CFLAGS=	-g -Wall -O2 -fPIC #-m64 #-arch ppc
 
+3. Remote file access over https is possible using libcurl when compiling HTSlib
+
+   autoconf
+   ./configure --enable-libcurl 
+
+
 ## TESTING AND CONTRIBUTING
 
 You can obtain the most recent development version of this module via

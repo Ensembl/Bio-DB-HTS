@@ -237,4 +237,20 @@ if [ "$2" = "INSTALL_STATIC_FLAG" ]; then
     exit 0
 fi
 
+if [ "$2" = "INSTALL_HTSLIB_VERSION" ]; then
+    echo INSTALL.pl built against a specific release of HTSlib
+    $1
+    cd Bio-HTS
+    perl INSTALL.pl --htslib_version 1.3
+    export PERL5LIB=$PERL5LIB:$(pwd -P)/lib:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/Faidx
+    cd t
+    for f in $(ls *.t) ;
+    do
+        perl $f
+    done
+    echo "Completed $2"
+    exit 0
+fi
+
+
 echo Build test option $2 not found
