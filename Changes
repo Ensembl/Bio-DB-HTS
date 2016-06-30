@@ -1,4 +1,9 @@
 
+2.2
+   * Zip file downloads during install
+   * HTSlib version set to 1.3.1 or specified parameter during install
+   * https for remote file prefix check added, courtesy of Zhicheng-Liu
+
 2.1
    * add missing test file to manifest
 
