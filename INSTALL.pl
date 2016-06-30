@@ -75,7 +75,7 @@ my $install_dir = tempdir(CLEANUP => 1);
 info("Performing build in $install_dir");
 
 
-# STEP 2: Check out HTSlib
+# STEP 2: Download HTSlib
 info("Checking out HTSlib v".$htslib_version);
 chdir $install_dir;
 my $htslib_archive = $htslib_version.".zip" ;
@@ -87,12 +87,16 @@ system "mv htslib-$htslib_version htslib" ;
 -d './htslib' or die "Unzip seems to have failed. Could not find $install_dir/htslib directory";
 
 
-# STEP 3: Check out Bio-HTS
-info("Checking out Bio-HTS");
+# STEP 3: Download Bio-HTS
+info("Fetching latest version of Bio-HTS from GitHub");
 chdir $install_dir;
-system "git clone -b master --depth=1 https://github.com/Ensembl/Bio-HTS.git";
--d './Bio-HTS' or die "git clone seems to have failed. Could not find $install_dir/Bio-HTS directory";
-chdir "./Bio-HTS";
+my $biodbhts_archive = "master.zip" ;
+my $biodbhts_archive_url = "https://github.com/Ensembl/Bio-HTS/archive/master.zip" ;
+system "wget ".$biodbhts_archive_url  ;
+-f './'.$htslib_archive or die "Could not fetch Bio::DB::HTS archive ".$biodbhts_archive_url ;
+system "unzip ".$biodbhts_archive ;
+system "mv Bio-HTS-master Bio-HTS" ;
+-d './Bio-HTS' or die "Unzip seems to have failed. Could not find $install_dir/Bio-HTS directory";
 
 
 # Step 4: Build libhts.a
