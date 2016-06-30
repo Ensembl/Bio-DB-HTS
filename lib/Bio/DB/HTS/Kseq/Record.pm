@@ -53,6 +53,9 @@ The quality string from a FASTA/Q record
 
 =cut
 
+use strict;
+use warnings;
+
 $Bio::DB::HTS::Kseq::Record::VERSION = '2.1';
 
 sub name {

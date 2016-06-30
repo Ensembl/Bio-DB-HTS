@@ -207,7 +207,7 @@ sub close
 }
 
 package Bio::DB::HTS::VCF::Sweep ;
-$Bio::DB::HTS::VCF::Sweep::VERSION = '1.12';
+$Bio::DB::HTS::VCF::Sweep::VERSION = '2.2';
 
 use Bio::DB::HTS;
 use strict;
