@@ -17,7 +17,7 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::DB::HTS -- Read SAM/BAM/CRAM database files
+Bio::DB::HTS -- Read files using HTSlib including BAM/CRAM, Tabix and BCF database files
 
 =head1 SYNOPSIS
 
