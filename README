@@ -70,8 +70,12 @@ looks like this:
 3. Remote file access over https is possible using libcurl when compiling HTSlib
 
    autoconf
-   ./configure --enable-libcurl 
+   ./configure --enable-libcurl
 
+
+4. "Failed to populate reference for id X" error message
+
+This is probably an indication that the CRAM Reference archive is unavailable.
 
 ## TESTING AND CONTRIBUTING
 
