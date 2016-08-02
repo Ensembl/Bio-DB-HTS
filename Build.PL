@@ -93,7 +93,7 @@ sub find_hts {
         $self->prefix,
         from_Alien(),
         scalar `pkg-config --variable=libdir htslib 2>/dev/null`,
-        qw{ /usr/local /usr/share /opt/local },
+        qw{ /usr /usr/local /usr/share /opt/local },
     ) {
         if ($dir and $self->find_hts_in_install_dir($dir)) {
             $found = 1;
@@ -175,7 +175,7 @@ This script will attempt to locate htslib by looking for hts.h and libhts.a in:
   3. --prefix command line argument (which also sets installation location)
   4. Alien::HTSlib dependency resolver
   5. pkg-config (extra directories can be set in PKG_CONFIG_PATH environment variable)
-  6. common library locations: /usr/local, /usr/share, /opt/local
+  6. common library locations: /usr /usr/local, /usr/share, /opt/local
 
 END
 
