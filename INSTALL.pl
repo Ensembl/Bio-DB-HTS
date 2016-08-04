@@ -95,6 +95,10 @@ chdir $install_dir;
 my $htslib_archive = $htslib_version.".zip" ;
 my $htslib_archive_url = "https://github.com/samtools/htslib/archive/".$htslib_version.".zip" ;
 system "wget ".$htslib_archive_url  ;
+if ( $? == -1 )
+{
+  die "HTSlib fetch command failed: $!\n";
+}
 -f './'.$htslib_archive or die "Could not fetch HTSlib archive ".$htslib_archive_url ;
 system "unzip ".$htslib_archive ;
 system "mv htslib-$htslib_version htslib" ;
@@ -107,6 +111,10 @@ chdir $install_dir;
 my $biodbhts_archive = "master.zip" ;
 my $biodbhts_archive_url = "https://github.com/Ensembl/Bio-HTS/archive/master.zip" ;
 system "wget ".$biodbhts_archive_url  ;
+if ( $? == -1 )
+{
+  die "Bio-HTS fetch command failed: $!\n";
+}
 -f './'.$htslib_archive or die "Could not fetch Bio::DB::HTS archive ".$biodbhts_archive_url ;
 system "unzip ".$biodbhts_archive ;
 system "mv Bio-HTS-master Bio-HTS" ;
