@@ -17,7 +17,7 @@
 #
 # Script for testing/installing various build configurations of Bio::DB::HTS
 # $1 - clone command for Bio::DB::HTS from GitHub
-#    e.g. "git clone -b master https://github.com/Ensembl/Bio-HTS.git"
+#    e.g. "git clone -b master https://github.com/Ensembl/Bio-DB-HTS.git"
 #    Set this to be an alternative clone command if required
 # $2 - the test to be run, to match one of the options below
 #
@@ -33,7 +33,7 @@ if [ "$2" = "BUILD_SYSTEM_INSTALLED_HTSLIB" ]; then
     sudo make install
     cd ..
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl Build.PL
     ./Build
     export PERL5LIB=$PERL5LIB:$(pwd -P)/lib:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/Faidx
@@ -55,7 +55,7 @@ if [ "$2" = "BUILD_SYSTEM_INSTALL_ALL" ]; then
     sudo ldconfig
     cd ..
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl Build.PL
     sudo ./Build install
     cd t
@@ -77,7 +77,7 @@ if [ "$2" = "BUILD_LOCAL_INSTALLED_HTSLIB" ]; then
     export HTSLIB_DIR=
     cd ..
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl Build.PL --prefix=~/localsw
     ./Build
     export PERL5LIB=$PERL5LIB:$(pwd -P)/lib:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/Faidx
@@ -103,7 +103,7 @@ if [ "$2" = "BUILD_HTSLIB_DIR_ENV" ]; then
     echo $HTSLIB_DIR
     cd ..
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl Build.PL
     ./Build
     export PERL5LIB=$PERL5LIB:$(pwd -P)/lib:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/Faidx
@@ -127,7 +127,7 @@ if [ "$2" = "BUILD_HTSLIB_DIR_FLAG" ]; then
     echo $HTSLIB_DIR_FOR_FLAG
     cd ..
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl Build.PL --htslib=$HTSLIB_DIR_FOR_FLAG
     ./Build
     export PERL5LIB=$PERL5LIB:$(pwd -P)/lib:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/Faidx
@@ -158,7 +158,7 @@ if [ "$2" = "INSTALL_WITH_SYSTEM_HTSLIB" ]; then
     sudo ldconfig
     cd ..
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl INSTALL.pl
     cd t
     for f in $(ls *.t) ;
@@ -178,7 +178,7 @@ if [ "$2" = "INSTALL_WITH_OTHER_HTSLIB" ]; then
     cd ..
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd -P)/htslib_run_location
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl INSTALL.pl
     cd t
     for f in $(ls *.t) ;
@@ -193,7 +193,7 @@ fi
 if [ "$2" = "INSTALL_PREFIX_PATH" ]; then
     echo INSTALL.pl with prefix at end of line
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl INSTALL.pl ~/prefix_path_test
     export PERL5LIB=$PERL5LIB:~/prefix_path_test/lib/perl5/x86_64-linux-gnu-thread-multi/:~/prefix_path_test/lib/perl5/x86_64-linux-gnu-thread-multi/auto
     cd t
@@ -209,7 +209,7 @@ fi
 if [ "$2" = "INSTALL_PREFIX_FLAG" ]; then
     echo INSTALL.pl with prefix at end of line
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl INSTALL.pl --prefix=~/prefix_flag_test
     export PERL5LIB=$PERL5LIB:~/prefix_flag_test/lib/perl5/x86_64-linux-gnu-thread-multi/:~/prefix_flag_test/lib/perl5/x86_64-linux-gnu-thread-multi/auto
     cd t
@@ -226,7 +226,7 @@ fi
 if [ "$2" = "INSTALL_STATIC_FLAG" ]; then
     echo INSTALL.pl with static option as flag
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl INSTALL.pl --static
     cd t
     for f in $(ls *.t) ;
@@ -240,7 +240,7 @@ fi
 if [ "$2" = "INSTALL_HTSLIB_VERSION" ]; then
     echo INSTALL.pl built against a specific release of HTSlib
     $1
-    cd Bio-HTS
+    cd Bio-DB-HTS
     perl INSTALL.pl --htslib_version 1.3
     export PERL5LIB=$PERL5LIB:$(pwd -P)/lib:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/:$(pwd -P)/blib/arch/auto/Bio/DB/HTS/Faidx
     cd t

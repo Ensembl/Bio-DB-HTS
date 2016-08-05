@@ -46,7 +46,7 @@ my $build = $class->new(
     requires => { 'perl' => '5.008', 'Bio::Root::Version' => '1.006009001', },
     meta_merge => {
         'resources' => {
-            'repository' => 'https://github.com/Ensembl/Bio-HTS',
+            'repository' => 'https://github.com/Ensembl/Bio-DB-HTS',
             },
         },
 );

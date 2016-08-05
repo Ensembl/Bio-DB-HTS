@@ -21,7 +21,7 @@ package Bio::DB::HTS::Tabix;
 
 use Bio::DB::HTS;
 use Bio::DB::HTS::Tabix::Iterator;
-$Bio::DB::HTS::Tabix::VERSION = '2.3';
+$Bio::DB::HTS::Tabix::VERSION = '2.4';
 use strict;
 use warnings;
 

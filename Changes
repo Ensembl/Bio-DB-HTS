@@ -1,4 +1,9 @@
 
+2.4
+   * github repo move to https://github.com/Ensembl/Bio-DB-HTS
+   * -Wformat=no removed from build options
+   * check results of archive fetches
+
 2.3
    * cram tests moved to the scripts directory to allow install when CRAM reference archive is unavailable
 

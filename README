@@ -1,15 +1,10 @@
-
-NOTE: Superceded by https://github.com/Ensembl/Bio-DB-HTS to match the CPAN module naming. 
-This repo will be archived
-PLEASE UPDATE YOUR URLS TO POINT TO THE NEW LOCATION
-
 This is a Perl interface to the HTS Library. See http://htslib.org
 
 Bio::DB::HTS supports a wide range of install configurations, with two scripts - Build.PL and INSTALL.pl.
 
 For a list of the ways it can be used, with examples in action see
-https://github.com/Ensembl/Bio-HTS/blob/master/scripts/build_options.sh
-(link to scripts/build_options.sh in the Bio::DB::HTS GitHub repo at https://github.com/Ensembl/Bio-HTS)
+https://github.com/Ensembl/Bio-DB-HTS/blob/master/scripts/build_options.sh
+(link to scripts/build_options.sh in the Bio::DB::HTS GitHub repo at https://github.com/Ensembl/Bio-DB-HTS)
 
 ## ONE-STEP INSTALLATION (INSTALL.pl)
 
@@ -85,7 +80,7 @@ This is probably an indication that the CRAM Reference archive is unavailable.
 ## TESTING AND CONTRIBUTING
 
 You can obtain the most recent development version of this module via
-its GitHub site at https://github.com/Ensembl/Bio-HTS. Please
+its GitHub site at https://github.com/Ensembl/Bio-DB-HTS. Please
 feel free to submit bug reports, patches, etc. via GitHub.
 
 ### AUTHOR

@@ -105,20 +105,20 @@ system "mv htslib-$htslib_version htslib" ;
 -d './htslib' or die "Unzip seems to have failed. Could not find $install_dir/htslib directory";
 
 
-# STEP 3: Download Bio-HTS
-info("Fetching latest version of Bio-HTS from GitHub");
+# STEP 3: Download Bio-DB-HTS
+info("Fetching latest version of Bio-DB-HTS from GitHub");
 chdir $install_dir;
 my $biodbhts_archive = "master.zip" ;
-my $biodbhts_archive_url = "https://github.com/Ensembl/Bio-HTS/archive/master.zip" ;
+my $biodbhts_archive_url = "https://github.com/Ensembl/Bio-DB-HTS/archive/master.zip" ;
 system "wget ".$biodbhts_archive_url  ;
 if ( $? == -1 )
 {
-  die "Bio-HTS fetch command failed: $!\n";
+  die "Bio-DB-HTS fetch command failed: $!\n";
 }
 -f './'.$htslib_archive or die "Could not fetch Bio::DB::HTS archive ".$biodbhts_archive_url ;
 system "unzip ".$biodbhts_archive ;
-system "mv Bio-HTS-master Bio-HTS" ;
--d './Bio-HTS' or die "Unzip seems to have failed. Could not find $install_dir/Bio-HTS directory";
+system "mv Bio-DB-HTS-master Bio-DB-HTS" ;
+-d './Bio-DB-HTS' or die "Unzip seems to have failed. Could not find $install_dir/Bio-DB-HTS directory";
 
 
 # Step 4: Build libhts.a
@@ -151,9 +151,9 @@ if($opts->{'static'}){
 }
 -e 'libhts.a' or die "Compile didn't complete. No libhts.a library file found";
 
-# Step 5: Build Bio::DB::HTSlib
-info("Building Bio::DB::HTSlib");
-chdir "$install_dir/Bio-HTS";
+# Step 5: Build Bio::DB::HTS
+info("Building Bio::DB::HTS");
+chdir "$install_dir/Bio-DB-HTS";
 my $cmd;
 if(defined $prefix_path) {
   if(!$opts->{'static'}){
