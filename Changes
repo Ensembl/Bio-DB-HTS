@@ -1,3 +1,4 @@
+   * added BAM writing and sorting capabilities (Dietmar Rieder)
 
 2.4
    * github repo move to https://github.com/Ensembl/Bio-DB-HTS
