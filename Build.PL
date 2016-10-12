@@ -41,6 +41,8 @@ my $build = $class->new(
         '-Wno-unused-result',  ],
 
 
+    c_source => ['src'],
+
     build_requires => { 'ExtUtils::CBuilder' => 0, },
     configure_requires => { 'Module::Build' => 0.42, },
     requires => { 'perl' => '5.008', 'Bio::Root::Version' => '1.006009001', },

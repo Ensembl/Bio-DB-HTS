@@ -415,6 +415,7 @@ hts_open(packname, filename, mode="r")
       char * mode
       PROTOTYPE: $$$
       CODE:
+        if(strstr(mode,"w")) { mode = "wb"; } // only support writing compressed BAM
         RETVAL = hts_open(filename,mode);
       OUTPUT:
       RETVAL
@@ -437,7 +438,16 @@ hts_index_build(packname, filename)
   OUTPUT:
      RETVAL
 
-
+void
+hts_sort_core(packname, is_by_qname=0, filename, prefix, max_mem=500000000)
+   char * packname
+   int    is_by_qname
+   char * filename
+   char * prefix
+   int    max_mem
+   PROTOTYPE: $$$$$
+   CODE:
+     bam_sort_core(is_by_qname,filename,prefix,max_mem);
 
 Bio::DB::HTS::Index
 hts_index_load(packname, htsfile)
@@ -477,15 +487,21 @@ hts_header_read(htsfile)
 
 
 int
-hts_header_write(hts,header)
-    Bio::DB::HTSfile     hts
+hts_header_write(htsfile,header)
+    Bio::DB::HTSfile     htsfile
     Bio::DB::HTS::Header header
     PROTOTYPE: $$
     CODE:
-      RETVAL= sam_hdr_write(hts,header);
+      if( htsfile->format.format == bam ) //enum value from htsExactFormat from hts.h
+      {
+        RETVAL= bam_hdr_write(htsfile->fp.bgzf,header);
+      }
+      else
+      {
+        RETVAL= sam_hdr_write(htsfile,header);
+      }
     OUTPUT:
       RETVAL
-
 
 Bio::DB::HTS::Alignment
 hts_read1(htsfile,header)
@@ -504,6 +520,23 @@ hts_read1(htsfile,header)
     OUTPUT:
        RETVAL
 
+int
+hts_write1(htsfile,align)
+    Bio::DB::HTSfile            htsfile
+    Bio::DB::HTS::Alignment     align
+    PROTOTYPE: $$
+    CODE:
+      if( htsfile->format.format == bam ) //enum value from htsExactFormat from hts.h
+      {
+        RETVAL = bam_write1(htsfile->fp.bgzf,align);
+      }
+      else
+      {
+        // RETVAL = sam_write1(htsfile,header,align); // not implemented BAM only 
+        RETVAL = -1;
+      }
+    OUTPUT:
+      RETVAL
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Alignment PREFIX=bama_
 

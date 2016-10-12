@@ -979,12 +979,44 @@ Given an open alignment file, return a Bio::DB::HTS::Header object
 containing information about the reference sequence(s). Note that you
 must invoke header_read() at least once before calling read1().
 
+=item $status_code = $hfile->header_write($header)
+
+Given a Bio::DB::HTSfile::Header object and a BAM file opened in write mode, write the
+header to the file. If the write fails the process will be terminated at the C layer.
+The result code is (currently) always zero.
+
 =item $alignment = $hfile->read1($header)
 
 Read one alignment from the alignment file and return it as a
 Bio::DB::HTS::Alignment object. The $header parameter is returned by
 invoking header().
 
+=item $bytes = $hfile->write1($alignment)
+
+Given a BAM file that has been opened in write mode and a Bio::DB::HTS::Alignment object, 
+write the alignment to the BAM file and return the number of bytes successfully written.
+
+=item Bio::DB::HTSfile->sort_core($by_qname,$path,$prefix,$max_mem)
+
+Attempt to sort a BAM file by chromosomal location or name and create a
+new sorted BAM file. Arguments are as follows:
+
+ Argument      Description
+ --------      -----------
+
+ $by_qname     If true, sort by read name rather than chromosomal
+               location.
+
+ $path         Path to the BAM file
+
+ $prefix       Prefix to use for the new sorted file. For example,
+               passing "foo" will result in a BAM file named 
+	       "foo.bam".
+
+ $max_mem      Maximum core memory to use for the sort. If the sort
+               requires more than this amount of memory, intermediate
+               sort files will be written to disk. The default, if not
+               provided is 500M.
 
 =back
 
