@@ -1,3 +1,7 @@
+   * updated doc
+   * added tests cases for CRAM/SAM
+   * added CRAM/BAM writing
+   * removed sorting capabilites
    * added BAM writing and sorting capabilities (Dietmar Rieder)
 
 2.4
