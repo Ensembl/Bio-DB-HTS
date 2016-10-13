@@ -415,7 +415,6 @@ hts_open(packname, filename, mode="r")
       char * mode
       PROTOTYPE: $$$
       CODE:
-        if(strstr(mode,"w")) { mode = "wb"; } // only support writing compressed BAM
         RETVAL = hts_open(filename,mode);
       OUTPUT:
       RETVAL
@@ -437,17 +436,6 @@ hts_index_build(packname, filename)
      RETVAL = sam_index_build(filename,0); //generate BAI for BAM files
   OUTPUT:
      RETVAL
-
-void
-hts_sort_core(packname, is_by_qname=0, filename, prefix, max_mem=500000000)
-   char * packname
-   int    is_by_qname
-   char * filename
-   char * prefix
-   int    max_mem
-   PROTOTYPE: $$$$$
-   CODE:
-     bam_sort_core(is_by_qname,filename,prefix,max_mem);
 
 Bio::DB::HTS::Index
 hts_index_load(packname, htsfile)
@@ -487,19 +475,28 @@ hts_header_read(htsfile)
 
 
 int
-hts_header_write(htsfile,header)
+hts_header_write(htsfile,header, ...)
     Bio::DB::HTSfile     htsfile
     Bio::DB::HTS::Header header
+    PREINIT:
+      char *reference = "";
     PROTOTYPE: $$
     CODE:
-      if( htsfile->format.format == bam ) //enum value from htsExactFormat from hts.h
+      if( htsfile->format.format == cram )
       {
-        RETVAL= bam_hdr_write(htsfile->fp.bgzf,header);
+        if(items > 2)
+        {
+          reference = (char *)SvPV_nolen(ST(2));
+          hts_set_fai_filename(htsfile, reference);
+        }
+        else
+        {
+          croak("Error: need reference sequence file for writing CRAM file '%s'", htsfile->fn);
+        }
       }
-      else
-      {
-        RETVAL= sam_hdr_write(htsfile,header);
-      }
+      RETVAL= sam_hdr_write(htsfile,header);
+      if (RETVAL != 0)
+        croak("Error %d while creating file '%s'", RETVAL, htsfile->fn);
     OUTPUT:
       RETVAL
 
@@ -521,20 +518,13 @@ hts_read1(htsfile,header)
        RETVAL
 
 int
-hts_write1(htsfile,align)
+hts_write1(htsfile,header,align)
     Bio::DB::HTSfile            htsfile
+    Bio::DB::HTS::Header        header
     Bio::DB::HTS::Alignment     align
     PROTOTYPE: $$
     CODE:
-      if( htsfile->format.format == bam ) //enum value from htsExactFormat from hts.h
-      {
-        RETVAL = bam_write1(htsfile->fp.bgzf,align);
-      }
-      else
-      {
-        // RETVAL = sam_write1(htsfile,header,align); // not implemented BAM only 
-        RETVAL = -1;
-      }
+      RETVAL = sam_write1(htsfile,header,align);
     OUTPUT:
       RETVAL
 
