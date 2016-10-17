@@ -437,8 +437,6 @@ hts_index_build(packname, filename)
   OUTPUT:
      RETVAL
 
-
-
 Bio::DB::HTS::Index
 hts_index_load(packname, htsfile)
     char *      packname
@@ -477,15 +475,30 @@ hts_header_read(htsfile)
 
 
 int
-hts_header_write(hts,header)
-    Bio::DB::HTSfile     hts
+hts_header_write(htsfile,header, ...)
+    Bio::DB::HTSfile     htsfile
     Bio::DB::HTS::Header header
+    PREINIT:
+      char *reference = "";
     PROTOTYPE: $$
     CODE:
-      RETVAL= sam_hdr_write(hts,header);
+      if( htsfile->format.format == cram )
+      {
+        if(items > 2)
+        {
+          reference = (char *)SvPV_nolen(ST(2));
+          hts_set_fai_filename(htsfile, reference);
+        }
+        else
+        {
+          croak("Error: need reference sequence file for writing CRAM file '%s'", htsfile->fn);
+        }
+      }
+      RETVAL= sam_hdr_write(htsfile,header);
+      if (RETVAL != 0)
+        croak("Error %d while creating file '%s'", RETVAL, htsfile->fn);
     OUTPUT:
       RETVAL
-
 
 Bio::DB::HTS::Alignment
 hts_read1(htsfile,header)
@@ -504,6 +517,16 @@ hts_read1(htsfile,header)
     OUTPUT:
        RETVAL
 
+int
+hts_write1(htsfile,header,align)
+    Bio::DB::HTSfile            htsfile
+    Bio::DB::HTS::Header        header
+    Bio::DB::HTS::Alignment     align
+    PROTOTYPE: $$
+    CODE:
+      RETVAL = sam_write1(htsfile,header,align);
+    OUTPUT:
+      RETVAL
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Alignment PREFIX=bama_
 
