@@ -38,13 +38,13 @@ BEGIN {
 use Bio::DB::HTS;
 
 {
-    my $cramfile = "$Bin/data/ex1.cram";
-    my $hts_file     = Bio::DB::HTSfile->open($cramfile);
+    my $infile = "$Bin/data/ex1.bam";
+    my $hts_file     = Bio::DB::HTSfile->open($infile);
     ok($hts_file);
 
     my $header  = $hts_file->header_read();
 
-    my $bamfile = "$Bin/data/ex1_2.bam";
+    my $bamfile = "$Bin/data/write_test_08.bam";
     my $hts_file2 = Bio::DB::HTSfile->open( $bamfile, 'wb' );
     ok($hts_file2);
 

@@ -44,7 +44,7 @@ use Bio::DB::HTS;
 
     my $header  = $hts_file->header_read();
 
-    my $cramfile = "$Bin/data/ex1.cram";
+    my $cramfile = "$Bin/data/write_test_07.cram";
     my $hts_file2 = Bio::DB::HTSfile->open( $cramfile, 'wc' );
     ok($hts_file2);
 
