@@ -463,8 +463,10 @@ hts_header_read(htsfile)
     PREINIT:
       bam_hdr_t *bh;
       int64_t result ;
+      const htsFormat *format ;
     CODE:
-      if( htsfile->format.format == bam ) //enum value from htsExactFormat from hts.h
+      format = hts_get_format( htsfile ) ;
+      if( format->format == bam ) //enum value from htsExactFormat from hts.h
       {
         result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
       }
@@ -480,9 +482,11 @@ hts_header_write(htsfile,header, ...)
     Bio::DB::HTS::Header header
     PREINIT:
       char *reference = "";
+      const htsFormat *format ;
     PROTOTYPE: $$
     CODE:
-      if( htsfile->format.format == cram )
+      format = hts_get_format( htsfile ) ;
+      if( format->format == cram )
       {
         if(items > 2)
         {
