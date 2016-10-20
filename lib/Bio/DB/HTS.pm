@@ -996,7 +996,7 @@ invoking header().
 
 =item $bytes = $hfile->write1($header, $alignment)
 
-Given a BAM file that has been opened in write mode and a Bio::DB::HTS::Alignment object, 
+Given a BAM file that has been opened in write mode and a Bio::DB::HTS::Alignment object,
 write the alignment to the BAM file and return the number of bytes successfully written.
 
 =back
@@ -1283,7 +1283,7 @@ Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
 =cut
 
 package Bio::DB::HTS;
-$Bio::DB::HTS::VERSION = '2.4';
+$Bio::DB::HTS::VERSION = '2.5';
 
 use strict;
 use warnings;
@@ -2082,7 +2082,7 @@ sub _glob_match {
 
 package Bio::DB::HTS::Fai;
 
-$Bio::DB::HTS::Fai::VERSION = '2.4';
+$Bio::DB::HTS::Fai::VERSION = '2.5';
 
 sub open { shift->load(@_) }
 
@@ -2099,7 +2099,7 @@ package Bio::SeqFeature::HTSCoverage;
 
 use base 'Bio::SeqFeature::Lite';
 
-$Bio::SeqFeature::HTSCoverage::VERSION = '2.4';
+$Bio::SeqFeature::HTSCoverage::VERSION = '2.5';
 
 sub coverage {
     my $self = shift;
@@ -2131,7 +2131,7 @@ sub gff3_string {
 
 package Bio::DB::HTSfile;
 
-$Bio::DB::HTS::HTSfile::VERSION = '2.4';
+$Bio::DB::HTS::HTSfile::VERSION = '2.5';
 
 use File::Spec;
 use Cwd;

@@ -1,5 +1,5 @@
 
- 2.5
+2.5
    * added CRAM/BAM writing, courtesy of Dietmar Rieder
    * CRAM read test reference embedded in CRAM file to allow test to pass when CRAM reference archive is unavailable
 

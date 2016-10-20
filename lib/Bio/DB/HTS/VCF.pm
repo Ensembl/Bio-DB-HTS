@@ -151,7 +151,7 @@ so using the next() function is preferable to using sweeps.
 =cut
 
 package Bio::DB::HTS::VCF;
-$Bio::DB::HTS::VCF::VERSION = '2.4';
+$Bio::DB::HTS::VCF::VERSION = '2.5';
 
 use Bio::DB::HTS;
 use strict;
@@ -207,7 +207,7 @@ sub close
 }
 
 package Bio::DB::HTS::VCF::Sweep ;
-$Bio::DB::HTS::VCF::Sweep::VERSION = '2.4';
+$Bio::DB::HTS::VCF::Sweep::VERSION = '2.5';
 
 use Bio::DB::HTS;
 use strict;
