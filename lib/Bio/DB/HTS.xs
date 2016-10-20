@@ -1111,12 +1111,14 @@ PREINIT:
     SV*             cov;
     int             i;
     bam_hdr_t      *bh;
+    const htsFormat *format ;
 CODE:
   {
       /* TODO:can we do away with this check by a move to CSI as the standard for BAM indices */
       if (end >= BAM_MAX_REGION)
       {
-        if( hfp->format.format == bam ) //enum value from htsExactFormat from hts.h
+        format = hts_get_format( hfp ) ;
+        if( format->format == bam ) //enum value from htsExactFormat from hts.h
         {
           bgzf_seek(hfp->fp.bgzf,0,0);
           bh = sam_hdr_read(hfp);
