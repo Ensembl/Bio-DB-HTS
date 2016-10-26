@@ -14,7 +14,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 13, 'die';
+use Test::More tests => 22, 'die';
 use feature qw( say );
 use FindBin qw( $Bin );
 
@@ -41,7 +41,23 @@ is $num_rows, 7, "correct number of values come back from the iterator";
 #check seqnames
 my $seqnames = $tbx->seqnames;
 isa_ok($seqnames, 'ARRAY');
-is_deeply $seqnames, [1, 12, 'X'], 'seqnames are correct';
+is_deeply $seqnames, [1, 12, 'X', 'HLA-A*01:01:01:01'], 'seqnames are correct';
+
+## test chr names containing ':'
+#
+ok $iter = $tbx->query_full('HLA-A*01:01:01:01',1,10), "can query a region with ':' in chr";
+ok $row = $iter->next, 'can get a value from the iterator';
+is $row, "HLA-A*01:01:01:01\t1\t500\t0.65", "row value is correct with ':' in chr";
+
+ok $iter = $tbx->query_full('HLA-A*01:01:01:01',1,), "can query a region with ':' in chr, no end";
+ok $row = $iter->next, 'can get a value from the iterator';
+is $row, "HLA-A*01:01:01:01\t1\t500\t0.65", "row value is correct with ':' in chr, no end";
+
+ok $iter = $tbx->query_full('HLA-A*01:01:01:01'), "can query a region with ':' in chr, no coord";
+ok $row = $iter->next, 'can get a value from the iterator';
+is $row, "HLA-A*01:01:01:01\t1\t500\t0.65", "row value is correct with ':' in chr, no coord";
+#
+## end strange chr name testing
 
 ok $iter = $tbx->query("fake"), 'non existent chrom works fine';
 is $iter->next, undef, 'iterator for missing chrom is fine';
