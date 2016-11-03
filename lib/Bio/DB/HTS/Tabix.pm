@@ -55,6 +55,29 @@ sub new {
   return $self;
 }
 
+sub query_full {
+  my ($self, $chr, $start, $end) = @_;
+  my $region = $chr;
+  $region .= ':'; #trailing ':' required for odd chr containing ':'
+  if(defined $start) {
+    $region .= $start;
+    $region .= '-'.$end if(defined $end);
+  }
+  my $iter = tbx_query( $self->{_tabix_index}, $region );
+  unless ( $iter ) {
+    #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.
+    my $seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
+    if ( not exists $seqnames_hash->{ $chr } ) {
+      #$self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->_filename);
+    }
+    else {
+      die "Unable to get iterator for region '$region' in file ". $self->{_filename} . " -- htslib couldn't parse your region string";
+      }
+  }
+
+  return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->{_htsfile}, _tabix_index => $self->{_tabix_index} );
+}
+
 sub query {
     my ( $self, $region ) = @_;
 
@@ -73,21 +96,7 @@ sub query {
         }
     }
 
-    my $iter = tbx_query( $self->{_tabix_index}, $region );
-
-    unless ( $iter ) {
-      #this likely means the chromosome wasn't found in the tabix index, or it couldn't parse the provided region.
-      my $seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
-      if ( not exists $seqnames_hash->{ $chr } ) {
-        #$self->log->warn("Specified chromosome '$chr' does not exist in file " . $self->_filename);
-      }
-      else {
-        die "Unable to get iterator for region '$region' in file ". $self->{_filename} . " -- htslib couldn't parse your region string";
-        }
-
-    }
-
-    return Bio::DB::HTS::Tabix::Iterator->new( _tabix_iter => $iter, _htsfile => $self->{_htsfile}, _tabix_index => $self->{_tabix_index} );
+    return $self->query_full($chr, $start, $end);
 }
 
 sub seqnames {
