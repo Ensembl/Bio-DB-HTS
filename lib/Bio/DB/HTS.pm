@@ -1962,7 +1962,7 @@ sub _coverage {
     $bins ||= $end - $start + 1;
 
     my $index = $self->hts_index;
-    my $coverage = $index->coverage( $self->{hts_file}, $id, $s, $e, $bins );
+    my $coverage = $index->coverage( $self->{hts_file}, $id, $s, $end, $bins );
 
     return
       Bio::SeqFeature::HTSCoverage->new( -display_name => "$seqid coverage",
