@@ -111,7 +111,10 @@ sub header {
 
 sub header_array {
     my $self = shift;
-    my @lines = split(/\n/,$self->{_header});
+    if( $self->{_header} )
+    {
+      my @lines = split(/\n/,$self->{_header});
+    }
     return @lines ;
 }
 
