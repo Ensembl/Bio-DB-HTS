@@ -205,11 +205,14 @@ Returns all the header lines as a single scalar from the tabixed file
 
 Takes a single region like: '1:4000005-4000009' or '12:5000000'. The coordinate format is 0 or 1-based for start and stop positions depending on how the Tabix index file was created - by default this is 1.
 
+The index for remote files will be downloaded to the system temporary directory by default. Set use_tmp_dir to 0 to download to the current working directory instead.
+
+
 Here are some examples showing Tabix.
 
     use Bio::DB::HTS::Tabix;
 
-    my $tabix = Bio::DB::HTS::Tabix->new(filename => $file);
+    my $tabix = Bio::DB::HTS::Tabix->new(filename => $file, use_tmp_dir => 1);
 
     # Calling region 1
 
