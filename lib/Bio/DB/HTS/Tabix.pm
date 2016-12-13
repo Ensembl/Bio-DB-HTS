@@ -42,7 +42,7 @@ sub new {
   my $tmpdir = File::Spec->tmpdir;
 
   #change to the tmp dir to allow the C library to download remote index files
-  if( $use_tmp_dir && Bio::DB::HTS->is_remote($filename) )
+  if( Bio::DB::HTS->is_remote($filename) && ( !defined $use_tmp_dir || $use_tmp_dir != 0) )
   {
     chdir($tmpdir);
   }
