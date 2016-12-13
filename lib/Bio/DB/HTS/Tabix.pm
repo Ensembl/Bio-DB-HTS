@@ -26,15 +26,26 @@ use strict;
 use warnings;
 
 use Scalar::Util qw/reftype/;
+use File::Spec;
+use Cwd;
 
 sub new {
   my $class         = shift;
   my (%args) = @_;
   my $filename = $args{filename};
   my $warnings = $args{warnings};
+  my $use_tmp_dir = $args{use_tmp_dir};
 
   # filename checks
   die "Tabix region lookup requires a gzipped, tabixed bedfile" unless $filename =~ /gz$/;
+  my $pdir    = getcwd;
+  my $tmpdir = File::Spec->tmpdir;
+
+  #change to the tmp dir to allow the C library to download remote index files
+  if( $use_tmp_dir && Bio::DB::HTS->is_remote($filename) )
+  {
+    chdir($tmpdir);
+  }
 
   my $htsfile = Bio::DB::HTSfile->open($filename);
   my $tabix_index = tbx_open($filename);
@@ -44,6 +55,7 @@ sub new {
   {
     $header = join "\n", @{ $header } ;
   }
+  chdir($pdir);
 
   my $self = bless {
                     _htsfile => $htsfile,
