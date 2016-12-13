@@ -70,7 +70,7 @@ L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::Bam::Alignment>
 =cut
 
 package Bio::DB::HTS::Constants;
-$Bio::DB::HTS::Constants::VERSION = '2.5';
+$Bio::DB::HTS::Constants::VERSION = '2.6';
 
 use strict;
 use warnings;

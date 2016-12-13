@@ -1,4 +1,9 @@
 
+2.6
+   * tabix index files downloaded by default to system tmp directory
+   * bugfix - Specify correct end when calling coverage if none specified
+   * Create a way to Tabix query against chr containing ':', courtesy of Keiran Raine
+
 2.5
    * added CRAM/BAM writing, courtesy of Dietmar Rieder
    * CRAM read test reference embedded in CRAM file to allow test to pass when CRAM reference archive is unavailable
