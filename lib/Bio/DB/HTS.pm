@@ -1346,7 +1346,7 @@ sub hts_file { shift->{hts_file} }
 sub is_remote {
     my $self = shift;
     my $path = shift;
-    return $path =~ /^(http|https|ftp):/;
+    return $path =~ /^(http|https|ftp|s3):/;
 }
 
 sub clone {
