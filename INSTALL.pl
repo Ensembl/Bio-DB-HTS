@@ -93,7 +93,7 @@ info("Performing build in $install_dir");
 info("Checking out HTSlib v".$htslib_version);
 chdir $install_dir;
 my $htslib_archive = $htslib_version.".zip" ;
-my $htslib_archive_url = "https://github.com/samtools/htslib/archive/".$htslib_version.".zip" ;
+my $htslib_archive_url = "https://github.com/samtools/htslib/archive/".$htslib_archive ;
 system "wget ".$htslib_archive_url  ;
 if ( $? == -1 )
 {
@@ -115,7 +115,7 @@ if ( $? == -1 )
 {
   die "Bio-DB-HTS fetch command failed: $!\n";
 }
--f './'.$htslib_archive or die "Could not fetch Bio::DB::HTS archive ".$biodbhts_archive_url ;
+-f './'.$biodbhts_archive or die "Could not fetch Bio::DB::HTS archive ".$biodbhts_archive_url ;
 system "unzip ".$biodbhts_archive ;
 system "mv Bio-DB-HTS-master Bio-DB-HTS" ;
 -d './Bio-DB-HTS' or die "Unzip seems to have failed. Could not find $install_dir/Bio-DB-HTS directory";
