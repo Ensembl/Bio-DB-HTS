@@ -1318,7 +1318,7 @@ sub new {
     my $force_refseq  = $args{-force_refseq};
 
     # file existence checks
-    unless ( $class->is_remote($hts_path) ) {
+    unless ( Bio::DB::HTSfile->is_remote($hts_path) ) {
         -e $hts_path or croak "$hts_path does not exist";
         -r _ or croak "is not readable";
     }
@@ -1343,11 +1343,6 @@ sub new {
 
 sub hts_file { shift->{hts_file} }
 
-sub is_remote {
-    my $self = shift;
-    my $path = shift;
-    return $path =~ /^(http|https|ftp):/;
-}
 
 sub clone {
     my $self = shift;
@@ -2144,7 +2139,7 @@ sub index {
     my $autoindex = $hts_obj->{autoindex};
     my $path      = $hts_obj->{hts_path};
 
-    return $self->index_open_in_safewd($fh) if Bio::DB::HTS->is_remote($path);
+    return $self->index_open_in_safewd($fh) if Bio::DB::HTSfile->is_remote($path);
 
     if ($autoindex) {
         if ( !( -e "${path}.bai" or -e "${path}.crai" ) ) {

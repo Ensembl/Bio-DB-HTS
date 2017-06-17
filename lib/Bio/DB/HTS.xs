@@ -44,6 +44,7 @@ limitations under the License.
 #include <string.h>
 #include "kseq.h"
 #include "hts.h"
+#include "hfile.h"
 #include "sam.h"
 #include "khash.h"
 #include "faidx.h"
@@ -357,8 +358,6 @@ int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void
 }
 
 
-
-
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Fai PREFIX=fai_
 
 Bio::DB::HTS::Fai
@@ -406,6 +405,19 @@ CODE:
 	RETVAL = MaxPileupCnt;
 OUTPUT:
         RETVAL
+
+
+int
+hts_is_remote(packname, filename)
+      char * packname
+      char * filename
+      PROTOTYPE: $$
+      CODE:
+        RETVAL = hisremote(filename) ;
+      OUTPUT:
+      RETVAL
+
+
 
 
 Bio::DB::HTSfile
