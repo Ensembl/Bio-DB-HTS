@@ -20,7 +20,7 @@ use Cwd;
 use File::Path qw(make_path);
 use Getopt::Long;
 
-my $htslib_version = "1.3.1";
+my $htslib_version = "1.4.1";
 
 my $help = "INSTALL.pl [-h|--help] [--prefix=filepath] [--static] [~/prefix/path]\n";
 $help .= "--help (-h)  - this help message\n";
@@ -64,12 +64,27 @@ On Debian/Ubuntu systems you can do this with the command:
   apt-get install build-essential
 END
 
+-e '/usr/include/lzma.h' or die <<END;
+lzma.h library header not found in /usr/include. Please install it and try again.
+On Debian/Ubuntu systems you can do this with the command:
+
+  apt-get install liblzma-dev
+END
+
+-e '/usr/include/bzlib.h' or die <<END;
+zlib.h library header not found in /usr/include. Please install it and try again.
+On Debian/Ubuntu systems you can do this with the command:
+
+  apt-get install libbz2-dev
+END
+
 -e '/usr/include/zlib.h' or die <<END;
 zlib.h library header not found in /usr/include. Please install it and try again.
 On Debian/Ubuntu systems you can do this with the command:
 
   apt-get install zlib1g-dev
 END
+
     ;
 
 eval "require Bio::SeqFeature::Lite" or die <<END;
