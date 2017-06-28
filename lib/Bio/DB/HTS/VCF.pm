@@ -154,6 +154,7 @@ package Bio::DB::HTS::VCF;
 $Bio::DB::HTS::VCF::VERSION = '2.7';
 
 use Bio::DB::HTS;
+use Scalar::Util qw/reftype/;
 use strict;
 use warnings;
 use Carp 'croak';
@@ -202,14 +203,23 @@ sub close
     my $self = shift;
     if ( $self->{vcf_file} )
     {
-        $self->{vcf_file}->vcf_close($self->{header});
+        $self->{vcf_file}->vcf_close();
+        delete $self->{vcf_file};
     }
+}
+
+sub DESTROY {
+    my $self = shift;
+    return if reftype($self) ne 'HASH';
+    $self->close();
+    return;
 }
 
 package Bio::DB::HTS::VCF::Sweep ;
 $Bio::DB::HTS::VCF::Sweep::VERSION = '2.7';
 
 use Bio::DB::HTS;
+use Scalar::Util qw/reftype/;
 use strict;
 use warnings;
 
@@ -259,7 +269,15 @@ sub close
     if ( $self->{sweep} )
     {
         sweep_close($self->{sweep});
+        delete $self->{sweep};
     }
+}
+
+sub DESTROY {
+    my $self = shift;
+    return if reftype($self) ne 'HASH';
+    $self->close();
+    return;
 }
 
 1;

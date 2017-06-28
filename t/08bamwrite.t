@@ -54,10 +54,9 @@ use Bio::DB::HTS;
         $hts_file2->write1($header, $b);
         $count++;
     }
-    $hts_file2->close();
+    $hts_file2 = undef;
     ok( $count, 3307 );
 
-    $hts_file->close();
     $hts_file = Bio::DB::HTSfile->open( $bamfile );
     ok($hts_file);
 

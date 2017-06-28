@@ -69,7 +69,9 @@ typedef tbx_t*          Bio__DB__HTS__Tabix;
 typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
 typedef vcfFile*        Bio__DB__HTS__VCFfile;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
+typedef bcf_hdr_t*      Bio__DB__HTS__VCF__HeaderPtr;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
+typedef bcf1_t*         Bio__DB__HTS__VCF__RowPtr;
 KSEQ_INIT(gzFile, gzread)
 typedef gzFile          Bio__DB__HTS__Kseq;
 typedef kseq_t*         Bio__DB__HTS__Kseq__Iterator;
@@ -371,7 +373,7 @@ fai_load(packname="Bio::DB::HTS::Fai", filename)
     RETVAL
 
 void
-fai_destroy(fai)
+fai_DESTROY(fai)
   Bio::DB::HTS::Fai fai
   PROTOTYPE: $
   CODE:
@@ -433,7 +435,7 @@ hts_open(packname, filename, mode="r")
 
 
 void
-hts_close(htsfile)
+hts_DESTROY(htsfile)
    Bio::DB::HTSfile   htsfile
 PROTOTYPE: $
 CODE:
@@ -458,15 +460,6 @@ hts_index_load(packname, htsfile)
       RETVAL = sam_index_load(htsfile, htsfile->fn) ;
     OUTPUT:
       RETVAL
-
-void
-hts_index_close(indexfile)
-           Bio::DB::HTS::Index indexfile
-    PROTOTYPE: $$
-    CODE:
-      hts_idx_destroy(indexfile) ;
-
-
 
 Bio::DB::HTS::Header
 hts_header_read(htsfile)
@@ -1173,7 +1166,7 @@ OUTPUT:
 
 
 void
-bami_close(hts_idx)
+bami_DESTROY(hts_idx)
   Bio::DB::HTS::Index hts_idx
   CODE:
     hts_idx_destroy(hts_idx) ;
@@ -1280,7 +1273,6 @@ tabix_tbx_close(t)
     Bio::DB::HTS::Tabix t
   CODE:
     tbx_destroy(t);
-  OUTPUT:
 
 Bio::DB::HTS::Tabix::Iterator
 tabix_tbx_query(t, region)
@@ -1439,6 +1431,8 @@ vcf_file_num_variants(packname,filename)
         {
             ++n_records;
         }
+        bcf_destroy(rec);
+        bcf_hdr_destroy(h);
         bcf_close(vfile) ;
         RETVAL = newSViv(n_records);
     OUTPUT:
@@ -1447,16 +1441,18 @@ vcf_file_num_variants(packname,filename)
 
 
 void
-vcf_file_vcf_close(vfile,h)
+vcf_file_vcf_close(vfile)
     Bio::DB::HTS::VCFfile vfile
-    Bio::DB::HTS::VCF::Header h
     CODE:
-        bcf_hdr_destroy(h);
         bcf_close(vfile);
-    OUTPUT:
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Header PREFIX = vcfh_
 
+void
+vcfh_DESTROY(h)
+    Bio::DB::HTS::VCF::Header h
+    CODE:
+        bcf_hdr_destroy(h);
 
 SV*
 vcfh_version(header)
@@ -1938,19 +1934,11 @@ vcfrow_get_genotypes(row,header)
   OUTPUT:
       RETVAL
 
-
-
-
-
 void
-vcfrow_destroy(packname, row)
-    char* packname
+vcfrow_DESTROY(row)
     Bio::DB::HTS::VCF::Row row
     CODE:
       bcf_destroy(row);
-    OUTPUT:
-
-
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Sweep PREFIX = vcfs_
 
@@ -1965,7 +1953,7 @@ vcfs_sweep_open(filename)
     OUTPUT:
         RETVAL
 
-Bio::DB::HTS::VCF::Header
+Bio::DB::HTS::VCF::HeaderPtr
 vcfs_header_read(sweep)
     Bio::DB::HTS::VCF::Sweep sweep
     PREINIT:
@@ -1976,7 +1964,7 @@ vcfs_header_read(sweep)
     OUTPUT:
         RETVAL
 
-Bio::DB::HTS::VCF::Row
+Bio::DB::HTS::VCF::RowPtr
 vcfs_sweep_next(sweep)
     Bio::DB::HTS::VCF::Sweep sweep
     PREINIT:
@@ -1994,7 +1982,7 @@ vcfs_sweep_next(sweep)
     OUTPUT:
         RETVAL
 
-Bio::DB::HTS::VCF::Row
+Bio::DB::HTS::VCF::RowPtr
 vcfs_sweep_previous(sweep)
     Bio::DB::HTS::VCF::Sweep sweep
     PREINIT:

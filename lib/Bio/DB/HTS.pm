@@ -1337,7 +1337,6 @@ sub new {
                        autoindex     => $autoindex,
                        force_refseq  => $force_refseq, },
       ref $class || $class;
-    my $b = $self->{hts_file};
     $self->header;    # catch it
     return $self;
 } ## end sub new
