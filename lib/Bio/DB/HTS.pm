@@ -1373,7 +1373,7 @@ sub new_dna_accessor {
     return unless $accessor;
 
     if ( -e $accessor ) {    # a file, assume it is a fasta file
-        use filetest
+        use filetest 'access';
         -r $accessor or croak "$accessor is not readable";
         my $a = Bio::DB::HTS::Fai->open($accessor) or
           croak "$accessor open: $!" or
