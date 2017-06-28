@@ -1319,8 +1319,9 @@ sub new {
 
     # file existence checks
     unless ( Bio::DB::HTSfile->is_remote($hts_path) ) {
+        use filetest 'access';
         -e $hts_path or croak "$hts_path does not exist";
-        -r _ or croak "is not readable";
+        -r $hts_path or croak "is not readable";
     }
     my $hts_file = Bio::DB::HTSfile->open($hts_path) or
       croak "$hts_path open: $!";
@@ -1372,7 +1373,8 @@ sub new_dna_accessor {
     return unless $accessor;
 
     if ( -e $accessor ) {    # a file, assume it is a fasta file
-        -r _ or croak "$accessor is not readable";
+        use filetest 'access';
+        -r $accessor or croak "$accessor is not readable";
         my $a = Bio::DB::HTS::Fai->open($accessor) or
           croak "$accessor open: $!" or
           croak "Can't open FASTA file $accessor: $!";
