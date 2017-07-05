@@ -38,6 +38,8 @@ my $prefix_path;
 $prefix_path = $opts->{'prefix'} if(exists($opts->{'prefix'}) && defined($opts->{'prefix'}));
 $htslib_version = $opts->{'htslib_version'} if($opts->{'htslib_version'}) ;
 
+my ($version_major,$version_minor,$version_revision) = split /\./, $htslib_version ;
+
 
 # STEP 0: various dependencies
 my $git = `which git`;
@@ -63,6 +65,9 @@ On Debian/Ubuntu systems you can do this with the command:
   apt-get install build-essential
 END
 
+# The following libraries are version number dependant for HTSlib
+if( $version_major >= 2 || ($version_major==1 && $version_minor>=5) )
+{
 -e '/usr/include/lzma.h' or die <<END;
 lzma.h library header not found in /usr/include. Please install it and try again.
 On Debian/Ubuntu systems you can do this with the command:
@@ -76,7 +81,9 @@ On Debian/Ubuntu systems you can do this with the command:
 
   apt-get install libbz2-dev
 END
-
+}
+else
+{
 -e '/usr/include/zlib.h' or die <<END;
 zlib.h library header not found in /usr/include. Please install it and try again.
 On Debian/Ubuntu systems you can do this with the command:
@@ -85,6 +92,8 @@ On Debian/Ubuntu systems you can do this with the command:
 END
 
     ;
+}
+
 
 eval "require Bio::SeqFeature::Lite" or die <<END;
 BioPerl does not seem to be installed. Please install it and try again.
