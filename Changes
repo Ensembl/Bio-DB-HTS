@@ -1,4 +1,13 @@
 
+2.8
+  * Use the htslib his_remote function to determine which files are remote
+  * Add output filename to wget functon in install script, courtesy of Zhicheng Liu
+  * Use htslib v1.5 by default in install script
+  * Use filetest access to allow POSIX ACLs, courtesy of Can Wood
+  * Copyright updates
+  * Update TravisCI Perl test versions
+
+
 2.7
    * change BioPerl version required in Build.PL to be 1.6.1
 
