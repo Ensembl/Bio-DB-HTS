@@ -136,11 +136,6 @@ sub header_array {
 sub close {
     my $self = shift;
 
-    if ( $self->{_htsfile} ) {
-        Bio::DB::HTSfile::close($self->{_htsfile});
-        delete $self->{_htsfile};
-    }
-
     if ( $self->{_tabix_index} ) {
         tbx_close($self->{_tabix_index});
         delete $self->{_tabix_index};

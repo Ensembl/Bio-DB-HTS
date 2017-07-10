@@ -14,11 +14,17 @@
 
 use strict;
 use warnings;
-use Test::More tests => 109, 'die';
+use Test::More tests => 113, 'die';
 
 use FindBin qw( $Bin );
 
-BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
+BEGIN {
+  use_ok 'Bio::DB::HTS::VCF';
+  use_ok 'Bio::DB::HTS::VCF::Row';
+  use_ok 'Bio::DB::HTS::VCF::RowPtr';
+  use_ok 'Bio::DB::HTS::VCF::Header';
+  use_ok 'Bio::DB::HTS::VCF::HeaderPtr';    
+}
 
 {
   # Test sweep functions
@@ -93,8 +99,6 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is_deeply $info_result, [3], 'info ints read correctly';
   is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
 
-  Bio::DB::HTS::VCF::Row->destroy($row) ;
-
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "112", "Position value read" ;
@@ -109,7 +113,6 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
-  Bio::DB::HTS::VCF::Row->destroy($row) ;
 
   #Format and genotype tests
   ok $row = $v->next(), "Next row";
@@ -172,8 +175,6 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is_deeply $info_result, [3], 'info ints read correctly';
   is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
 
-  Bio::DB::HTS::VCF::Row->destroy($row) ;
-
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "112", "Position value read" ;
@@ -188,7 +189,6 @@ BEGIN { use_ok 'Bio::DB::HTS::VCF'; }
   is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
-  Bio::DB::HTS::VCF::Row->destroy($row) ;
 
   #Format and genotype tests
   ok $row = $v->next(), "Next row";
