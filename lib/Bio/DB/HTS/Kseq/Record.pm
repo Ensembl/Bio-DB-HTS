@@ -56,7 +56,7 @@ The quality string from a FASTA/Q record
 use strict;
 use warnings;
 
-$Bio::DB::HTS::Kseq::Record::VERSION = '2.8';
+$Bio::DB::HTS::Kseq::Record::VERSION = '2.9';
 
 sub name {
   return $_[0]->{name};

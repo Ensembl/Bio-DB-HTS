@@ -16,80 +16,92 @@ name: Bio-DB-HTS
 provides:
   Bio::DB::HTS:
     file: lib/Bio/DB/HTS.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::AlignWrapper:
     file: lib/Bio/DB/HTS/AlignWrapper.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Alignment:
     file: lib/Bio/DB/HTS/Alignment.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Constants:
     file: lib/Bio/DB/HTS/Constants.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Fai:
     file: lib/Bio/DB/HTS.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Faidx:
     file: lib/Bio/DB/HTS/Faidx.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::FetchIterator:
     file: lib/Bio/DB/HTS/FetchIterator.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::HTSfile:
     file: lib/Bio/DB/HTS.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Kseq:
     file: lib/Bio/DB/HTS/Kseq.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Kseq::Record:
     file: lib/Bio/DB/HTS/Kseq/Record.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Pileup:
     file: lib/Bio/DB/HTS/Pileup.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::PileupWrapper:
     file: lib/Bio/DB/HTS/PileupWrapper.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Query:
     file: lib/Bio/DB/HTS/Query.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::ReadIterator:
     file: lib/Bio/DB/HTS/ReadIterator.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Segment:
     file: lib/Bio/DB/HTS/Segment.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Segment::Iterator:
     file: lib/Bio/DB/HTS/Segment.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::SplitAlignmentPart:
     file: lib/Bio/DB/HTS/AlignWrapper.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Tabix:
     file: lib/Bio/DB/HTS/Tabix.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Tabix::Iterator:
     file: lib/Bio/DB/HTS/Tabix/Iterator.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::Target:
     file: lib/Bio/DB/HTS/Target.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTS::VCF:
     file: lib/Bio/DB/HTS/VCF.pm
-    version: '2.8'
+    version: '2.9'
+  Bio::DB::HTS::VCF::Header:
+    file: lib/Bio/DB/HTS/VCF/Header.pm
+    version: '2.9'
+  Bio::DB::HTS::VCF::HeaderPtr:
+    file: lib/Bio/DB/HTS/VCF/HeaderPtr.pm
+    version: '2.9'
+  Bio::DB::HTS::VCF::Row:
+    file: lib/Bio/DB/HTS/VCF/Row.pm
+    version: '2.9'
+  Bio::DB::HTS::VCF::RowPtr:
+    file: lib/Bio/DB/HTS/VCF/RowPtr.pm
+    version: '2.9'
   Bio::DB::HTS::VCF::Sweep:
     file: lib/Bio/DB/HTS/VCF.pm
-    version: '2.8'
+    version: '2.9'
   Bio::DB::HTSfile:
     file: lib/Bio/DB/HTS.pm
   Bio::SeqFeature::HTSCoverage:
     file: lib/Bio/DB/HTS.pm
-    version: '2.8'
+    version: '2.9'
 requires:
   Bio::Root::Version: '1.006001'
   perl: '5.008'
 resources:
   license: http://www.apache.org/licenses/LICENSE-2.0.txt
   repository: https://github.com/Ensembl/Bio-DB-HTS
-version: '2.8'
+version: '2.9'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.012'

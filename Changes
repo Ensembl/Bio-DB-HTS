@@ -1,4 +1,10 @@
 
+2.9
+  PR#50 - https://github.com/Ensembl/Bio-DB-HTS/pull/50
+  * Guarantee resource deallocation  by adding DESTROY methods to replace close methods
+  * add Bio::DB::HTS::VCF::HeaderPtr and Bio::DB::HTS::VCF::RowPtr packages
+
+
 2.8
   * Use the htslib his_remote function to determine which files are remote
   * Add output filename to wget functon in install script, courtesy of Zhicheng Liu

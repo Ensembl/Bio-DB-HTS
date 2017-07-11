@@ -97,5 +97,5 @@ L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Alignment>, L<Bio::DB::HTS::Const
 package Bio::DB::HTS::Pileup;
 use strict;
 use warnings;
-$Bio::DB::HTS::Pileup::VERSION = '2.8';
+$Bio::DB::HTS::Pileup::VERSION = '2.9';
 1;

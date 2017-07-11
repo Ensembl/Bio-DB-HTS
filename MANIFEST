@@ -22,6 +22,10 @@ lib/Bio/DB/HTS.xs
 lib/Bio/DB/HTS/Constants.pm
 lib/Bio/DB/HTS/Segment.pm
 lib/Bio/DB/HTS/VCF.pm
+lib/Bio/DB/HTS/VCF/Header.pm
+lib/Bio/DB/HTS/VCF/HeaderPtr.pm
+lib/Bio/DB/HTS/VCF/Row.pm
+lib/Bio/DB/HTS/VCF/RowPtr.pm
 lib/Bio/DB/HTS/Tabix/Iterator.pm
 LICENSE
 MANIFEST			This list of files
