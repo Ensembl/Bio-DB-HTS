@@ -194,6 +194,8 @@ int invoke_pileup_callback_fun(uint32_t tid,
 
   FREETMPS;
   LEAVE;
+
+  return 0;
 }
 
 /*
@@ -531,8 +533,10 @@ hts_read1(htsfile,header)
        if (sam_read1(htsfile,header,alignment) >= 0) {
          RETVAL = alignment ;
        }
-       else
+       else {
+         bam_destroy1(alignment);
          XSRETURN_EMPTY;
+       }
     OUTPUT:
        RETVAL
 
@@ -657,7 +661,7 @@ PREINIT:
     char* seq;
     int   i;
 CODE:
-    seq = Newxz(seq,b->core.l_qseq+1,char);
+    Newxz(seq,b->core.l_qseq+1,char);
     for (i=0;i<b->core.l_qseq;i++) {
       seq[i]=seq_nt16_str[bam_seqi(bam_get_seq(b),i)];
     }
