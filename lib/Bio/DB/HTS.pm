@@ -2143,11 +2143,14 @@ sub index {
     return $self->index_open_in_safewd($fh) if Bio::DB::HTSfile->is_remote($path);
 
     if ($autoindex) {
-        if ( !( -e "${path}.bai" or -e "${path}.crai" ) ) {
+        if ( !( -e "${path}.bai" or -e "${path}.csi" or -e "${path}.crai" ) ) {
             $self->reindex($path);
         }
         elsif ( -e "${path}.bai" && mtime($path) > mtime("${path}.bai") ) {
             $self->reindex($path);
+        }
+        elsif ( -e "${path}.csi" && mtime($path) > mtime("${path}.csi") ) {
+            croak "csi index is older than bam file, Bio::DB::HTS cannot index csi format."
         }
         elsif ( -e "${path}.crai" && mtime($path) > mtime("${path}.crai") ) {
             $self->reindex($path);
@@ -2156,7 +2159,8 @@ sub index {
 
     croak "No index file for $path; try opening file with -autoindex"
       unless -e "${path}.bai" or
-      -e "${path}.crai";
+        -e "${path}.csi" or
+        -e "${path}.crai";
     return $self->index_load($fh);
 } ## end sub index
 

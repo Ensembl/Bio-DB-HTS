@@ -18,7 +18,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 use File::Temp qw(tempfile);
 use FindBin '$Bin';
-use constant TEST_COUNT => 235;
+use constant TEST_COUNT => 236;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -513,6 +513,15 @@ for my $use_fasta ( 0, 1 ) {
     $hts->pileup( 'seq2:1-100', $fetch_back );
     ok( $matches{matched}/$matches{total} > 0.99 );
 } ## end for my $use_fasta ( 0, ...)
+
+{ # test access via csi index
+  my $hts = Bio::DB::HTS->new(-bam  =>"t/data/ex3.bam",
+                              -fasta=>"t/data/ex1.fa");
+  my @a = $hts->get_features_by_location(-seq_id => 'seq1',
+                                         -start  => 961,
+                                         -end    => 961);
+  ok(scalar @a, 3);
+}
 
 exit 0;
 
