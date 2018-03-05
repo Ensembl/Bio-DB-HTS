@@ -1003,7 +1003,7 @@ write the alignment to the BAM file and return the number of bytes successfully 
 
 =head2 Index methods
 
-The Bio::DB::HTS::Index object provides access to index (.bai,.crai) files.
+The Bio::DB::HTS::Index object provides access to index (.bai|.csi, .crai) files.
 
 =over 4
 
@@ -1031,7 +1031,7 @@ exist or if attempting to rebuild the index was unsuccessful.
 
 Attempt to open the index file for an alignment file, returning a
 Bio::DB::HTS::Index object. The filename path to use is the alignment file,
-not the index file (i.e. .bam or .cram, not .bai or .crai)
+not the index file (i.e. .bam or .cram, not .bai|.csi or .crai)
 
 =item $index = Bio::DB::HTS->index_open_in_safewd('/path/to/file.?am' [,$mode])
 
