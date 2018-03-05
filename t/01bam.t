@@ -363,7 +363,7 @@ sub low_level_tests {
   }
 }
 
-# 54 tests
+# 54x2 tests
 sub high_level_tests {
   my ($testbam, $testfa) = @_;
 # high level tests (defined in lib/Bio/DB/HTS.pm)
