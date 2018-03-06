@@ -2168,7 +2168,7 @@ sub reindex {
     my $self = shift;
     my $path = shift;
 
-    # if bam file is not sorted, then index_build will exit.
+    # if bam|cram file is not sorted, then index_build will exit.
     # we spawn a shell to intercept this eventuality
     print STDERR "[hts_index_build] creating index for $path\n" if -t STDOUT;
 
@@ -2189,8 +2189,11 @@ sub reindex {
         print STDERR "[hts_index_build] sorting by coordinate...\n"
           if -t STDOUT;
         $self->sort_core( 0, $path, "$path.sorted" );
-        rename "$path.sorted.bam", $path;
-        $self->index_build($path);
+
+	$path =~ /\.(.+?)$/;
+        rename "$path.sorted.$1", $path;
+
+	$self->index_build($path);
     }
     elsif ($mesg) {
         die $mesg;
