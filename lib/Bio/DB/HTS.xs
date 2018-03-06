@@ -31,6 +31,11 @@ limitations under the License.
  #include <perlio.h>
 #endif
 
+#define TRACEME(x) do {						\
+    if (SvTRUE(perl_get_sv("Bio::DB::HTS::ENABLE_DEBUG", TRUE)))	\
+      { PerlIO_stdoutf (x); PerlIO_stdoutf ("\n"); }		\
+  } while (0)
+
 #ifndef Newx
 #  define Newx(v,n,t) New(0,v,n,t)
 #endif
@@ -471,10 +476,15 @@ hts_header_read(htsfile)
       const htsFormat *format ;
     CODE:
       format = hts_get_format( htsfile ) ;
-      if( format->format == bam ) //enum value from htsExactFormat from hts.h
-      {
+      if( format->format == bam  ) //enum value from htsExactFormat from hts.h
         result = bgzf_seek(htsfile->fp.bgzf,0,0) ;
-      }
+      /*
+       * https://github.com/Ensembl/Bio-DB-HTS/issues/54
+       * must seek at beginning of file for sam as well
+       */
+      else if ( format->format == sam )
+	result = hseek(htsfile->fp.hfile, 0, 0);
+
       bh = sam_hdr_read(htsfile);
       RETVAL = bh ;
     OUTPUT:
