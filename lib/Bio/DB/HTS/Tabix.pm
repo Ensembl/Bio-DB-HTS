@@ -85,7 +85,7 @@ sub query_full {
     my $seqnames_hash = { map { $_ => 1 } @{ $self->seqnames } };
     
     if ( not exists $seqnames_hash->{ $chr } ) {
-      warn("Specified chromosome '$chr' does not exist in file " . $self->{_filename});
+      # warn("Specified chromosome '$chr' does not exist in file " . $self->{_filename});
       return undef;
     } else {
       die "Unable to get iterator for region '$region' in file ". $self->{_filename} . " -- htslib couldn't parse your region string";
