@@ -99,8 +99,8 @@ Bio::DB::HTS -- Read files using HTSlib including BAM/CRAM, Tabix and BCF databa
 =head1 DESCRIPTION
 
 This module provides a Perl interface to the HTSlib library for
-indexed and unindexed SAM/BAM sequence alignment databases. It
-provides support for retrieving information on individual alignments,
+indexed and unindexed SAM/BAM/CRAM sequence alignment databases. 
+It provides support for retrieving information on individual alignments,
 read pairs, and alignment coverage information across large
 regions. It also provides callback functionality for calling SNPs and
 performing other base-by-base functions.
