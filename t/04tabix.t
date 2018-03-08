@@ -14,7 +14,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 22, 'die';
+use Test::More tests => 21, 'die';
 use feature qw( say );
 use FindBin qw( $Bin );
 
@@ -59,8 +59,8 @@ is $row, "HLA-A*01:01:01:01\t1\t500\t0.65", "row value is correct with ':' in ch
 #
 ## end strange chr name testing
 
-ok $iter = $tbx->query("fake"), 'non existent chrom works fine';
-is $iter->next, undef, 'iterator for missing chrom is fine';
+$iter = $tbx->query("fake");
+ok(!$iter, 'querying non existent chrom');
 $tbx->close;
 
 #More in depth header tests
