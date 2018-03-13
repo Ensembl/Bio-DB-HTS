@@ -150,8 +150,12 @@ int hts_fetch_fun (void *data, bam1_t *b)
   callback     = fcp->callback;
   callbackdata = fcp->data;
 
-  /* turn the bam1_t into an appropriate object */
-  /* need to dup it here so that the C layer doesn't reuse the address under Perl */
+  /* The underlying bam1_t will be bam_destroy1()ed by alignment_obj's
+   * destructor, so we need to duplicate it here. We could create the Perl SV
+   * alongside the C bam1_t (cf bami_coverage), but note that a new b & b_sv
+   * would be needed for each iteration, as some callback functions will
+   * expect distinct references to distinct alignment objects each time.
+   */
   b2 = bam_dup1(b);
 
   alignment_obj = sv_setref_pv(newSV(sizeof(bam1_t)),"Bio::DB::HTS::Alignment",(void*) b2);
