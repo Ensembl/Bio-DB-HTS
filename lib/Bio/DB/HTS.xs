@@ -365,6 +365,17 @@ int hts_fetch(htsFile *fp, const hts_idx_t *idx, int tid, int beg, int end, void
 }
 
 
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS
+
+SV*
+htslib_version(packname="Bio::DB::HTS")
+  char * packname
+ PROTOTYPE: $
+ CODE:
+    RETVAL=newSVpv(hts_version(),0);
+ OUTPUT:
+    RETVAL
+
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Fai PREFIX=fai_
 
 Bio::DB::HTS::Fai
@@ -403,7 +414,7 @@ fai_fetch(fai,reg)
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTSfile PREFIX=hts_
-
+      
 int
 max_pileup_cnt(packname,...)
 CODE:
@@ -482,8 +493,16 @@ hts_header_read(htsfile)
        * https://github.com/Ensembl/Bio-DB-HTS/issues/54
        * must seek at beginning of file for sam as well
        */
-      else if ( format->format == sam )
-	result = hseek(htsfile->fp.hfile, 0, 0);
+      else if ( format->format == sam ) {
+	/*
+	 * Using hseek with htslib < 1.5 triggers segfault
+	 * and couldn't find a valid alternative.
+	 *
+	 * WARNING: we're tied to buggy behaviour for htslib <= 1.3.1
+	 */
+	if ( strcmp(hts_version(), "1.5") >= 0 )
+	  result = hseek(htsfile->fp.hfile, 0, SEEK_SET);
+      }
 
       bh = sam_hdr_read(htsfile);
       RETVAL = bh ;
