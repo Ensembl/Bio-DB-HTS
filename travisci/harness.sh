@@ -15,6 +15,7 @@ echo "Test list"
 ls -l t
 
 echo "COVERALLS value=$COVERALLS"
+echo "HTSLIB_VERSION value=$HTSLIB_VERSION"
 
 perl $PWD/ensembl-test/scripts/runtests.pl t $SKIP_TESTS
 

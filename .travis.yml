@@ -9,7 +9,10 @@ services:
 
 
 env:
-
+  matrix:
+    - HTSLIB_VERSION=1.3.1
+    - HTSLIB_VERSION=1.5
+    - HTSLIB_VERSION=1.7
 
 sudo: false
 
@@ -23,13 +26,13 @@ addons:
 before_install:
     - git clone -b bioperl-release-1-6-1 --depth 1 https://github.com/bioperl/bioperl-live.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
-    - git clone --branch master --depth=1 https://github.com/samtools/htslib.git
+
+install:
+    - git clone --branch $HTSLIB_VERSION --depth=1 https://github.com/samtools/htslib.git
     - cd htslib
     - make prefix=~/biodbhts install
     - export HTSLIB_DIR=
     - cd ..
-
-install:
     # manually install items from cpanfile so we can skip BioPerl
     - cpanm -f -n Carp
     - cpanm -f -n Test::Most
