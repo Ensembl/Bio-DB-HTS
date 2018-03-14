@@ -1276,9 +1276,72 @@ exported to the Perl API just in case.
 Please see L<Bio::DB::HTS::Alignment> for documentation of the
 Bio::DB::HTS::Alignment and Bio::DB::HTS::AlignWrapper objects.
 
-=head1 AUTHOR
+=head1 DEPENDENCIES
 
-Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
+Module::Build, Carp, Bio::Perl (>=1.006001), Test::More
+
+=head1 EXPORT
+
+None
+
+=head1 AUTHORS
+
+Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>, original author.
+
+Alessandro Vullo C<< <avullo at cpan.org> >>, the current developer and maintainer.
+
+=head1 CONTRIBUTORS
+
+Andy Yates, Keiran Raine, Zhicheng Liu, Can Wood, Dietmar Rieder, Chris Fields, David Jones, James Gilbert, Alex Hodgkins (Congenica Ltd.)
+
+=head1 KNOWN BUGS
+
+=over 4
+
+=item * SAM file reading and iterating over alignments does not work with older htslib versions (<1.5)
+
+=item * The padded_alignment() function with CRAM files sometimes produces invalid output: the strings that specify the pairwise alignment are not of equal length
+
+=back
+
+
+Please report any bugs or feature requests to C<bug-bio-db-hts at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-DB-HTS>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
+
+=head1 TESTING AND CONTRIBUTING
+
+You can obtain the most recent development version of this module via the GitHub
+repository at https://github.com/Ensembl/Bio-DB-HTS. Please feel free to submit bug
+reports, patches etc.
+
+=head1 SUPPORT 
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Bio::DB::HTS
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker (report bugs here)
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Bio-DB-HTS>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Bio-DB-HTS>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Bio-DB-HTS>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Bio-DB-HTS/>
+
+=back
 
 =cut
 
