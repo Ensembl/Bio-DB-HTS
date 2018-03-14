@@ -369,11 +369,11 @@ MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS
 
 SV*
 htslib_version(packname="Bio::DB::HTS")
-  char * packname
- PROTOTYPE: $
- CODE:
-    RETVAL=newSVpv(hts_version(),0);
- OUTPUT:
+    char * packname
+  PROTOTYPE: $
+  CODE:
+    RETVAL = newSVpv(hts_version(), 0);
+  OUTPUT:
     RETVAL
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::Fai PREFIX=fai_
