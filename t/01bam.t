@@ -18,7 +18,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 use File::Temp qw(tempfile);
 use FindBin '$Bin';
-use constant TEST_COUNT => 364;
+use constant TEST_COUNT => 452;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -504,6 +504,36 @@ sub high_level_tests {
       ok($c);
       ok( $c->[0],            3 );
       ok( $c->[1],            4 );
+      ok( $c->[798],         50 );
+      ok( $c->[799],         49 );
+      ok( $c->[831],         46 );
+      ok( $c->[1300],        45 );
+      ok( $coverage[0]->type, "coverage:1584" );
+
+      # try filtered coverage (no filtering)
+      @coverage = $hts->features( -type => 'coverage', -seq_id => 'seq2', -filter => sub { return 1; } );
+      ok( scalar @coverage, 1 );
+      ($c) = $coverage[0]->get_tag_values('coverage');
+      ok($c);
+      ok( $c->[0],            3 );
+      ok( $c->[1],            4 );
+      ok( $c->[798],         50 );
+      ok( $c->[799],         49 );
+      ok( $c->[831],         46 );
+      ok( $c->[1300],        45 );
+      ok( $coverage[0]->type, "coverage:1584" );
+
+      # try filtered coverage (really filtering)
+      @coverage = $hts->features( -type => 'coverage', -seq_id => 'seq2', -filter => sub { my $a = shift; return defined $a->start && $a->start < 800 } );
+      ok( scalar @coverage, 1 );
+      ($c) = $coverage[0]->get_tag_values('coverage');
+      ok($c);
+      ok( $c->[0],            3 );
+      ok( $c->[1],            4 );
+      ok( $c->[798],         50 );
+      ok( $c->[799],         47 );
+      ok( $c->[831],          0 );
+      ok( $c->[1300],         0 );
       ok( $coverage[0]->type, "coverage:1584" );
 
       # test high level API version of pileup

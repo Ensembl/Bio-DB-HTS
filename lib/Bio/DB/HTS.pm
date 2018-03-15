@@ -1936,9 +1936,6 @@ sub _coverage {
     my $self = shift;
     my ( $seqid, $start, $end, $bins, $filter ) = @_;
 
-    # Currently filter is ignored. In reality, we should
-    # turn filter into a callback and invoke it on each
-    # position in the pileup.
     croak "cannot calculate coverage unless a -seq_id is provided"
       unless defined $seqid;
 
@@ -1958,7 +1955,8 @@ sub _coverage {
     $bins ||= $end - $start + 1;
 
     my $index = $self->hts_index;
-    my $coverage = $index->coverage( $self->{hts_file}, $id, $s, $end, $bins );
+    my $coverage = $index->coverage( $self->{hts_file}, $id, $s, $end,
+                                     $bins, 8000, $filter );
 
     return
       Bio::SeqFeature::HTSCoverage->new( -display_name => "$seqid coverage",
