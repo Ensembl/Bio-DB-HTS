@@ -21,6 +21,7 @@ use File::Path qw(make_path);
 use Getopt::Long;
 
 my $htslib_version = "1.5";
+my $version = get_version();
 
 my $help = "INSTALL.pl [-h|--help] [--prefix=filepath] [--static] [~/prefix/path]\n";
 $help .= "--help (-h)  - this help message\n";
@@ -131,8 +132,8 @@ system "mv htslib-$htslib_version htslib" ;
 # STEP 3: Download Bio-DB-HTS
 info("Fetching latest version of Bio-DB-HTS from GitHub");
 chdir $install_dir;
-my $biodbhts_archive = "master.zip" ;
-my $biodbhts_archive_url = "https://github.com/Ensembl/Bio-DB-HTS/archive/master.zip" ;
+my $biodbhts_archive = "$version.zip" ;
+my $biodbhts_archive_url = "https://github.com/Ensembl/Bio-DB-HTS/archive/$version.zip" ;
 system "wget -O " . $biodbhts_archive . " " .$biodbhts_archive_url  ;
 if ( $? == -1 )
 {
@@ -140,7 +141,7 @@ if ( $? == -1 )
 }
 -f './'.$biodbhts_archive or die "Could not fetch Bio::DB::HTS archive ".$biodbhts_archive_url ;
 system "unzip ".$biodbhts_archive ;
-system "mv Bio-DB-HTS-master Bio-DB-HTS" ;
+system "mv Bio-DB-HTS-$version Bio-DB-HTS" ;
 -d './Bio-DB-HTS' or die "Unzip seems to have failed. Could not find $install_dir/Bio-DB-HTS directory";
 
 
@@ -275,4 +276,17 @@ sub prefix_install {
     }
   }
   return $prefix_path;
+}
+
+sub get_version {
+  use FindBin '$Bin';
+  my $version = `grep -m 1 "HTS::VERSION" $Bin/lib/Bio/DB/HTS.pm`;
+  $version =~ /(\d+?\.\d+?)/;
+  $version = $1;
+
+  use Carp;
+  croak "Couldn't get a meaningful library version: $version"
+    unless $version =~ /\d+?\.\d+?/;
+
+  return $version;
 }
