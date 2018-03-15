@@ -130,7 +130,7 @@ system "mv htslib-$htslib_version htslib" ;
 
 
 # STEP 3: Download Bio-DB-HTS
-info("Fetching latest version of Bio-DB-HTS from GitHub");
+info("Fetching version $version of Bio-DB-HTS from GitHub");
 chdir $install_dir;
 my $biodbhts_archive = "$version.zip" ;
 my $biodbhts_archive_url = "https://github.com/Ensembl/Bio-DB-HTS/archive/$version.zip" ;
@@ -212,7 +212,7 @@ if($opts->{'static'}){
 }
 
 # Step 7: Yay!
-info("Bio::DB::HTS is now installed.");
+info("Bio::DB::HTS v$version is now installed.");
 chdir '/';
 
 exit 0;
