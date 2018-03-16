@@ -18,7 +18,7 @@ use strict;
 use warnings;
 use File::Temp qw(tempfile);
 use FindBin '$Bin';
-use constant TEST_COUNT => 115;
+use constant TEST_COUNT => 139;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -334,6 +334,40 @@ for my $use_fasta (0,1)
     ok( $matches{matched}, 115 );
     ok( $matches{total}, 211 );
 
+    # test filtered coverage (no filtering)
+    $hts = Bio::DB::HTS->new(
+                                 -fasta => $fastafile,
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
+    @coverage = $hts->features( -type => 'coverage', -seq_id => 'XIII',
+                                -filter => sub { return 1; } );
+    ($c) = $coverage[0]->get_tag_values('coverage');
+    ok( $c );
+    ok( $c->[30],     3 );
+    ok( $c->[33148],  3 );
+    ok( $c->[924333], 5 );
+    ok( $c->[924351], 4 );
+    ok( $coverage[0]->type, "coverage:924431" );
+
+    # test filtered coverage (really filtering)
+    $hts = Bio::DB::HTS->new(
+                                 -fasta => $fastafile,
+                                 -bam          => $cramfile,
+                                 -expand_flags => 1,
+                                 -autoindex    => 1,
+                                 -force_refseq => $use_fasta, );
+    @coverage = $hts->features( -type => 'coverage', -seq_id => 'XIII',
+                                -filter => sub { my $a = shift;
+                           return defined $a->start && $a->start < 100000; } );
+    ($c) = $coverage[0]->get_tag_values('coverage');
+    ok( $c );
+    ok( $c->[30],     3 );
+    ok( $c->[33148],  3 );
+    ok( $c->[924333], 0 );
+    ok( $c->[924351], 0 );
+    ok( $coverage[0]->type, "coverage:924431" );
 
 } ## end for my $use_fasta ( 0, ...)
 
