@@ -1292,7 +1292,7 @@ Alessandro Vullo C<< <avullo at cpan.org> >>, the current developer and maintain
 
 =head1 CONTRIBUTORS
 
-Andy Yates, Keiran Raine, Zhicheng Liu, Can Wood, Dietmar Rieder, Chris Fields, David Jones, James Gilbert, Alex Hodgkins (Congenica Ltd.)
+Andy Yates, Keiran Raine, John Marshall, Zhicheng Liu, Can Wood, Dietmar Rieder, Chris Fields, David Jones, James Gilbert, Alex Hodgkins (Congenica Ltd.)
 
 =head1 KNOWN BUGS
 
@@ -1300,7 +1300,7 @@ Andy Yates, Keiran Raine, Zhicheng Liu, Can Wood, Dietmar Rieder, Chris Fields, 
 
 =item * SAM file reading and iterating over alignments does not work with older htslib versions (<1.5)
 
-=item * The padded_alignment() function with CRAM files sometimes produces invalid output: the strings that specify the pairwise alignment are not of equal length
+=item * The padded_alignment() function with CRAM files may produce invalid output: unequal lenght of the strings that specify the pairwise alignment
 
 =back
 
