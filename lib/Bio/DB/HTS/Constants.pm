@@ -55,7 +55,7 @@ A hashref that maps flag values to human-readable names. For example:
 
 The reverse of FLAGS:
 
- FLAGS->{M_UNMAPPED} == 0x0008
+ RFLAGS->{M_UNMAPPED} == 0x0008
 
 =back
 
