@@ -33,6 +33,7 @@ install:
     # manually install items from cpanfile so we can skip BioPerl
     - cpanm -f -n Carp
     - cpanm -f -n Test::Most
+    - cpanm -f -n Test::LeakTrace
     - cpanm -f -n Module::Build
     - cpanm -f -n Log::Log4perl
     - cpanm -f -n Try::Tiny
