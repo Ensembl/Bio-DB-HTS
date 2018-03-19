@@ -3,10 +3,7 @@ language: "perl"
 perl:
   - "5.26"
   - "5.14"
-
-
-services:
-
+  - "5.10"
 
 env:
   matrix:
