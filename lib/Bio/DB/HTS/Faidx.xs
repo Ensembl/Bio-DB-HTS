@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "faidx.h"
+#include "htslib/faidx.h"
 #ifndef Newx
 #  define Newx(v,n,t) New(0,v,n,t)
 #endif

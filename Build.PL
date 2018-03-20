@@ -117,7 +117,7 @@ sub set_include_and_compiler_flags {
 
 sub hts_dev_files_exist {
     my ($lib, $include) = @_;
-    return (-f "$lib/libhts.a" || -f "$lib/libhts.so") && -f "$include/hts.h";
+    return (-f "$lib/libhts.a" || -f "$lib/libhts.so") && -f "$include/htslib/hts.h";
 }
 
 # Look for the library and header in the location where htslib was compiled
@@ -128,11 +128,9 @@ sub find_hts_in_build_dir {
     $root =~ s{/$}{};
     $root =~ s{/(lib|include|include/htslib)$}{};
 
-    my $hts_lib     = "$root";
-    my $hts_include = "$root/htslib";
-    if (hts_dev_files_exist($hts_lib, $hts_include)) {
-        $self->config_data('hts_lib'     => $hts_lib);
-        $self->config_data('hts_include' => $hts_include);
+    if (hts_dev_files_exist($root, $root)) {
+        $self->config_data('hts_lib'     => $root);
+        $self->config_data('hts_include' => $root);
         return 1;
     }
     else {
@@ -149,7 +147,7 @@ sub find_hts_in_install_dir {
     $root =~ s{/(lib|include|include/htslib)$}{};
 
     my $hts_lib     = "$root/lib";
-    my $hts_include = "$root/include/htslib";
+    my $hts_include = "$root/include";
     if (hts_dev_files_exist($hts_lib, $hts_include)) {
         $self->config_data('hts_lib'     => $hts_lib);
         $self->config_data('hts_include' => $hts_include);

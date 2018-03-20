@@ -47,18 +47,18 @@ limitations under the License.
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
-#include "kseq.h"
-#include "hts.h"
-#include "hfile.h"
-#include "sam.h"
-#include "khash.h"
-#include "faidx.h"
-#include "tbx.h"
-#include "bgzf.h"
-#include "vcf.h"
-#include "vcfutils.h"
-#include "vcf_sweep.h"
-#include "synced_bcf_reader.h"
+#include "htslib/kseq.h"
+#include "htslib/hts.h"
+#include "htslib/hfile.h"
+#include "htslib/sam.h"
+#include "htslib/khash.h"
+#include "htslib/faidx.h"
+#include "htslib/tbx.h"
+#include "htslib/bgzf.h"
+#include "htslib/vcf.h"
+#include "htslib/vcfutils.h"
+#include "htslib/vcf_sweep.h"
+#include "htslib/synced_bcf_reader.h"
 #include <zlib.h>
 
 /* stolen from bam_aux.c */
