@@ -115,6 +115,11 @@ sub set_include_and_compiler_flags {
     }
 }
 
+sub hts_dev_files_exist {
+    my ($lib, $include) = @_;
+    return (-f "$lib/libhts.a" || -f "$lib/libhts.so") && -f "$include/hts.h";
+}
+
 # Look for the library and header in the location where htslib was compiled
 sub find_hts_in_build_dir {
     my ($self, $root) = @_;
@@ -125,7 +130,7 @@ sub find_hts_in_build_dir {
 
     my $hts_lib     = "$root";
     my $hts_include = "$root/htslib";
-    if (-f "$hts_lib/libhts.a" && -f "$hts_include/hts.h") {
+    if (hts_dev_files_exist($hts_lib, $hts_include)) {
         $self->config_data('hts_lib'     => $hts_lib);
         $self->config_data('hts_include' => $hts_include);
         return 1;
@@ -145,7 +150,7 @@ sub find_hts_in_install_dir {
 
     my $hts_lib     = "$root/lib";
     my $hts_include = "$root/include/htslib";
-    if (-f "$hts_lib/libhts.a" && -f "$hts_include/hts.h") {
+    if (hts_dev_files_exist($hts_lib, $hts_include)) {
         $self->config_data('hts_lib'     => $hts_lib);
         $self->config_data('hts_include' => $hts_include);
         return 1;
@@ -161,10 +166,11 @@ sub die_hts_not_found {
     $msg ||= '';
     die $msg, <<END;
 
-This module requires htslib (http://htslib/org)
+This module requires HTSlib (http://htslib.org/)
 Install it if you have not done so already.
 
-This script will attempt to locate htslib by looking for hts.h and libhts.a in:
+This script will attempt to locate HTSlib by looking for htslib/hts.h
+and libhts.a / libhts.so in:
 
   1. --htslib command line argument
   2. HTSLIB_DIR environment variable
