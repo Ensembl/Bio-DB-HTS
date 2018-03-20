@@ -188,9 +188,7 @@ int invoke_pileup_callback_fun(uint32_t tid,
   fetch_callback_dataptr fcp;
   SV*  callback;
   SV*  callbackdata;
-  SV*  pileup_obj;
   SV* p;
-  SV** pileups;
   AV*  pileup;
 
   fcp          = (fetch_callback_dataptr) data;
@@ -2001,7 +1999,6 @@ vcfrow_get_genotypes(row,header)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
   PREINIT:
-      bcf_fmt_t* fmt ;
       int ngt ;
       int* gt_arr = NULL ;
       int ngt_arr = 0;
