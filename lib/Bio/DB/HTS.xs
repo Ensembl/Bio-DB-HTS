@@ -503,8 +503,18 @@ hts_index_load(packname, htsfile)
     char *      packname
     Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
+    PREINIT:
+      SV *htsfile_sv = SvRV(ST(1));
+      HV *assocfile = get_hv("Bio::DB::HTS::_associated_file", GV_ADD);
     CODE:
       RETVAL = sam_index_load(htsfile, htsfile->fn) ;
+
+      /* For CRAM, it is important that this hts_idx_t is destroyed *before*
+       * the associated htsFile. We hold on to a reference to the htsFile
+       * (which we'll release in our destructor) to ensure it outlives us.
+       */
+      SvREFCNT_inc(htsfile_sv);
+      hv_store(assocfile, (char *) &RETVAL, sizeof RETVAL, htsfile_sv, 0);
     OUTPUT:
       RETVAL
 
@@ -1254,8 +1264,12 @@ OUTPUT:
 void
 bami_DESTROY(hts_idx)
   Bio::DB::HTS::Index hts_idx
+  PREINIT:
+    HV *assocfile = get_hv("Bio::DB::HTS::_associated_file", GV_ADD);
   CODE:
     hts_idx_destroy(hts_idx) ;
+    // Now release our reference to the associated Bio::DB::HTSfile
+    hv_delete(assocfile, (char *) &hts_idx, sizeof hts_idx, 0);
 
 
 
