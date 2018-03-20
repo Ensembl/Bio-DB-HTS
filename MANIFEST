@@ -75,11 +75,11 @@ t/data/ex2.sam.gz
 t/data/ex3.bam
 t/data/ex3.bam.csi
 t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz
-t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz.gzi
 t/data/yeast.fasta
 t/data/yeast.sorted.cram
 t/data/no_index.tsv.gz
 t/data/test.bcf
+t/data/test.sam
 t/data/test.tsv.gz
 t/data/test.tsv.gz.tbi
 t/data/test.vcf.gz
