@@ -281,7 +281,7 @@ sub prefix_install {
 sub get_version {
   use FindBin '$Bin';
   my $version = `grep -m 1 "HTS::VERSION" $Bin/lib/Bio/DB/HTS.pm`;
-  $version =~ /(\d+?\.\d+?)/;
+  $version =~ /(\d+?\.\d+?)\D/;
   $version = $1;
 
   use Carp;
