@@ -721,7 +721,7 @@ bama__qscore(b)
 Bio::DB::HTS::Alignment b
 PROTOTYPE: $
 CODE:
-    RETVAL = newSVpv(bam_get_qual(b),b->core.l_qseq);
+    RETVAL = newSVpv((char *) bam_get_qual(b),b->core.l_qseq);
 OUTPUT:
     RETVAL
 
@@ -802,7 +802,7 @@ CODE:
 	else if (type == 'f') { left -= snprintf(d, left, "f:%g", *(float*)s);   s += 4; }
 	else if (type == 'd') { left -= snprintf(d, left, "d:%lg", *(double*)s); s += 8; }
 	else if (type == 'Z' || type == 'H') { left -= snprintf(d, left, "%c:", type);
-	                                       strncat(d,s,left);
+	                                       strncat(d, (char *) s, left);
 					       while (*s++) {}
 					       left = sizeof(str) - strlen(str);
 	                                     }
@@ -874,7 +874,7 @@ PPCODE:
    {
      s = bam_get_aux(b);  /* s is a khash macro */
      while (s < b->data + b->l_data) {
-       XPUSHs(sv_2mortal(newSVpv(s,2)));
+       XPUSHs(sv_2mortal(newSVpv((char *) s, 2)));
        s   += 2;
        type = *s++;
        if      (type == 'A') { ++s; }
@@ -897,10 +897,10 @@ PREINIT:
     STRLEN  len;
 CODE:
     if (items > 1) {
-      b->data     = SvPV(ST(1),len);
+      b->data     = (uint8_t *) SvPV(ST(1),len);
       b->l_data = len;
     }
-    RETVAL=newSVpv(b->data,b->l_data);
+    RETVAL=newSVpv((char *) b->data, b->l_data);
 OUTPUT:
     RETVAL
 
