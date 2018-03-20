@@ -35,6 +35,7 @@ ppport.h
 README
 scripts/build_options.sh
 scripts/convert_gz_2_bgz.sh
+t/00_load.t
 t/01bam.t
 t/02faidx.t
 t/03cram.t
@@ -43,6 +44,8 @@ t/05vcf.t
 t/06kseq.t
 t/07cramwrite.t
 t/08bamwrite.t
+t/09sam.t
+t/10-leak.t
 t/kseq_data/bug2335.fastq
 t/kseq_data/evil_wrapping.fastq
 t/kseq_data/example.fasta
@@ -69,7 +72,10 @@ t/data/ex1.fa
 t/data/ex1.sam.gz
 t/data/ex2.bam
 t/data/ex2.sam.gz
+t/data/ex3.bam
+t/data/ex3.bam.csi
 t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz
+t/data/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz.gzi
 t/data/yeast.fasta
 t/data/yeast.sorted.cram
 t/data/no_index.tsv.gz

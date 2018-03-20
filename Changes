@@ -1,3 +1,13 @@
+2.10
+  * Tabix changes: header represented as empty string when none is available;
+    querying over an unrecognised seq region returns undefined, not an iterator
+  * Bugfix: read SAM header when iterating over alignments, see issue #54
+  * Bugfix: could not handle sorting when building index for CRAM files
+  PR#64 - https://github.com/Ensembl/Bio-DB-HTS/pull/64, courtesy of John Marshall
+  * Implement filter for features of type coverage
+  * Minor warning, memory leak and typo fixes
+  PR#58 - https://github.com/Ensembl/Bio-DB-HTS/pull/58, courtesy of Keiran Raine
+  * Minimal support for BAM with csi index (no index generation)
 
 2.9
   PR#50 - https://github.com/Ensembl/Bio-DB-HTS/pull/50
