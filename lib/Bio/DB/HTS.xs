@@ -1626,7 +1626,27 @@ vcfh_get_seqnames(header)
         RETVAL
 
 
+SV*
+vcfh_fmt_text(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+  int len, is_bcf = 0; /* discard IDX fields */
+  CODE:
+    if ( strcmp(hts_version(), "1.4") >= 0 ) {
+      /*
+       * get header formatted text using bcf_hdr_format
+       * since 1.4, optimised for huge headers
+       */
+      kstring_t txt = { 0, 0, 0 };
+      bcf_hdr_format(header, is_bcf, &txt);
+      RETVAL = newSVpv(txt.s, 0);
 
+    } else {
+      /* otherwise, rely on bcf_hdr_fmt_text, different interface */
+      RETVAL = newSVpv(bcf_hdr_fmt_text(header, is_bcf, &len), 0);
+    }
+  OUTPUT:
+    RETVAL
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Row PREFIX = vcfrow_
