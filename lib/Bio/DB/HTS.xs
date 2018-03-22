@@ -51,7 +51,6 @@ limitations under the License.
 #include "hts.h"
 #include "hfile.h"
 #include "sam.h"
-#include "khash.h"
 #include "faidx.h"
 #include "tbx.h"
 #include "bgzf.h"
@@ -60,6 +59,10 @@ limitations under the License.
 #include "vcf_sweep.h"
 #include "synced_bcf_reader.h"
 #include <zlib.h>
+
+#include "khash.h"
+KHASH_MAP_INIT_STR(vdict, bcf_idinfo_t)
+typedef khash_t(vdict) vdict_t;
 
 /* stolen from bam_aux.c */
 #define BAM_MAX_REGION 1<<29
@@ -1823,102 +1826,118 @@ vcfrow_get_info_type(row,header,id)
   OUTPUT:
       RETVAL
 
-
 SV*
-vcfrow_get_info(row,header,id)
+vcfrow_get_info(row, header, ...)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
-  char* id
+
   PREINIT:
       bcf_info_t* info ;
-      int i=0 ;
-      int strlength=0 ;
+      int i = 0, avi;
+      int strlength = 0;
       int* buf_i;
       float* buf_f;
       char* buf_c;
-      AV* av_ref;
       int result;
+
+      vdict_t *d;
+      khint_t k;
+      AV* row_ids;
+      HV* info_data;
+
+  INIT:
+      if ( items < 2 )
+	croak ( "Missing arguments" );
+
+      row_ids = newAV();
+      if ( items > 2 ) {
+        if ( SvOK(ST(2)) && SvTYPE(ST(2)) == SVt_PV ) {
+	  av_push ( row_ids, newSVpv ( SvPVX(ST(2)) , 0) );
+        } else
+	  croak ( "ID argument must be a valid string" );
+      } else {
+	d = (vdict_t*)header->dict[BCF_DT_ID];
+	if ( d == 0 ) croak ( "Couldn't get ID dict" );
+
+	for ( k = kh_begin(d); k != kh_end(d); ++k )
+	  if ( kh_exist(d, k) && bcf_get_info(header, row, kh_key(d, k)) != NULL )
+	    av_push ( row_ids, newSVpv ( kh_key(d, k), 0) );
+      }
+
   CODE:
-      info = bcf_get_info(header, row, id);
-      if( info == NULL )
-      {
-          // info null, nothing to return
-          RETVAL = newSVpv("ID_NOT_FOUND",0);
+
+      info_data = newHV();
+
+      for ( avi = 0; avi <= AvFILL(row_ids); ++avi ) {
+	char* id = savepv( SvPV_nolen( *av_fetch ( row_ids, avi, 0 ) ) ) ;
+
+        info = bcf_get_info(header, row, id);
+
+        if( info == NULL ) { /* info null, nothing to return */
+          hv_store( info_data, id, strlen(id), newSVpv("ID_NOT_FOUND", 0), 0 );
+	} else {
+          AV* av_ref = newAV();
+
+          if( info->type == BCF_BT_NULL ) {
+            buf_i = calloc(1, sizeof(int)) ;
+            result = bcf_get_info_flag(header, row, id, &buf_i, &(info->len));
+
+            if( result == 1 )
+              av_push(av_ref, newSViv(1));
+	    else
+              av_push(av_ref, newSViv(0));
+
+            free(buf_i);
+          } else if( info->type == BCF_BT_FLOAT ) {
+            buf_f = calloc(info->len, sizeof(float));
+            result = bcf_get_info_float(header, row, id, &buf_f, &(info->len)) ;
+
+            for( i=0 ; i<result ; i++ )
+              av_push(av_ref, newSVnv(buf_f[i])) ;
+
+            free(buf_f);
+          } else if( info->type == BCF_BT_CHAR ) {
+            strlength = info->len+1 ;
+            buf_c = calloc(strlength, sizeof(char));
+            result = bcf_get_info_string(header, row, id, &buf_c, &strlength) ;
+            buf_c[info->len] = '\0' ;
+
+            av_push(av_ref, newSVpv(buf_c,0));
+
+            free(buf_c);
+          } else if( info->type == BCF_BT_INT8 || info->type == BCF_BT_INT16 || info->type == BCF_BT_INT32 ) {
+            buf_i = calloc(info->len, sizeof(int));
+            result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+
+            for( i=0 ; i<result ; i++ )
+              av_push(av_ref, newSViv(buf_i[i])) ;
+
+            free(buf_i);
+          }
+
+	  hv_store ( info_data, id, strlen(id), newRV_noinc((SV*)av_ref), 0 );
+	}
       }
-      else
-      {
-        av_ref = newAV();
-        if( info->type == BCF_BT_NULL )
-        {
-          buf_i = calloc(1, sizeof(int)) ;
-          result = bcf_get_info_flag(header,row,id,&buf_i,&(info->len));
-          if( result == 1 )
-          {
-            av_push(av_ref, newSViv(1));
-          }
-          else
-          {
-            av_push(av_ref, newSViv(0));
-          }
-          free(buf_i);
-        }
-        else if( info->type == BCF_BT_FLOAT )
-        {
-          buf_f = calloc(info->len, sizeof(float));
-          result = bcf_get_info_float(header, row, id, &buf_f, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSVnv(buf_f[i])) ;
-          }
-          free(buf_f);
-        }
-        else if( info->type == BCF_BT_CHAR )
-        {
-          strlength = info->len+1 ;
-          buf_c = calloc(strlength, sizeof(char));
-          result = bcf_get_info_string(header,row,id,&buf_c,&strlength) ;
-          buf_c[info->len] = '\0' ;
-          av_push(av_ref, newSVpv(buf_c,0));
-          free(buf_c);
-        }
-        else if( info->type == BCF_BT_INT32 )
-        {
-          buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        else if( info->type == BCF_BT_INT16 )
-        {
-          buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        else if( info->type == BCF_BT_INT8 )
-        {
-          buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        //return a reference to our array
-        RETVAL = newRV_noinc((SV*)av_ref);
-      }
+
+      if ( AvFILL(row_ids) == 0 ) {
+	STRLEN len;
+	char* key = SvPV(*av_fetch(row_ids, 0, 0), len);
+
+	SV** svp = hv_fetch( info_data, key, len, 0);
+	if (svp != NULL) {
+	  RETVAL = newSVsv(*svp);
+
+	  SvREFCNT_dec((SV*)info_data);
+	} else
+	  croak ("Couldn't find key");
+
+      } else
+	RETVAL = newRV_noinc((SV*)info_data);
+
+      SvREFCNT_dec((SV*)row_ids);
 
   OUTPUT:
       RETVAL
-
-
 
 
 SV*

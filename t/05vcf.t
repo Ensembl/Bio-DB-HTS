@@ -14,7 +14,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 115, 'die';
+use Test::More tests => 121, 'die';
 
 use FindBin qw( $Bin );
 
@@ -114,6 +114,8 @@ HEADER
 
   #info related tests
   my $info_result ;
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { AF => [0.5], DB => [1], DP => [14], H2 => [1], NS => [3], TT => ['TESTSTRING'] }, 'info read correctly');
   $info_result = $row->get_info($h,"DB") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [1], 'info flag read correctly';
@@ -148,6 +150,8 @@ HEADER
   is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, {}, 'info read correctly');
 
   #Format and genotype tests
   ok $row = $v->next(), "Next row";
@@ -162,6 +166,13 @@ HEADER
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
   is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found';
   is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found';
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { NS => [3],
+			    DP => [14],
+			    AF => [0.5],
+			    DB => [1],
+			    H2 => [1]
+			  }, 'info read correctly');
 
   $v->close();
 }
@@ -225,6 +236,8 @@ HEADER
 
   #info related tests
   my $info_result ;
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { AF => [0.5], DB => [1], DP => [14], H2 => [1], NS => [3], TT => ['TESTSTRING'] }, 'info read correctly');
   $info_result = $row->get_info($h,"DB") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [1], 'info flag read correctly';
@@ -239,8 +252,7 @@ HEADER
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
   is $row->get_info_type($h,"TT"), "String", "info String type correct" ;
-
-  $info_result = $row->get_info($h,"NS") ;
+  $info_result = $row->get_info($h,"NS") ;  
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [3], 'info ints read correctly';
   is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
@@ -259,7 +271,9 @@ HEADER
   is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
-
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, {}, 'info read correctly');
+  
   #Format and genotype tests
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "20", "Chromosome value read" ;
@@ -273,6 +287,13 @@ HEADER
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
   is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found';
   is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found';
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { NS => [3],
+			    DP => [14],
+			    AF => [0.5],
+			    DB => [1],
+			    H2 => [1]
+			  }, 'info read correctly');
 
   $v->close();
 }
