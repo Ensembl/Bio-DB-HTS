@@ -275,15 +275,20 @@ no_leaks_ok {
   } # end for my $use_fasta ( 0, ...)
 } 'High level';
 
-# get_info has been modified to allow not to specify ID
-# lots of allow/dealloc going underneath, test SVs are not
-# leaking.
+# get_info/format have been modified to allow not to specify ID,
+# lots of allow/dealloc going underneath, test SVs are not leaking
 no_leaks_ok {
   my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.bcf" );
   my $h = $v->header();
   my $row = $v->next();
   
   my $info_result = $row->get_info($h);
+  $info_result = $row->get_info($h, 'DUMMY');
+  $info_result = $row->get_info($h, 'NS');
+
+  # my $fmt_result = $row->get_format($h);
+  # $fmt_result = $row->get_format($h, 'DUMMY');
+  # $fmt_result = $row->get_format($h, 'HQ');
 } 'VCF/BCF reading';
 
 done_testing();
