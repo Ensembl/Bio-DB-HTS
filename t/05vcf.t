@@ -14,9 +14,10 @@
 
 use strict;
 use warnings;
-use Test::More tests => 121, 'die';
+use Test::More tests => 143, 'die';
 
 use FindBin qw( $Bin );
+use Data::Dumper;
 
 BEGIN {
   use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
@@ -136,6 +137,16 @@ HEADER
   is_deeply $info_result, [3], 'info ints read correctly';
   is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
 
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format id not present');
+  print Dumper $row->get_format($h);
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, 'format read correctly');
+  
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "112", "Position value read" ;
@@ -153,14 +164,32 @@ HEADER
   $info_result = $row->get_info($h);
   is_deeply($info_result, {}, 'info read correctly');
 
-  #Format and genotype tests
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format id not present');
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, 'format read correctly');
+
+  # Format and genotype tests
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "20", "Chromosome value read" ;
-  is $row->get_format_type($h,"DP"), "Integer", "int format type correct" ;
-  my $fmt_result = $row->get_format($h,"DP") ;
-  isa_ok($fmt_result, 'ARRAY');
-  is_deeply $fmt_result, [1,8,5], 'format ints read correctly' ;
-  $fmt_result = $row->get_genotypes($h) ;
+  is $row->get_format_type($h,"DP"), "Integer", "int format type correct";
+  is_deeply($row->get_format($h, "GT"), [2,3,4,3,4,4], "format int read");
+  is_deeply($row->get_format($h, "GQ"), [48,48,43], 'format int read');
+  is_deeply($row->get_format($h, "DP"), [1,8,5], 'format int read');
+  note "!!! Not sure this is correct !!!";
+  is_deeply($row->get_format($h, "HQ"), [51,51,51,51,'-2147483648','-2147483648'], 'format int read');
+  is_deeply($row->get_format($h), {
+				   GT => [2,3,4,3,4,4],
+				   GQ => [48,48,43],
+				   DP => [1,8,5],
+				   HQ => [51,51,51,51,'-2147483648','-2147483648']
+				  }, 'format read correctly');
+
+  my $fmt_result = $row->get_genotypes($h) ;
   isa_ok($fmt_result, 'ARRAY');
   #TODO resolve how these translate to the strings in htslib
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
@@ -234,7 +263,7 @@ HEADER
   is $row->has_filter($h,"."), 0, "PASS filter absent" ;
   is $row->get_variant_type(1),1, "Variant type matches" ;
 
-  #info related tests
+  # info related tests
   my $info_result ;
   $info_result = $row->get_info($h);
   is_deeply($info_result, { AF => [0.5], DB => [1], DP => [14], H2 => [1], NS => [3], TT => ['TESTSTRING'] }, 'info read correctly');
@@ -257,6 +286,15 @@ HEADER
   is_deeply $info_result, [3], 'info ints read correctly';
   is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
 
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format ID not present');
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, 'format read correctly');
+
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "112", "Position value read" ;
@@ -273,17 +311,34 @@ HEADER
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
   $info_result = $row->get_info($h);
   is_deeply($info_result, {}, 'info read correctly');
+
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format ID not present');
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, 'format read correctly');
   
   #Format and genotype tests
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "20", "Chromosome value read" ;
   is $row->get_format_type($h,"DP"), "Integer", "int format type correct" ;
-  my $fmt_result = $row->get_format($h,"DP") ;
+  is_deeply($row->get_format($h, "GT"), [2,3,4,3,4,4], 'format int read');
+  is_deeply($row->get_format($h, "GQ"), [48,48,43], 'format int read');
+  is_deeply($row->get_format($h, "DP"), [1,8,5], 'format int read');
+  note "!!! Not sure this is correct !!!";
+  is_deeply($row->get_format($h, "HQ"), [51,51,51,51,'-2147483648','-2147483648'], 'format int read');
+  is_deeply($row->get_format($h), {
+				   GT => [2,3,4,3,4,4],
+				   GQ => [48,48,43],
+				   DP => [1,8,5],
+				   HQ => [51,51,51,51,'-2147483648','-2147483648']
+				  }, 'format read correctly');
+  my $fmt_result = $row->get_genotypes($h) ;
   isa_ok($fmt_result, 'ARRAY');
-  is_deeply $fmt_result, [1,8,5], 'format ints read correctly' ;
-  $fmt_result = $row->get_genotypes($h) ;
-  isa_ok($fmt_result, 'ARRAY');
-  #TODO resolve how these translate to the strings in htslib
+  # TODO resolve how these translate to the strings in htslib
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
   is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found';
   is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found';
