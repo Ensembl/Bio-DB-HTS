@@ -45,7 +45,7 @@ t/06kseq.t
 t/07cramwrite.t
 t/08bamwrite.t
 t/09sam.t
-t/10-leak.t
+t/10leak.t
 t/kseq_data/bug2335.fastq
 t/kseq_data/evil_wrapping.fastq
 t/kseq_data/example.fasta
