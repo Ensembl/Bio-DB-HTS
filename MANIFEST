@@ -35,7 +35,7 @@ ppport.h
 README
 scripts/build_options.sh
 scripts/convert_gz_2_bgz.sh
-t/00_load.t
+t/00load.t
 t/01bam.t
 t/02faidx.t
 t/03cram.t
