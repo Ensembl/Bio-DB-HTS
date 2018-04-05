@@ -286,9 +286,8 @@ no_leaks_ok {
   $info_result = $row->get_info($h, 'DUMMY');
   $info_result = $row->get_info($h, 'NS');
 
-  # my $fmt_result = $row->get_format($h);
-  # $fmt_result = $row->get_format($h, 'DUMMY');
-  # $fmt_result = $row->get_format($h, 'HQ');
+  my $fmt_result = $row->get_format($h, 'DUMMY');
+  $fmt_result = $row->get_format($h, 'HQ');
 } 'VCF/BCF reading';
 
 done_testing();
