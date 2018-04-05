@@ -1970,118 +1970,81 @@ vcfrow_get_format_type(row,header,id)
   OUTPUT:
       RETVAL
 
-
 SV*
-vcfrow_get_format(row, header, ...)
+vcfrow_get_format(row,header,id)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
-
+  char* id
   PREINIT:
-      bcf_fmt_t* fmt;
-      int i, avi;
-      int* buf_i = NULL;
-      float* buf_f = NULL;
-      char* buf_c = NULL;
+      bcf_fmt_t* fmt ;
+      int i ;
+      int* buf_i = NULL ;
+      float* buf_f = NULL ;
+      char* buf_c = NULL ;
+      AV* av_ref;
+      int ndst = 0 ;
       int result;
-
-      vdict_t *d;
-      khint_t k;
-      AV* row_ids;
-      HV* fmt_data;
-
-  INIT:
-      if ( items < 2 )
-	croak ( "Missing arguments" );
-
-      row_ids = newAV();
-      if ( items > 2 ) {
-        if ( SvOK(ST(2)) && SvTYPE(ST(2)) == SVt_PV ) {
-	  av_push ( row_ids, newSVpv ( SvPVX(ST(2)) , 0) );
-        } else
-	  croak ( "ID argument must be a valid string" );
-      } else {
-	d = (vdict_t*)header->dict[BCF_DT_ID];
-	if ( d == 0 ) croak ( "Couldn't get ID dict" );
-
-	for ( k = kh_begin(d); k != kh_end(d); ++k )
-	  if ( kh_exist(d, k) && bcf_get_fmt(header, row, kh_key(d, k) ) != NULL )
-	    av_push ( row_ids, newSVpv ( kh_key(d, k), 0) );
-      }
-
   CODE:
-
-      fmt_data = (HV*) sv_2mortal( (SV*) newHV() );
-
-      for ( avi = 0; avi <= AvFILL(row_ids); ++avi ) {
-	// char* id = SvPV_nolen( *av_fetch ( row_ids, avi, 0 ) );
-	char* id = savepv( SvPV_nolen( *av_fetch ( row_ids, avi, 0 ) ) ) ;
-	
-        fmt = bcf_get_fmt(header, row, id);
-
-        if( fmt == NULL ) { /* fmt null, nothing to return */
-          hv_store( fmt_data, id, strlen(id), newSVpv("ID_NOT_FOUND", 0), 0 );
-	} else {
-          AV* av_ref = (AV*) sv_2mortal((SV*) newAV() );
-
-	  int ndst = 0;
-          if( fmt->type == BCF_BT_FLOAT ) {
-            result = bcf_get_format_float(header, row, id, &buf_f, &ndst) ;
-	    if ( result < 0 )
-	      croak ("Couldn't read float format");
-	    
-            for( i=0 ; i<ndst ; i++ )
-              av_push(av_ref, newSVnv(buf_f[i]));
-	    
-            free(buf_f);
-	    
-          } else if( fmt->type == BCF_BT_CHAR ) {
-            result = bcf_get_format_char(header, row, id, &buf_c, &ndst) ;
-	    if ( result < 0 )
-	      croak ("Couldn't read string format");
-
-            av_push(av_ref, newSVpv(buf_c, ndst+1));
-            free(buf_c);
-	    
-          } else if( fmt->type == BCF_BT_INT8 || fmt->type == BCF_BT_INT16 || fmt->type == BCF_BT_INT32 ) {
-            result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
-	    if ( result < 0 )
-	      croak ("Couldn't read int format");
-
-            for( i=0 ; i<ndst ; i++ )
-              av_push(av_ref, newSViv(buf_i[i]));
-
-            free(buf_i);
-          }
-
-	  // hv_store_ent ( fmt_data, newSVpv(id, 0), newRV_noinc((SV*)av_ref), 0 );
-	  SV* idsv = newSVpv(id, 0);
-	  hv_store_ent ( fmt_data, SvREFCNT_inc(idsv), newRV((SV*) av_ref), 0 );
-	  // hv_store ( fmt_data, id, strlen(id), newRV_noinc((SV*)av_ref), 0 );
-	  // hv_store ( fmt_data, id, strlen(id), newRV((SV*) av_ref), 0 );
-	}
+      fmt = bcf_get_fmt(header, row, id);
+      if( fmt == NULL )
+      {
+          // info null, nothing to return
+          RETVAL = newSVpv("ID_NOT_FOUND",0);
       }
+      else
+      {
+        av_ref = newAV();
 
-      if ( AvFILL(row_ids) == 0 ) {
-	STRLEN len;
-	char* key = SvPV(*av_fetch(row_ids, 0, 0), len);
-
-	SV** svp = hv_fetch( fmt_data, key, len, 0);
-	if (svp != NULL) {
-	  RETVAL = newSVsv(*svp);
-
-	  //SvREFCNT_dec((SV*)fmt_data);
-	} else
-	  croak ("Couldn't find key");
-
-      } else
-	//RETVAL = newRV_noinc((SV*)fmt_data);
-        RETVAL = newRV((SV*) fmt_data);
-
-      SvREFCNT_dec((SV*)row_ids);
+        if( fmt->type == BCF_BT_FLOAT )
+        {
+          result = bcf_get_format_float(header, row, id, &buf_f, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSVnv(buf_f[i])) ;
+          }
+          free(buf_f);
+        }
+        else if( fmt->type == BCF_BT_CHAR )
+        {
+          result = bcf_get_format_char(header,row,id,&buf_c,&ndst) ;
+          av_push(av_ref, newSVpv(buf_c, ndst+1));
+          free(buf_c);
+        }
+        else if( fmt->type == BCF_BT_INT32 )
+        {
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        else if( fmt->type == BCF_BT_INT16 )
+        {
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        else if( fmt->type == BCF_BT_INT8 )
+        {
+          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
+          for( i=0 ; i<ndst ; i++ )
+          {
+            av_push(av_ref, newSViv(buf_i[i])) ;
+          }
+          free(buf_i);
+        }
+        //return a reference to our array
+        RETVAL = newRV_noinc((SV*)av_ref);
+      }
 
   OUTPUT:
-      RETVAL
+    RETVAL
 
+    
 SV*
 vcfrow_get_genotypes(row,header)
   Bio::DB::HTS::VCF::Row row
