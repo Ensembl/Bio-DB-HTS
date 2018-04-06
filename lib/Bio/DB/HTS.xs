@@ -61,7 +61,7 @@ limitations under the License.
 #include "htslib/vcf_sweep.h"
 #include "htslib/synced_bcf_reader.h"
 
-#include "khash.h"
+#include "htslib/khash.h"
 KHASH_MAP_INIT_STR(vdict, bcf_idinfo_t)
 typedef khash_t(vdict) vdict_t;
 
