@@ -14,11 +14,13 @@
 
 use strict;
 use warnings;
-use Test::More tests => 113, 'die';
+use Test::More tests => 143, 'die';
 
 use FindBin qw( $Bin );
+use Data::Dumper;
 
 BEGIN {
+  use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
   use_ok 'Bio::DB::HTS::VCF';
   use_ok 'Bio::DB::HTS::VCF::Row';
   use_ok 'Bio::DB::HTS::VCF::RowPtr';
@@ -61,6 +63,40 @@ BEGIN {
   is $v->num_variants(), 9, 'correct number of variants identified in file';
 
   my $h = $v->header();
+
+  my $header_str = <<"HEADER";
+##fileformat=VCFv4.0
+##FILTER=<ID=PASS,Description="All filters passed">
+##fileDate=20090805
+##source=myImputationProgramV3.1
+##reference=1000GenomesPilot-NCBI36
+##phasing=partial
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=AC,Number=.,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
+##INFO=<ID=TT,Number=0,Type=String,Description="Test">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
+##FILTER=<ID=q10,Description="Quality below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples have data">
+##FILTER=<ID=MQ45,Description="MQ45 info">
+##FILTER=<ID=DP50,Description="DP50 info">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
+##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##contig=<ID=19>
+##contig=<ID=20>
+##contig=<ID=X>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+HEADER
+    
+  is($h->fmt_text, $header_str, "Header formatted string");
   is $h->version(), "VCFv4.0", "VCF Header version matches" ;
   is $h->num_samples(), 3, "Number of samples" ;
   is_deeply $h->get_sample_names(), ['NA00001','NA00002','NA00003'], "sample names correct" ;
@@ -79,6 +115,8 @@ BEGIN {
 
   #info related tests
   my $info_result ;
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { AF => [0.5], DB => [1], DP => [14], H2 => [1], NS => [3], TT => ['TESTSTRING'] }, 'info read correctly');
   $info_result = $row->get_info($h,"DB") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [1], 'info flag read correctly';
@@ -99,6 +137,15 @@ BEGIN {
   is_deeply $info_result, [3], 'info ints read correctly';
   is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
 
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format id not present');
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, "format read");
+  
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
   is $row->position(), "112", "Position value read" ;
@@ -113,20 +160,47 @@ BEGIN {
   is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, {}, 'info read correctly');
 
-  #Format and genotype tests
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format id not present');
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, "format read");
+
+  # Format and genotype tests
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "20", "Chromosome value read" ;
-  is $row->get_format_type($h,"DP"), "Integer", "int format type correct" ;
-  my $fmt_result = $row->get_format($h,"DP") ;
-  isa_ok($fmt_result, 'ARRAY');
-  is_deeply $fmt_result, [1,8,5], 'format ints read correctly' ;
-  $fmt_result = $row->get_genotypes($h) ;
+  is $row->get_format_type($h,"DP"), "Integer", "int format type correct";
+  is_deeply($row->get_format($h, "GT"), [2,3,4,3,4,4], "format int read");
+  is_deeply($row->get_format($h, "GQ"), [48,48,43], 'format int read');
+  is_deeply($row->get_format($h, "DP"), [1,8,5], 'format int read');
+  note "!!! Not sure this is correct !!!";
+  is_deeply($row->get_format($h, "HQ"), [51,51,51,51,'-2147483648','-2147483648'], 'format int read');
+  is_deeply($row->get_format($h), {
+				   GT => [2,3,4,3,4,4],
+				   GQ => [48,48,43],
+				   DP => [1,8,5],
+				   HQ => [51,51,51,51,'-2147483648','-2147483648']
+				  }, "format read");
+
+  my $fmt_result = $row->get_genotypes($h) ;
   isa_ok($fmt_result, 'ARRAY');
   #TODO resolve how these translate to the strings in htslib
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
-  is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found ok';
-  is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found ok';
+  is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found';
+  is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found';
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { NS => [3],
+			    DP => [14],
+			    AF => [0.5],
+			    DB => [1],
+			    H2 => [1]
+			  }, 'info read correctly');
 
   $v->close();
 }
@@ -138,6 +212,41 @@ BEGIN {
   is $v->num_variants(), 9, 'correct number of variants identified in file';
 
   my $h = $v->header();
+  my $header_str = <<"HEADER";
+##fileformat=VCFv4.0
+##FILTER=<ID=PASS,Description="All filters passed">
+##fileDate=20090805
+##source=myImputationProgramV3.1
+##reference=1000GenomesPilot-NCBI36
+##phasing=partial
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=AC,Number=.,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
+##INFO=<ID=TT,Number=0,Type=String,Description="Test">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
+##FILTER=<ID=q10,Description="Quality below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples have data">
+##FILTER=<ID=MQ45,Description="MQ45 info">
+##FILTER=<ID=DP50,Description="DP50 info">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
+##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##contig=<ID=19>
+##contig=<ID=20>
+##contig=<ID=X>
+##bcftools_viewVersion=1.3.1+htslib-1.3.1
+##bcftools_viewCommand=view -o test.bcf -O b test.vcf.gz
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+HEADER
+  
+  is($h->fmt_text, $header_str, "Header formatted string");
   is $h->version(), "VCFv4.0", "VCF Header version matches" ;
   is $h->num_samples(), 3, "Number of samples" ;
   is_deeply $h->get_sample_names(), ['NA00001','NA00002','NA00003'], "sample names correct" ;
@@ -153,8 +262,10 @@ BEGIN {
   is $row->has_filter($h,"."), 0, "PASS filter absent" ;
   is $row->get_variant_type(1),1, "Variant type matches" ;
 
-  #info related tests
+  # info related tests
   my $info_result ;
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { AF => [0.5], DB => [1], DP => [14], H2 => [1], NS => [3], TT => ['TESTSTRING'] }, 'info read correctly');
   $info_result = $row->get_info($h,"DB") ;
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [1], 'info flag read correctly';
@@ -169,11 +280,19 @@ BEGIN {
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, ["TESTSTRING"], 'info string read correctly';
   is $row->get_info_type($h,"TT"), "String", "info String type correct" ;
-
-  $info_result = $row->get_info($h,"NS") ;
+  $info_result = $row->get_info($h,"NS") ;  
   isa_ok($info_result, 'ARRAY');
   is_deeply $info_result, [3], 'info ints read correctly';
   is $row->get_info_type($h,"NS"), "Integer", "info int type correct" ;
+
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format ID not present');
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, "format read");
 
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "19", "Chromosome value read" ;
@@ -189,20 +308,47 @@ BEGIN {
   is $row->has_filter($h,"PASS"), 1, "PASS Filter present" ;
   is $row->has_filter($h,"DP50"), 0, "Actual Filter absent" ;
   is $row->has_filter($h,"sdkjsdf"), -1, "Made up filter not existing" ;
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, {}, 'info read correctly');
 
+  # format related tests
+  is_deeply($row->get_format($h, "GT"), [2, 3, 2, 3, 2, 4], 'format int read');
+  is_deeply($row->get_format($h, "HQ"), [10, 10, 10, 10, 3, 3], 'format int read');
+  is($row->get_format($h, "INVALID"), "ID_NOT_FOUND", 'format ID not present');
+  is_deeply($row->get_format($h), {
+				   GT => [2, 3, 2, 3, 2, 4],
+				   HQ => [10, 10, 10, 10, 3, 3]
+				  }, "format read");
+  
   #Format and genotype tests
   ok $row = $v->next(), "Next row";
   is $row->chromosome($h), "20", "Chromosome value read" ;
   is $row->get_format_type($h,"DP"), "Integer", "int format type correct" ;
-  my $fmt_result = $row->get_format($h,"DP") ;
+  is_deeply($row->get_format($h, "GT"), [2,3,4,3,4,4], 'format int read');
+  is_deeply($row->get_format($h, "GQ"), [48,48,43], 'format int read');
+  is_deeply($row->get_format($h, "DP"), [1,8,5], 'format int read');
+  note "!!! Not sure this is correct !!!";
+  is_deeply($row->get_format($h, "HQ"), [51,51,51,51,'-2147483648','-2147483648'], 'format int read');
+  is_deeply($row->get_format($h), {
+				   GT => [2,3,4,3,4,4],
+				   GQ => [48,48,43],
+				   DP => [1,8,5],
+				   HQ => [51,51,51,51,'-2147483648','-2147483648']
+				  }, "format read");
+
+  my $fmt_result = $row->get_genotypes($h) ;
   isa_ok($fmt_result, 'ARRAY');
-  is_deeply $fmt_result, [1,8,5], 'format ints read correctly' ;
-  $fmt_result = $row->get_genotypes($h) ;
-  isa_ok($fmt_result, 'ARRAY');
-  #TODO resolve how these translate to the strings in htslib
+  # TODO resolve how these translate to the strings in htslib
   is_deeply $fmt_result, [2,3,4,3,4,4], 'genotypes read correctly' ;
-  is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found ok';
-  is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found ok';
+  is $row->get_format($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'format id not found';
+  is $row->get_info($h,"IDONTEXIST"), 'ID_NOT_FOUND', 'info id not found';
+  $info_result = $row->get_info($h);
+  is_deeply($info_result, { NS => [3],
+			    DP => [14],
+			    AF => [0.5],
+			    DB => [1],
+			    H2 => [1]
+			  }, 'info read correctly');
 
   $v->close();
 }

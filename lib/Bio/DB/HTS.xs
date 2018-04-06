@@ -47,11 +47,12 @@ limitations under the License.
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include <zlib.h>
+
 #include "htslib/kseq.h"
 #include "htslib/hts.h"
 #include "htslib/hfile.h"
 #include "htslib/sam.h"
-#include "htslib/khash.h"
 #include "htslib/faidx.h"
 #include "htslib/tbx.h"
 #include "htslib/bgzf.h"
@@ -59,7 +60,10 @@ limitations under the License.
 #include "htslib/vcfutils.h"
 #include "htslib/vcf_sweep.h"
 #include "htslib/synced_bcf_reader.h"
-#include <zlib.h>
+
+#include "khash.h"
+KHASH_MAP_INIT_STR(vdict, bcf_idinfo_t)
+typedef khash_t(vdict) vdict_t;
 
 /* stolen from bam_aux.c */
 #define BAM_MAX_REGION 1<<29
@@ -501,8 +505,18 @@ hts_index_load(packname, htsfile)
     char *      packname
     Bio::DB::HTSfile htsfile
     PROTOTYPE: $$
+    PREINIT:
+      SV *htsfile_sv = SvRV(ST(1));
+      HV *assocfile = get_hv("Bio::DB::HTS::_associated_file", GV_ADD);
     CODE:
       RETVAL = sam_index_load(htsfile, htsfile->fn) ;
+
+      /* For CRAM, it is important that this hts_idx_t is destroyed *before*
+       * the associated htsFile. We hold on to a reference to the htsFile
+       * (which we'll release in our destructor) to ensure it outlives us.
+       */
+      SvREFCNT_inc(htsfile_sv);
+      hv_store(assocfile, (char *) &RETVAL, sizeof RETVAL, htsfile_sv, 0);
     OUTPUT:
       RETVAL
 
@@ -1252,8 +1266,12 @@ OUTPUT:
 void
 bami_DESTROY(hts_idx)
   Bio::DB::HTS::Index hts_idx
+  PREINIT:
+    HV *assocfile = get_hv("Bio::DB::HTS::_associated_file", GV_ADD);
   CODE:
     hts_idx_destroy(hts_idx) ;
+    // Now release our reference to the associated Bio::DB::HTSfile
+    hv_delete(assocfile, (char *) &hts_idx, sizeof hts_idx, 0);
 
 
 
@@ -1610,7 +1628,25 @@ vcfh_get_seqnames(header)
         RETVAL
 
 
-
+SV*
+vcfh_fmt_text(header)
+  Bio::DB::HTS::VCF::Header header
+  PREINIT:
+  int len, is_bcf = 0; /* discard IDX fields */
+  CODE:
+    /*
+     * get header formatted text
+     * use deprecated (since 1.4) bcf_hdr_fmt_text to support
+     * older htslib versions
+     * NOTE:
+     *   using bcf_hdr_format is claimed to be better (optimised for huge headers),
+     *   but for htslib >= 1.4 bcf_hdr_fmt_text calls bcf_hdr_format underneath
+     *   and for htslib 1.3.1 bcf_hdr_fmt_text execute the same statements
+     *   as bcf_hdr_format
+     */
+    RETVAL = newSVpv(bcf_hdr_fmt_text(header, is_bcf, &len), 0);
+  OUTPUT:
+    RETVAL
 
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Row PREFIX = vcfrow_
@@ -1789,102 +1825,118 @@ vcfrow_get_info_type(row,header,id)
   OUTPUT:
       RETVAL
 
-
 SV*
-vcfrow_get_info(row,header,id)
+vcfrow_get_info(row, header, ...)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
-  char* id
+
   PREINIT:
       bcf_info_t* info ;
-      int i=0 ;
-      int strlength=0 ;
+      int i = 0, avi;
+      int strlength = 0;
       int* buf_i;
       float* buf_f;
       char* buf_c;
-      AV* av_ref;
       int result;
+
+      vdict_t *d;
+      khint_t k;
+      AV* row_ids;
+      HV* info_data;
+
+  INIT:
+      if ( items < 2 )
+	croak ( "Missing arguments" );
+
+      row_ids = newAV();
+      if ( items > 2 ) {
+        if ( SvOK(ST(2)) && SvTYPE(ST(2)) == SVt_PV ) {
+	  av_push ( row_ids, newSVpv ( SvPVX(ST(2)) , 0) );
+        } else
+	  croak ( "ID argument must be a valid string" );
+      } else {
+	d = (vdict_t*)header->dict[BCF_DT_ID];
+	if ( d == 0 ) croak ( "Couldn't get ID dict" );
+
+	for ( k = kh_begin(d); k != kh_end(d); ++k )
+	  if ( kh_exist(d, k) && bcf_get_info(header, row, kh_key(d, k)) != NULL )
+	    av_push ( row_ids, newSVpv ( kh_key(d, k), 0) );
+      }
+
   CODE:
-      info = bcf_get_info(header, row, id);
-      if( info == NULL )
-      {
-          // info null, nothing to return
-          RETVAL = newSVpv("ID_NOT_FOUND",0);
+
+      info_data = newHV();
+
+      for ( avi = 0; avi <= AvFILL(row_ids); ++avi ) {
+	char* id = savepv( SvPV_nolen( *av_fetch ( row_ids, avi, 0 ) ) ) ;
+
+        info = bcf_get_info(header, row, id);
+
+        if( info == NULL ) { /* info null, nothing to return */
+          hv_store( info_data, id, strlen(id), newSVpv("ID_NOT_FOUND", 0), 0 );
+	} else {
+          AV* av_ref = newAV();
+
+          if( info->type == BCF_BT_NULL ) {
+            buf_i = calloc(1, sizeof(int)) ;
+            result = bcf_get_info_flag(header, row, id, &buf_i, &(info->len));
+
+            if( result == 1 )
+              av_push(av_ref, newSViv(1));
+	    else
+              av_push(av_ref, newSViv(0));
+
+            free(buf_i);
+          } else if( info->type == BCF_BT_FLOAT ) {
+            buf_f = calloc(info->len, sizeof(float));
+            result = bcf_get_info_float(header, row, id, &buf_f, &(info->len)) ;
+
+            for( i=0 ; i<result ; i++ )
+              av_push(av_ref, newSVnv(buf_f[i])) ;
+
+            free(buf_f);
+          } else if( info->type == BCF_BT_CHAR ) {
+            strlength = info->len+1 ;
+            buf_c = calloc(strlength, sizeof(char));
+            result = bcf_get_info_string(header, row, id, &buf_c, &strlength) ;
+            buf_c[info->len] = '\0' ;
+
+            av_push(av_ref, newSVpv(buf_c,0));
+
+            free(buf_c);
+          } else if( info->type == BCF_BT_INT8 || info->type == BCF_BT_INT16 || info->type == BCF_BT_INT32 ) {
+            buf_i = calloc(info->len, sizeof(int));
+            result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
+
+            for( i=0 ; i<result ; i++ )
+              av_push(av_ref, newSViv(buf_i[i])) ;
+
+            free(buf_i);
+          }
+
+	  hv_store ( info_data, id, strlen(id), newRV_noinc((SV*)av_ref), 0 );
+	}
       }
-      else
-      {
-        av_ref = newAV();
-        if( info->type == BCF_BT_NULL )
-        {
-          buf_i = calloc(1, sizeof(int)) ;
-          result = bcf_get_info_flag(header,row,id,&buf_i,&(info->len));
-          if( result == 1 )
-          {
-            av_push(av_ref, newSViv(1));
-          }
-          else
-          {
-            av_push(av_ref, newSViv(0));
-          }
-          free(buf_i);
-        }
-        else if( info->type == BCF_BT_FLOAT )
-        {
-          buf_f = calloc(info->len, sizeof(float));
-          result = bcf_get_info_float(header, row, id, &buf_f, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSVnv(buf_f[i])) ;
-          }
-          free(buf_f);
-        }
-        else if( info->type == BCF_BT_CHAR )
-        {
-          strlength = info->len+1 ;
-          buf_c = calloc(strlength, sizeof(char));
-          result = bcf_get_info_string(header,row,id,&buf_c,&strlength) ;
-          buf_c[info->len] = '\0' ;
-          av_push(av_ref, newSVpv(buf_c,0));
-          free(buf_c);
-        }
-        else if( info->type == BCF_BT_INT32 )
-        {
-          buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        else if( info->type == BCF_BT_INT16 )
-        {
-          buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        else if( info->type == BCF_BT_INT8 )
-        {
-          buf_i = calloc(info->len, sizeof(int));
-          result = bcf_get_info_int32(header, row, id, &buf_i, &(info->len)) ;
-          for( i=0 ; i<result ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        //return a reference to our array
-        RETVAL = newRV_noinc((SV*)av_ref);
-      }
+
+      if ( AvFILL(row_ids) == 0 ) {
+	STRLEN len;
+	char* key = SvPV(*av_fetch(row_ids, 0, 0), len);
+
+	SV** svp = hv_fetch( info_data, key, len, 0);
+	if (svp != NULL) {
+	  RETVAL = newSVsv(*svp);
+
+	  SvREFCNT_dec((SV*)info_data);
+	} else
+	  croak ("Couldn't find key");
+
+      } else
+	RETVAL = newRV_noinc((SV*)info_data);
+
+      SvREFCNT_dec((SV*)row_ids);
 
   OUTPUT:
       RETVAL
-
-
 
 
 SV*
@@ -1917,83 +1969,128 @@ vcfrow_get_format_type(row,header,id)
   OUTPUT:
       RETVAL
 
-
 SV*
-vcfrow_get_format(row,header,id)
+vcfrow_get_format(row, header, ...)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
-  char* id
-  PREINIT:
-      bcf_fmt_t* fmt ;
-      int i ;
-      int* buf_i = NULL ;
-      float* buf_f = NULL ;
-      char* buf_c = NULL ;
-      AV* av_ref;
-      int ndst = 0 ;
-      int result;
-  CODE:
-      fmt = bcf_get_fmt(header, row, id);
-      if( fmt == NULL )
-      {
-          // info null, nothing to return
-          RETVAL = newSVpv("ID_NOT_FOUND",0);
-      }
-      else
-      {
-        av_ref = newAV();
 
-        if( fmt->type == BCF_BT_FLOAT )
-        {
-          result = bcf_get_format_float(header, row, id, &buf_f, &ndst) ;
-          for( i=0 ; i<ndst ; i++ )
-          {
-            av_push(av_ref, newSVnv(buf_f[i])) ;
-          }
-          free(buf_f);
-        }
-        else if( fmt->type == BCF_BT_CHAR )
-        {
-          result = bcf_get_format_char(header,row,id,&buf_c,&ndst) ;
-          av_push(av_ref, newSVpv(buf_c, ndst+1));
-          free(buf_c);
-        }
-        else if( fmt->type == BCF_BT_INT32 )
-        {
-          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
-          for( i=0 ; i<ndst ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        else if( fmt->type == BCF_BT_INT16 )
-        {
-          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
-          for( i=0 ; i<ndst ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        else if( fmt->type == BCF_BT_INT8 )
-        {
-          result = bcf_get_format_int32(header, row, id, &buf_i, &ndst) ;
-          for( i=0 ; i<ndst ; i++ )
-          {
-            av_push(av_ref, newSViv(buf_i[i])) ;
-          }
-          free(buf_i);
-        }
-        //return a reference to our array
-        RETVAL = newRV_noinc((SV*)av_ref);
+  PREINIT:
+      bcf_fmt_t* fmt;
+      int i, avi;
+      int* buf_i = NULL;
+      float* buf_f = NULL;
+      char* buf_c = NULL;
+      int result;
+
+      vdict_t *d;
+      khint_t k;
+      AV* row_ids;
+      HV* fmt_data;
+
+  INIT:
+      if ( items < 2 )
+	croak ( "Missing arguments" );
+
+  CODE:
+
+      if ( items > 2 ) {
+        if ( SvOK(ST(2)) && SvTYPE(ST(2)) == SVt_PV ) {
+	  // av_push ( row_ids, newSVpv ( SvPVX(ST(2)) , 0) );
+
+	  fmt = bcf_get_fmt(header, row, SvPVX(ST(2)));
+
+	  if( fmt == NULL ) { /* fmt null, nothing to return */
+	    RETVAL = newSVpv("ID_NOT_FOUND", 0);
+	  } else {
+	    AV* av_ref = (AV*) sv_2mortal((SV*) newAV() );
+
+	    int ndst = 0;
+	    if( fmt->type == BCF_BT_FLOAT ) {
+	      result = bcf_get_format_float(header, row, SvPVX(ST(2)), &buf_f, &ndst) ;
+	      if ( result < 0 )
+		croak ("Couldn't read float format");
+
+	      for( i=0 ; i<ndst ; i++ )
+		av_push(av_ref, newSVnv(buf_f[i]));
+
+	      free(buf_f);
+
+	    } else if( fmt->type == BCF_BT_CHAR ) {
+	      result = bcf_get_format_char(header, row, SvPVX(ST(2)), &buf_c, &ndst) ;
+	      if ( result < 0 )
+		croak ("Couldn't read string format");
+
+	      av_push(av_ref, newSVpv(buf_c, ndst+1));
+	      free(buf_c);
+
+	    } else if( fmt->type == BCF_BT_INT8 || fmt->type == BCF_BT_INT16 || fmt->type == BCF_BT_INT32 ) {
+	      result = bcf_get_format_int32(header, row, SvPVX(ST(2)), &buf_i, &ndst) ;
+	      if ( result < 0 )
+		croak ("Couldn't read int format");
+
+	      for( i=0 ; i<ndst ; i++ )
+		av_push(av_ref, newSViv(buf_i[i]));
+
+	      free(buf_i);
+	    }
+
+	    RETVAL = newRV((SV*)av_ref);
+	  }
+        } else
+	  croak ( "ID argument must be a valid string" );
+
+      } else {
+	fmt_data = (HV*) sv_2mortal( (SV*) newHV() );
+
+	d = (vdict_t*)header->dict[BCF_DT_ID];
+	if ( d == 0 ) croak ( "Couldn't get ID dict" );
+
+	for ( k = kh_begin(d); k != kh_end(d); ++k )
+	  if ( kh_exist(d, k) && (fmt = bcf_get_fmt(header, row, kh_key(d, k) ) ) != NULL ) {
+
+	    AV* av_ref = (AV*) sv_2mortal((SV*) newAV() );
+
+	    int ndst = 0;
+	    if( fmt->type == BCF_BT_FLOAT ) {
+	      result = bcf_get_format_float(header, row, kh_key(d, k), &buf_f, &ndst) ;
+	      if ( result < 0 )
+		croak ("Couldn't read float format");
+
+	      for( i=0 ; i<ndst ; i++ )
+		av_push(av_ref, newSVnv(buf_f[i]));
+
+	      free(buf_f);
+
+	    } else if( fmt->type == BCF_BT_CHAR ) {
+	      result = bcf_get_format_char(header, row, kh_key(d, k), &buf_c, &ndst) ;
+	      if ( result < 0 )
+		croak ("Couldn't read string format");
+
+	      av_push(av_ref, newSVpv(buf_c, ndst+1));
+	      free(buf_c);
+
+	    } else if( fmt->type == BCF_BT_INT8 || fmt->type == BCF_BT_INT16 || fmt->type == BCF_BT_INT32 ) {
+	      result = bcf_get_format_int32(header, row, kh_key(d, k), &buf_i, &ndst) ;
+	      if ( result < 0 )
+		croak ("Couldn't read int format");
+
+	      for( i=0 ; i<ndst ; i++ )
+		av_push(av_ref, newSViv(buf_i[i]));
+
+	      free(buf_i);
+	    }
+
+	    char* key = savepv((const char*) kh_key(d, k));
+	    hv_store ( fmt_data, key, (I32)strlen(key), newRV((SV*) av_ref), 0 );
+	  }
+
+	RETVAL = newRV((SV*) fmt_data);
       }
 
   OUTPUT:
       RETVAL
 
-
-
+    
 SV*
 vcfrow_get_genotypes(row,header)
   Bio::DB::HTS::VCF::Row row

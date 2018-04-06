@@ -19,13 +19,14 @@ use File::Temp qw(tempfile);
 use FindBin '$Bin';
 
 use constant HAS_LEAKTRACE => eval{ require Test::LeakTrace };
-use Test::More HAS_LEAKTRACE ? (tests => 4) : (skip_all => 'require Test::LeakTrace');
+use Test::More HAS_LEAKTRACE ? (tests => 6) : (skip_all => 'require Test::LeakTrace');
 use Test::LeakTrace;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
 use_ok('Bio::DB::HTS');
 use_ok('Bio::DB::HTS::AlignWrapper');
+use_ok('Bio::DB::HTS::VCF');
 
 my $cramfile = "$Bin/data/yeast.sorted.cram";
 my $fastafile = "$Bin/data/yeast.fasta";
@@ -273,5 +274,22 @@ no_leaks_ok {
 
   } # end for my $use_fasta ( 0, ...)
 } 'High level';
+
+# get_info/format have been modified to allow not to specify ID,
+# lots of allow/dealloc going underneath, test SVs are not leaking
+no_leaks_ok {
+  my $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.bcf" );
+  my $h = $v->header();
+  my $row = $v->next();
+  
+  my $info_result = $row->get_info($h);
+  $info_result = $row->get_info($h, 'DUMMY');
+  $info_result = $row->get_info($h, 'NS');
+
+  my $fmt_result = $row->get_format($h, 'DUMMY');
+  $fmt_result = $row->get_format($h, 'HQ');
+  $fmt_result = $row->get_format($h);
+
+} 'VCF/BCF reading';
 
 done_testing();
