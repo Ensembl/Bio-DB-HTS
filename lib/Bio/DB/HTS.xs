@@ -47,20 +47,21 @@ limitations under the License.
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
-#include "kseq.h"
-#include "hts.h"
-#include "hfile.h"
-#include "sam.h"
-#include "faidx.h"
-#include "tbx.h"
-#include "bgzf.h"
-#include "vcf.h"
-#include "vcfutils.h"
-#include "vcf_sweep.h"
-#include "synced_bcf_reader.h"
 #include <zlib.h>
 
-#include "khash.h"
+#include "htslib/kseq.h"
+#include "htslib/hts.h"
+#include "htslib/hfile.h"
+#include "htslib/sam.h"
+#include "htslib/faidx.h"
+#include "htslib/tbx.h"
+#include "htslib/bgzf.h"
+#include "htslib/vcf.h"
+#include "htslib/vcfutils.h"
+#include "htslib/vcf_sweep.h"
+#include "htslib/synced_bcf_reader.h"
+
+#include "htslib/khash.h"
 KHASH_MAP_INIT_STR(vdict, bcf_idinfo_t)
 typedef khash_t(vdict) vdict_t;
 
@@ -191,9 +192,7 @@ int invoke_pileup_callback_fun(uint32_t tid,
   fetch_callback_dataptr fcp;
   SV*  callback;
   SV*  callbackdata;
-  SV*  pileup_obj;
   SV* p;
-  SV** pileups;
   AV*  pileup;
 
   fcp          = (fetch_callback_dataptr) data;
@@ -736,7 +735,7 @@ bama__qscore(b)
 Bio::DB::HTS::Alignment b
 PROTOTYPE: $
 CODE:
-    RETVAL = newSVpv(bam_get_qual(b),b->core.l_qseq);
+    RETVAL = newSVpv((char *) bam_get_qual(b),b->core.l_qseq);
 OUTPUT:
     RETVAL
 
@@ -817,7 +816,7 @@ CODE:
 	else if (type == 'f') { left -= snprintf(d, left, "f:%g", *(float*)s);   s += 4; }
 	else if (type == 'd') { left -= snprintf(d, left, "d:%lg", *(double*)s); s += 8; }
 	else if (type == 'Z' || type == 'H') { left -= snprintf(d, left, "%c:", type);
-	                                       strncat(d,s,left);
+	                                       strncat(d, (char *) s, left);
 					       while (*s++) {}
 					       left = sizeof(str) - strlen(str);
 	                                     }
@@ -889,7 +888,7 @@ PPCODE:
    {
      s = bam_get_aux(b);  /* s is a khash macro */
      while (s < b->data + b->l_data) {
-       XPUSHs(sv_2mortal(newSVpv(s,2)));
+       XPUSHs(sv_2mortal(newSVpv((char *) s, 2)));
        s   += 2;
        type = *s++;
        if      (type == 'A') { ++s; }
@@ -912,10 +911,10 @@ PREINIT:
     STRLEN  len;
 CODE:
     if (items > 1) {
-      b->data     = SvPV(ST(1),len);
+      b->data     = (uint8_t *) SvPV(ST(1),len);
       b->l_data = len;
     }
-    RETVAL=newSVpv(b->data,b->l_data);
+    RETVAL=newSVpv((char *) b->data, b->l_data);
 OUTPUT:
     RETVAL
 
@@ -2097,7 +2096,6 @@ vcfrow_get_genotypes(row,header)
   Bio::DB::HTS::VCF::Row row
   Bio::DB::HTS::VCF::Header header
   PREINIT:
-      bcf_fmt_t* fmt ;
       int ngt ;
       int* gt_arr = NULL ;
       int ngt_arr = 0;
