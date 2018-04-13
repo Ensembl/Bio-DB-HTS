@@ -77,6 +77,7 @@ typedef bam_pileup1_t*  Bio__DB__HTS__Pileup;
 typedef tbx_t*          Bio__DB__HTS__Tabix;
 typedef hts_itr_t*      Bio__DB__HTS__Tabix__Iterator;
 typedef vcfFile*        Bio__DB__HTS__VCFfile;
+typedef hts_itr_t*      Bio__DB__HTS__VCF__Iterator;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__Header;
 typedef bcf_hdr_t*      Bio__DB__HTS__VCF__HeaderPtr;
 typedef bcf1_t*         Bio__DB__HTS__VCF__Row;
@@ -1479,6 +1480,50 @@ vcf_file_open(packname, filename, mode="r")
     OUTPUT:
       RETVAL
 
+Bio::DB::HTS::Tabix
+vcf_file_tbx_index_load(packname, fname)
+  char* packname
+  char *fname
+  PROTOTYPE: $$
+  CODE:
+      htsFile *fp = hts_open(fname,"r");
+      if ( !fp ) croak("Could not read %s\n", fname);
+      enum htsExactFormat format = hts_get_format(fp)->format;
+      if ( hts_close(fp) ) croak("hts_close returned non-zero status: %s\n", fname);
+
+      if ( format != vcf ) XSRETURN_UNDEF;
+
+      RETVAL = tbx_index_load(fname);
+  OUTPUT:
+      RETVAL
+
+Bio::DB::HTS::Index
+vcf_file_bcf_index_load(packname, filename)
+     char* packname
+     char* filename
+     PROTOTYPE: $$
+     CODE:
+         htsFile *fp = hts_open(filename,"r");
+         if ( !fp ) croak("Could not read %s\n", filename);
+         enum htsExactFormat format = hts_get_format(fp)->format;
+	 if ( hts_close(fp) ) croak("hts_close returned non-zero status: %s\n", filename);
+
+	 if ( format != bcf ) XSRETURN_UNDEF;
+
+         RETVAL = bcf_index_load(filename);
+         if (!RETVAL) croak("Couldn't load bcf idx");
+
+     OUTPUT:
+         RETVAL
+
+void
+vcf_file_bcf_index_close(packname, bcf_idx)
+     char* packname
+     Bio::DB::HTS::Index bcf_idx
+     PROTOTYPE: $$
+     CODE:
+         hts_idx_destroy(bcf_idx);
+
 
 Bio::DB::HTS::VCF::Header
 vcf_file_header_read(vfile)
@@ -1547,7 +1592,7 @@ vcf_file_vcf_close(vfile)
     Bio::DB::HTS::VCFfile vfile
     CODE:
         bcf_close(vfile);
-
+	     
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Header PREFIX = vcfh_
 
 void
