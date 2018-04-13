@@ -14,7 +14,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 143, 'die';
+use Test::More tests => 149, 'die';
 
 use FindBin qw( $Bin );
 use Data::Dumper;
@@ -202,6 +202,14 @@ HEADER
 			    H2 => [1]
 			  }, 'info read correctly');
 
+  # Query tests
+  ok my $iter = $v->query("20:1000000-1231000"), "can query a region";
+  ok my $row = $iter->next, "can get a value from the iterator";
+  is $row, "20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4:.,.", "correct row value";
+  ok $row = $iter->next, "can get a value from the iterator";
+  is $row, "20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:.:56,60	0|0:48:4:51,51	0/0:61:2:.,.", "correct row value";
+  ok !$iter->next, "no more results";
+  
   $v->close();
 }
 
@@ -349,6 +357,14 @@ HEADER
 			    DB => [1],
 			    H2 => [1]
 			  }, 'info read correctly');
+
+  # Query tests
+  # ok my $iter = $v->query("20:1000000-1231000"), "can query a region";
+  # ok my $row = $iter->next, "can get a value from the iterator";
+  # is $row, "20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4:.,.", "correct row value";
+  # ok $row = $iter->next, "can get a value from the iterator";
+  # is $row, "20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:.:56,60	0|0:48:4:51,51	0/0:61:2:.,.", "correct row value";
+  # ok !$iter->next, "no more results";
 
   $v->close();
 }
