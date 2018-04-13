@@ -69,6 +69,7 @@ typedef khash_t(vdict) vdict_t;
 #define BAM_MAX_REGION 1<<29
 
 typedef htsFile*        Bio__DB__HTSfile;
+typedef htsFile*        Bio__DB__HTS__VCFfile;
 typedef bam_hdr_t*      Bio__DB__HTS__Header;
 typedef bam1_t*         Bio__DB__HTS__Alignment;
 typedef hts_idx_t*      Bio__DB__HTS__Index;
@@ -1603,7 +1604,6 @@ vcf_file_query(packname, region, ...)
 	   RETVAL = tbx_itr_querys ( INT2PTR(tbx_t*, SvIV((SV *)SvRV(ST(2)))), region );
          } else if ( sv_isa( ST(2), "Bio::DB::HTS::Index" ) ) {
 	   assert( sv_isa( ST(3), "Bio::DB::HTS::VCF::Header") );
-	   printf("%d\t%d\n", SvIV((SV *)SvRV(ST(2))), SvIV((SV *)SvRV(ST(3))));
 	   RETVAL = bcf_itr_querys ( INT2PTR(hts_idx_t*, SvIV((SV *)SvRV(ST(2)))), INT2PTR(bcf_hdr_t*, SvIV((SV *)SvRV(ST(3)))), region );
          } else
            croak ( "Argument is not a valid index" );
@@ -1625,7 +1625,7 @@ MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Iterator PREFIX = vcf_
 SV*
 vcf_iter_next(iter, fp, ...)
     Bio::DB::HTS::VCF::Iterator iter
-    Bio::DB::HTSfile fp
+    Bio::DB::HTS::VCFfile fp
   PREINIT:
     kstring_t str = { 0, 0, 0 };
 
@@ -1638,7 +1638,7 @@ vcf_iter_next(iter, fp, ...)
 
   CODE:
     if ( sv_isa( ST(2), "Bio::DB::HTS::Tabix" ) ) {
-      if (tbx_itr_next(fp, INT2PTR(tbx_t*, SvIV(ST(2))), iter, &str) < 0) {
+      if (tbx_itr_next(fp, INT2PTR(tbx_t*, SvIV((SV *)SvRV(ST(2)))), iter, &str) < 0) {
         free(str.s);
         XSRETURN_EMPTY;
       }
