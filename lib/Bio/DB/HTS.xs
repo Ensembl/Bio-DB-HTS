@@ -1600,10 +1600,11 @@ vcf_file_query(packname, region, ...)
 
      CODE:
 	 if ( sv_isa( ST(2), "Bio::DB::HTS::Tabix" ) ) {
-	   RETVAL = tbx_itr_querys ( INT2PTR(tbx_t*, SvIV(ST(2))), region );
+	   RETVAL = tbx_itr_querys ( INT2PTR(tbx_t*, SvIV((SV *)SvRV(ST(2)))), region );
          } else if ( sv_isa( ST(2), "Bio::DB::HTS::Index" ) ) {
 	   assert( sv_isa( ST(3), "Bio::DB::HTS::VCF::Header") );
-	   RETVAL = bcf_itr_querys ( INT2PTR(hts_idx_t*, SvIV(ST(2))), INT2PTR(bcf_hdr_t*, SvIV(ST(3))), region );
+	   printf("%d\t%d\n", SvIV((SV *)SvRV(ST(2))), SvIV((SV *)SvRV(ST(3))));
+	   RETVAL = bcf_itr_querys ( INT2PTR(hts_idx_t*, SvIV((SV *)SvRV(ST(2)))), INT2PTR(bcf_hdr_t*, SvIV((SV *)SvRV(ST(3)))), region );
          } else
            croak ( "Argument is not a valid index" );
 
