@@ -159,8 +159,9 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-sub new
-{
+use Bio::DB::HTS::Tabix;
+
+sub new {
   my $class         = shift;
   my (%args) = @_;
   my $filename = $args{filename};
@@ -170,11 +171,13 @@ sub new
     croak "Error getting VCF file reader: $!" ;
   my $h = $reader->header_read() or
     croak "Error getting VCF file header: $!" ;
-
+  
   my $self = bless {
                     vcf_file => $reader,
                     filename => $filename,
                     header => $h,
+		    # can either have a tabix indexed VCF or a (CSI) indexed BCF file
+		    index => Bio::DB::HTS::VCFfile->tbx_index_load($filename) || Bio::DB::HTS::VCFfile->bcf_index_load($filename)
                    }, ref $class || $class;
   return $self;
 }
@@ -201,11 +204,21 @@ sub num_variants
 sub close
 {
     my $self = shift;
-    if ( $self->{vcf_file} )
-    {
+    if ( $self->{vcf_file} ) {
         $self->{vcf_file}->vcf_close();
         delete $self->{vcf_file};
+      }
+    if ($self->{tbx_index}) {
+      Bio::DB::HTS::Tabix::tbx_close($self->{tbx_index});
+      delete $self->{tbx_index};
     }
+    #
+    # NOTE/TODO: this generates segfault, probably related to issue #?
+    # if ($self->{bcf_index}) {
+    #   Bio::DB::HTS::VCFfile->bcf_index_close($self->{bcf_index});
+    #   delete $self->{bcf_index};
+    # }
+    #
 }
 
 sub DESTROY {
