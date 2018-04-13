@@ -1585,6 +1585,33 @@ vcf_file_num_variants(packname,filename)
     OUTPUT:
         RETVAL
 
+Bio::DB::HTS::VCF::Iterator
+vcf_file_query(packname, region, ...)
+     char* packname
+     char* region
+     INIT:
+         if( items < 4 )
+           croak("Missing arguments");
+
+         if( !(SvOK(ST(2)) && sv_isobject(ST(2))))
+	   croak("Invalid index argument");
+
+         if( !(SvOK(ST(3)) && sv_isobject(ST(3))) )
+	   croak("Invalid header argument");
+
+     CODE:
+	 if ( sv_isa( ST(2), "Bio::DB::HTS::Tabix" ) ) {
+	   RETVAL = tbx_itr_querys ( INT2PTR(tbx_t*, SvIV(ST(2))), region );
+         } else if ( sv_isa( ST(2), "Bio::DB::HTS::Index" ) ) {
+	   assert( sv_isa( ST(3), "Bio::DB::HTS::VCF::Header") );
+	   RETVAL = bcf_itr_querys ( INT2PTR(hts_idx_t*, SvIV(ST(2))), INT2PTR(bcf_hdr_t*, SvIV(ST(3))), region );
+         } else
+           croak ( "Argument is not a valid index" );
+
+         if ( RETVAL == NULL ) XSRETURN_UNDEF;
+
+     OUTPUT:
+         RETVAL
 
 
 void
@@ -1592,7 +1619,8 @@ vcf_file_vcf_close(vfile)
     Bio::DB::HTS::VCFfile vfile
     CODE:
         bcf_close(vfile);
-	     
+
+
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Header PREFIX = vcfh_
 
 void

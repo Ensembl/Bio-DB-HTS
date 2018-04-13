@@ -201,6 +201,34 @@ sub num_variants
     return $self->{vcf_file}->num_variants($self->{filename});
 }
 
+sub query {
+  my ($self, $region) = @_;
+
+  die "Please provide a region" unless defined $region;
+
+  my ( $chr, $start, $end ) = $region =~ /^([^:]+)(?::(\d+))?(?:-(\d+))?$/;
+  die "You must specify a region in the format chr, chr:start or chr:start-end"
+    unless defined $chr;
+  die "Couldn't get start of the region" unless defined $start;
+  die "End in $region is less than the start" if $end < $start;
+
+  my $iter = Bio::DB::HTS::VCFfile->query($region, $self->{index}, $self->{header});
+  unless ( $iter ) {
+    # this likely means the chromosome wasn't found in the index, or it couldn't parse the provided region.
+    my $seqnames_hash = { map { $_ => 1 } @{ $self->{header}->get_seqnames } };
+
+    if ( not exists $seqnames_hash->{ $chr } ) {
+      # warn("Specified chromosome '$chr' does not exist in file " . $self->{_filename});
+      return undef;
+    } else {
+      die "Unable to get iterator for region '$region' in file ". $self->{filename} . " -- htslib couldn't parse your region string";
+    }
+  }
+
+  return Bio::DB::HTS::VCF::Iterator->new( iter => $iter, file => $self->{vcf_file}, index => $self->{index} );
+
+}
+
 sub close
 {
     my $self = shift;
