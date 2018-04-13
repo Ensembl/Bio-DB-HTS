@@ -1511,7 +1511,6 @@ vcf_file_bcf_index_load(packname, filename)
 	 if ( format != bcf ) XSRETURN_UNDEF;
 
          RETVAL = bcf_index_load(filename);
-         if (!RETVAL) croak("Couldn't load bcf idx");
 
      OUTPUT:
          RETVAL
