@@ -1619,6 +1619,49 @@ vcf_file_vcf_close(vfile)
     CODE:
         bcf_close(vfile);
 
+MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Iterator PREFIX = vcf_
+
+SV*
+vcf_iter_next(iter, fp, ...)
+    Bio::DB::HTS::VCF::Iterator iter
+    Bio::DB::HTSfile fp
+  PREINIT:
+    kstring_t str = { 0, 0, 0 };
+
+  INIT:
+    if ( items < 3 )
+      croak("Missing arguments");
+
+    if( !(SvOK(ST(2)) && sv_isobject(ST(2))) )
+      croak("Invalid index argument");
+
+  CODE:
+    if ( sv_isa( ST(2), "Bio::DB::HTS::Tabix" ) ) {
+      if (tbx_itr_next(fp, INT2PTR(tbx_t*, SvIV(ST(2))), iter, &str) < 0) {
+        free(str.s);
+        XSRETURN_EMPTY;
+      }
+    } else if ( sv_isa( ST(2), "Bio::DB::HTS::Index" ) ) {
+      if (bcf_itr_next(fp, iter, &str) < 0) {
+        free(str.s);
+        XSRETURN_EMPTY;
+      }
+    } else
+      croak ( "VCF/BCF file does not have a valid index" );
+
+    RETVAL = newSVpv(str.s, str.l);
+    free(str.s);
+
+  OUTPUT:
+    RETVAL
+
+void
+vcf_iter_free(iter)
+  Bio::DB::HTS::VCF::Iterator iter
+  CODE:
+	/* can call it also on a non-tabix index, 
+	   see HTSlib synced_bcf_reader.c:_reader_fill_buffer */
+	tbx_itr_destroy(iter);
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Header PREFIX = vcfh_
 
