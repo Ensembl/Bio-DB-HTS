@@ -159,7 +159,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-use Bio::DB::HTS::Tabix;
+use Bio::DB::HTS::VCF::Iterator;
 
 sub new {
   my $class         = shift;
