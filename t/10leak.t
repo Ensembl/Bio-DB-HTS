@@ -290,6 +290,12 @@ no_leaks_ok {
   $fmt_result = $row->get_format($h, 'HQ');
   $fmt_result = $row->get_format($h);
 
-} 'VCF/BCF reading';
+  # Query tests
+  $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" );
+  my $iter = $v->query("20:1000000-1231000");
+  my $i = 0;
+  $i++ while $iter->next;
+
+} 'VCF/BCF reading/querying';
 
 done_testing();
