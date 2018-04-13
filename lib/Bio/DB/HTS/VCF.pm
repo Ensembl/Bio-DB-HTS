@@ -240,12 +240,10 @@ sub close
       Bio::DB::HTS::Tabix::tbx_close($self->{tbx_index});
       delete $self->{tbx_index};
     }
-    #
-    # NOTE/TODO: this generates segfault, probably related to issue #?
-    # if ($self->{bcf_index}) {
-    #   Bio::DB::HTS::VCFfile->bcf_index_close($self->{bcf_index});
-    #   delete $self->{bcf_index};
-    # }
+    if ($self->{bcf_index}) {
+      Bio::DB::HTS::VCFfile->bcf_index_close($self->{bcf_index});
+      delete $self->{bcf_index};
+    }
     #
 }
 
