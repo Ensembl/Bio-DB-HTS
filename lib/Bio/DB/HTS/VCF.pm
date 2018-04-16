@@ -225,7 +225,7 @@ sub query {
     }
   }
 
-  return Bio::DB::HTS::VCF::Iterator->new( iter => $iter, file => $self->{vcf_file}, index => $self->{index} );
+  return Bio::DB::HTS::VCF::Iterator->new( iter => $iter, file => $self->{vcf_file}, header => $self->{header}, index => $self->{index} );
 
 }
 

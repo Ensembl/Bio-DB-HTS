@@ -30,11 +30,13 @@ sub new {
   my (%args) = @_;
   my $iter = $args{iter}; 
   my $htsfile = $args{file}; # an open htsFile pointer
+  my $header = $args{header};
   my $index = $args{index}; # either tabix (VCF) or hts index (BCF), depending on the file type
 
   my $self = bless {
                     _iter => $iter,
                     _htsfile => $htsfile,
+		    _header  => $header,
                     _index => $index,
                    }, ref $class || $class;
 
@@ -47,9 +49,9 @@ sub next {
 
     # sometimes *_query doesn't return an iterator, just NULL
     # so we have to allow a null iterator
-    return unless defined $self->{_iter};
+    return unless defined $self->{_iter} and defined $self->{_header};
 
-    return iter_next($self->{_iter}, $self->{_htsfile}, $self->{_index});
+    return iter_next($self->{_iter}, $self->{_htsfile}, $self->{_header}, $self->{_index});
 }
 
 sub close {
