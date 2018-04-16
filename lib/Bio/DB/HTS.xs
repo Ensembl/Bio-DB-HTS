@@ -1602,9 +1602,9 @@ vcf_file_query(packname, region, ...)
      CODE:
 	 if ( sv_isa( ST(2), "Bio::DB::HTS::Tabix" ) ) {
 	   RETVAL = tbx_itr_querys ( INT2PTR(tbx_t*, SvIV((SV *)SvRV(ST(2)))), region );
-         /* } else if ( sv_isa( ST(2), "Bio::DB::HTS::Index" ) ) { */
-	 /*   assert( sv_isa( ST(3), "Bio::DB::HTS::VCF::Header") ); */
-	 /*   RETVAL = bcf_itr_querys ( INT2PTR(hts_idx_t*, SvIV((SV *)SvRV(ST(2)))), INT2PTR(bcf_hdr_t*, SvIV((SV *)SvRV(ST(3)))), region ); */
+         } else if ( sv_isa( ST(2), "Bio::DB::HTS::Index" ) ) {
+	   assert( sv_isa( ST(3), "Bio::DB::HTS::VCF::Header") );
+	   RETVAL = bcf_itr_querys ( INT2PTR(hts_idx_t*, SvIV((SV *)SvRV(ST(2)))), INT2PTR(bcf_hdr_t*, SvIV((SV *)SvRV(ST(3)))), region );
          } else
            croak ( "Argument is not a valid index" );
 
@@ -1622,36 +1622,43 @@ vcf_file_vcf_close(vfile)
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Iterator PREFIX = vcf_
 
-SV*
-vcf_iter_next(iter, fp, ...)
+Bio::DB::HTS::VCF::Row
+vcf_iter_next(iter, fp, hdr, ...)
     Bio::DB::HTS::VCF::Iterator iter
     Bio::DB::HTS::VCFfile fp
+    Bio::DB::HTS::VCF::Header hdr
   PREINIT:
     kstring_t str = { 0, 0, 0 };
+    bcf1_t *rec = bcf_init();
+    int ret;
 
   INIT:
-    if ( items < 3 )
+    if ( items < 4 )
       croak("Missing arguments");
 
-    if( !(SvOK(ST(2)) && sv_isobject(ST(2))) )
+    if( !(SvOK(ST(3)) && sv_isobject(ST(3))) )
       croak("Invalid index argument");
 
   CODE:
-    if ( sv_isa( ST(2), "Bio::DB::HTS::Tabix" ) ) {
-      if (tbx_itr_next(fp, INT2PTR(tbx_t*, SvIV((SV *)SvRV(ST(2)))), iter, &str) < 0) {
+    if ( sv_isa( ST(3), "Bio::DB::HTS::Tabix" ) ) {
+      if (tbx_itr_next(fp, INT2PTR(tbx_t*, SvIV((SV *)SvRV(ST(3)))), iter, &str) < 0 || vcf_parse1(&str, hdr, rec) < 0) {
         free(str.s);
+	bcf_destroy(rec);
         XSRETURN_EMPTY;
       }
-    /* } else if ( sv_isa( ST(2), "Bio::DB::HTS::Index" ) ) { */
-    /*   if (bcf_itr_next(fp, iter, &str) < 0) { */
-    /*     free(str.s); */
-    /*     XSRETURN_EMPTY; */
-    /*   } */
+
+      free(str.s);
+
+    } else if ( sv_isa( ST(3), "Bio::DB::HTS::Index" ) ) {
+      if (bcf_itr_next(fp, iter, rec) < 0) {
+        bcf_destroy(rec);
+        XSRETURN_EMPTY;
+      }
     } else
       croak ( "VCF/BCF file does not have a valid index" );
 
-    RETVAL = newSVpv(str.s, str.l);
-    free(str.s);
+    bcf_unpack(rec, BCF_UN_ALL) ;
+    RETVAL = rec;
 
   OUTPUT:
     RETVAL
@@ -1661,7 +1668,7 @@ vcf_iter_free(iter)
   Bio::DB::HTS::VCF::Iterator iter
   CODE:
 	/* can call it also on a non-tabix index, 
-	   see HTSlib synced_bcf_reader.c:_reader_fill_buffer */
+	   see HTSlib synced_bcf_reader.c: bcf_sr_destroy1, _reader_fill_buffer */
 	tbx_itr_destroy(iter);
 
 MODULE = Bio::DB::HTS PACKAGE = Bio::DB::HTS::VCF::Header PREFIX = vcfh_
