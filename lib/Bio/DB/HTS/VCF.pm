@@ -14,9 +14,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>
+Rishi Nag E<lt>rishi@ebi.ac.ukE<gt>, original author.
+
+Alessandro Vullo C<< <avullo at cpan.org> >>, the current developer and maintainer.
 
 =head1 NAME
 
@@ -24,34 +26,24 @@ Bio::DB::HTS::VCF -- Read VCF/BCF data files
 
 =head1 DESCRIPTION
 
-This module provides a Perl interface to the HTSlib library for
-reading variant calls stored in VCF and BCF file databases.
+This module provides a Perl interface to the HTSlib library for reading variant calls 
+stored in VCF and BCF file databases.
 
-Individual rows can be read in and fields accessed.
+The functions provided are for opening a VCF/BCF file, reading header values, querying 
+specific chromosome intervals and then reading row values.
 
 A sweep set of methods allows running through rows one by one, either backwards or
 forwards through the file.
 
 =head1 SYNOPSIS
 
-=head2 VCF Row Objects
-
   use Bio::DB::HTS::VCF ;
 
-  # VCF Row objects
+  ### File Open ###
+  my $v = Bio::DB::HTS::VCF->new( filename => "/path/to/myfile.vcf.gz" );
 
-
-=head2 VCF use
-
-The functions provided are for opening a VCF/BCF file, reading header values and then reading row values.
-
-  use Bio::DB::HTS::VCF ;
-
-  # File Open and header read functions
-  my $v = Bio::DB::HTS::VCF->new( filename => "/path/to/myfile.vcf.gz" ) ;
+  # once the file has been opened, various global values can be read from the header
   my $h = $v->header();
-
-Once the file has been opened, various global values can be read from the header.
 
   $h->get_seqnames() ;
   $h->version() ;  # read the VCF file version
@@ -62,9 +54,7 @@ Once the file has been opened, various global values can be read from the header
   $h->num_seqnames() ;
   $h->get_seqnames() ; # return an array of sequence names
 
-To read a row use the next function. Various other fields can then be read from the row object. Some
-of the functions to read these fields will need the header object supplied.
-
+  ### Individual rows can be read in and fields accessed ###
   my $row = $v->next() ;
 
   # row functions
@@ -74,59 +64,323 @@ of the functions to read these fields will need the header object supplied.
   $row->num_filters() ;
   $row->quality() ;
 
-The alleles can be retrieved with the following functions. get_alleles() will return the alleles in an array
-reference.
-  my $num_alleles = $row->num_alleles() ;
-  my $alleles_ref = $row->get_alleles() ;
-  my @alleles = @$alleles_ref ;
-  for my $a (@alleles)
-  {
-    print($a.",") ;
+  # retrieve alleles
+  my $num_alleles = $row->num_alleles();
+  my $alleles = $row->get_alleles();
+  my $allele_index = 1;
+  for my $a (@$alleles) {
+    printf( "(%s, %s)\n", $a, $row->get_variant_type($allele_index++) ) ;
   }
 
+  # query filters
+  $row->has_filter($h,"DP50");
+  $row->has_filter($h,"."); # PASS filter check
+
+  $row->get_info_type($h, "AF"); # one of "String", "Integer", "Float" or "Flag".
+  $info_result = $row->get_info($h, "NS"); # [3]
+
+  $row->get_format_type($h, "GT") ; # "String"
+  $row->get_format($h, "DP") ; # [ 1, 8, 5 ]
+
+  ### free memory associated with the row
+  Bio::DB::HTS::VCF::Row->destroy($row);
+
+  ### query specific locations
+  my $iter = $v->query("20:1000000-1231000");
+  while (my $result = $iter->next) {
+    print $result->chromosome($h), $result->position(), $result->id(), $result->num_filters(), $result->quality(), "\n";
+  }
+
+=head1 METHODS
+
+=head2 C<new>
+
+Opens a VCF/BCF file for reading. If the file is indexed (i.e. tabix for VCF, csi for BCF) 
+the index is opened and used for querying arbitrary locations on the chromosomes.
+
+=over 1
+
+=item $vcf = Bio::DB::HTS::VCF->new($filepath)
+
+Returns an instance of Bio::DB::HTS::VCF.
+
+=back
+
+=head2 C<header>
+
+Returns instance of Bio::DB::HTS::VCF::Header, representing the header of the file.
+
+=over 1
+
+=item $header = $vcf->header()
+
+=back
+
+=head2 C<num_variants>
+
+Returns the number of variants (i.e. rows) of the file.
+
+=over 1
+
+=item $nv = $vcf->num_variants();
+
+=back
+
+=head2 C<close>
+
+Close the VCF/BCF file, allocated memory will be released, included the index, if present.
+
+=over 1
+
+=item $vcf->close()
+
+=back
+
+=head2 C<next>
+
+Returns the next row (starting from the first one) read from the file.
+
+=over
+
+=item $row = $vcf->next()
+
+Returns an instance of Bio::DB::HTS::VCF::Row or undef if end of file is reached.
+
+=back
+
+=head1 Querying an indexed VCF/BCF file
+
+If the file is indexed, the file can be queried for variants on a specified region.
+Regions can be specified using either the "chr", "chr:start" or "chr:start-end" format,
+with start <= end.
+
+Once an iterator is obtained, individual rows belonging to the result set can be
+sequentially accessed by iteratively invoking the iterator next method until it
+returns nothing.
+
+=head2 C<query>
+
+=over 1
+
+=item $iterator = $vcf->query($region);
+
+Returns an instance of Bio::DB::HTS::VCF::Iterator or undef if the chromosome is not 
+found in the index or raises an exception in case the underlying HTSlib library cannot 
+parse the region.
+
+=back
+
+=head1 HEADER METHODS
+
+Once the file has been opened, various global values can be read from the header.
+
+=head2 C<version>
+
+Returns the VCF file version, as a string
+
+=over 1
+
+=item $h->version()
+
+=back
+
+=head2 C<num_samples>
+
+Returns the number of samples
+
+=over 1
+
+=item $h->num_samples()
+
+=back
+
+=head2 C<get_sample_names>
+
+Returns the list of sample names
+
+=over 1
+
+=item $sample_names = $h->get_sample_names()
+
+Returns an array ref of strings representing the sample names
+
+=back
+
+=head2 C<get_seqnames>
+
+Returns the number of sequence names
+
+=over 1
+
+=item $h->num_seqnames()
+
+=back
+
+=head2 C<get_seqnames>
+
+Returns the list of sequence names
+
+=over 1
+
+=item $h->get_seqnames()
+
+Returns an array ref of strings representing the sequence names
+
+=back
+
+=head2 C<fmt_text>
+
+Get header formatted text, as a string
+
+=over 1
+
+=item $h->fmt_text()
+
+Returns the text string representing the content of the header
+
+=back
+
+=head1 ROW METHODS
+
+Individual rows can be read in and fields accessed. To read a row use the next function,
+which returns a Bio::DB::HTS::VCF::Row instance.
+
+Various fields can then be read from the row object. Some of the functions to read these 
+fields will need the header object supplied.
+
+=over 6
+
+=item $row->print($header)
+
+Returns a formatted textual representation of the row.
+
+=item $row->chromosome($header)
+
+=item $row->position()
+
+=item $row->id()
+
+=item $row->quality()
+
+=item $row->reference()
+
+=back
+
+=head2 Accessing alleles information
+
+=over 2
+
+=item $row->num_alleles()
+
+Returns the number of alleles
+
+=item $row->get_alleles()
+
+Returns the alleles as strings in an array ref
+
+=back
+
 The variant type of an allele can be determined using the index of the allele. The index starts
-from 1 for the first allele.
-   $row->get_variant_type($allele_index)
+from 1 for the first allele:
+
+=over 2
+
+=item $row->is_snp()
+
+Returns a true value if the row refers to a SNP.
+
+=item $row->get_variant_type($allele_index)
 
 This will return one of the values as defined in htslib. As of v1.3.1 these are as follows.
-   #define VCF_REF   0
-   #define VCF_SNP   1
-   #define VCF_MNP   2
-   #define VCF_INDEL 4
-   #define VCF_OTHER 8
+
+=over 5
+
+=item VCF_REF   0
+
+=item VCF_SNP   1
+
+=item VCF_MNP   2
+
+=item VCF_INDEL 4
+
+=item VCF_OTHER 8
+
+=back
+
+=back
+
+=head2 Row filters
 
 Each row object has filters that may or may not have been applied to it.
-has_filter will return 0 if the filter is not present, 1 if it is present.
-The PASS filter is represented by a dot.
-  $row->has_filter($h,"DP50") ;
-  $row->has_filter($h,".") ; #PASS filter check
 
-Each row may also have additional info fields associated with each allele in the row.
-Each info tag is specified as a string. If the row does not have an item of that info, or
-it does not exist in the file, a string ID_NOT_FOUND will be returned by the get_info() function.
+=over 2
 
-These are returned in an array reference. There
-will be one value per allele in the row. The get_info_type() function can be used to clarify
-the type of info. This will be the type of the info as specified in the VCF file header,
-one of String, Integer, Float or Flag). The flag will be signified by a value of 1.
+=item $row->num_filters()
 
-  $row->get_info_type($h,"INFO_ID") ;
-  $info_result = $row->get_info($h,"INFO_ID") ;
+Returns the number of filters of the row.
 
-Formats are dealt with similarly. A string ID_NOT_FOUND will be returned by the get_format() function
-if the specified format ID is not found.
+=item $row->has_filter($header, $filter)
 
-  $row->get_format_type($h,"FORMAT_ID") ;
-  $row->get_format($h,"FORMAT_ID") ;
+Returns 0 if the filter is not present, 1 if it is present. The PASS filter is represented by a dot.
+
+=back
+
+=head2 Accessing info fields
+
+Each row may have additional info fields associated with each allele in the row. 
+
+=over 2
+
+=item $row->get_info_type($header, $info_id)
+
+Returns the type of the info ID as specified in the VCF file header, one of "String", "Integer", "Float" or "Flag".
+
+=item $row->get_info($header, $info_id) or $row->get_info($header)
+
+If an info_id string is passed, returns an array ref of values for that particular info field, 
+one for each allele in the row. If the row does not have an item of that info, or it does not 
+exist in the file, a string "ID_NOT_FOUND" will be returned.
+
+Alternatively, the get_info() method can be invoked by just passing the header. In this case,
+the whole info field is returned organised as a hash ref where keys are the info IDs and values
+are the info fields for the corresponding ID.
+
+=back
+
+=head2 Accessing format fields
+
+Formats are dealt with similarly to info fields.
+
+=over 2
+
+=item $row->get_format_type($header, $format_id)
+
+Returns the type of the format ID as specified in the VCF file header, one of "String", "Integer", "Float" or "Flag".
+
+=item $row->get_format($header, $format_id) or $row->get_format($header)
+
+If a format_id string is passed, returns an array ref of values for that particular format ID. 
+If the row does not have an item of that format, or it does not exist in the file, a string 
+"ID_NOT_FOUND" will be returned.
+
+Alternatively, the get_format() method can be invoked by just passing the header. In this case,
+it returns the complete format specification as a hash ref of FORMAT_ID => [ FORMAT_ID_VALUE, ... ].
+
+=back
+
+=head2 Accessing genotypes
 
 Genotype records are currently returned as a series of integers, across all the samples for the row.
-  $row->get_genotypes($h)
 
-Finally, free memory associated with the row.
-  Bio::DB::HTS::VCF::Row->destroy($row) ;
+=over 1
 
+=item $row->get_genotypes($header)
 
-=head2 VCF Sweep Objects
+Returns an array reference of integers representing genotype records.
+
+=back
+
+=head1 VCF SWEEP OBJECTS
 
 Open the file and process using sweeps. Note that the two methods maintain pointers that are
 independant of one another. Using the next_row() will start at the first row in the file
@@ -145,8 +399,6 @@ so using the next() function is preferable to using sweeps.
   my $row_backwards = $sweep->previous_row(); #returns last row in file
   my $row_forwards = $sweep->next_row(); # returns second row in file
   my $row_backwards = $sweep->previous_row(); #returns penultimate row in file
-
-
 
 =cut
 
