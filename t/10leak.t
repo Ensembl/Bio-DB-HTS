@@ -294,7 +294,7 @@ no_leaks_ok {
   $v = Bio::DB::HTS::VCF->new( filename => $Bin . "/data/test.vcf.gz" );
   my $iter = $v->query("20:1000000-1231000");
   my $i = 0;
-  $i++ while $iter->next;
+  $i++ while $row = $iter->next;
 
 } 'VCF/BCF reading/querying';
 

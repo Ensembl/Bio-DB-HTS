@@ -14,7 +14,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 149, 'die';
+use Test::More tests => 177, 'die';
 
 use FindBin qw( $Bin );
 use Data::Dumper;
@@ -205,9 +205,25 @@ HEADER
   # Query tests
   ok my $iter = $v->query("20:1000000-1231000"), "can query a region";
   ok $row = $iter->next, "can get a value from the iterator";
-  is $row, "20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4:.,.", "correct row value";
+  # 20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4:.,.
+  is($row->chromosome($h), 20, 'chr');
+  is($row->position, 1110696, 'position');
+  is($row->id, 'rs6040355', 'id');
+  is($row->reference, 'A', 'reference');
+  is_deeply($row->get_info($h, 'NS'), [2], 'info');
+  is_deeply($row->get_info($h, 'DP'), [10], 'info');
+  is_deeply($row->get_info($h, 'AA'), ['T'], 'info');
+  is_deeply($row->get_info($h, 'DB'), [1], 'info');
   ok $row = $iter->next, "can get a value from the iterator";
-  is $row, "20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:.:56,60	0|0:48:4:51,51	0/0:61:2:.,.", "correct row value";
+  # 20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:.:56,60	0|0:48:4:51,51	0/0:61:2:.,.
+  is($row->chromosome($h), 20, 'chr');
+  is($row->position, 1230237, 'position');
+  is($row->id, '.', 'id');
+  is($row->reference, 'T', 'reference');
+  is_deeply($row->get_info($h), {
+				 NS => [3],
+				 DP => [13],
+				 AA => ['T']}, 'info');
   ok !$iter->next, "no more results";
   
   $v->close();
@@ -359,12 +375,28 @@ HEADER
 			  }, 'info read correctly');
 
   # Query tests
-  # ok my $iter = $v->query("20:1000000-1231000"), "can query a region";
-  # ok my $row = $iter->next, "can get a value from the iterator";
-  # is $row, "20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4:.,.", "correct row value";
-  # ok $row = $iter->next, "can get a value from the iterator";
-  # is $row, "20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:.:56,60	0|0:48:4:51,51	0/0:61:2:.,.", "correct row value";
-  # ok !$iter->next, "no more results";
+  ok my $iter = $v->query("20:1000000-1231000"), "can query a region";
+  ok $row = $iter->next, "can get a value from the iterator";
+  # 20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4:.,.
+  is($row->chromosome($h), 20, 'chr');
+  is($row->position, 1110696, 'position');
+  is($row->id, 'rs6040355', 'id');
+  is($row->reference, 'A', 'reference');
+  is_deeply($row->get_info($h, 'NS'), [2], 'info');
+  is_deeply($row->get_info($h, 'DP'), [10], 'info');
+  is_deeply($row->get_info($h, 'AA'), ['T'], 'info');
+  is_deeply($row->get_info($h, 'DB'), [1], 'info');
+  ok $row = $iter->next, "can get a value from the iterator";
+  # 20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:.:56,60	0|0:48:4:51,51	0/0:61:2:.,.
+  is($row->chromosome($h), 20, 'chr');
+  is($row->position, 1230237, 'position');
+  is($row->id, '.', 'id');
+  is($row->reference, 'T', 'reference');
+  is_deeply($row->get_info($h), {
+				 NS => [3],
+				 DP => [13],
+				 AA => ['T']}, 'info');
+  ok !$iter->next, "no more results";
 
   $v->close();
 }
