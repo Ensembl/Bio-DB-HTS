@@ -41,7 +41,7 @@ L<Bio::Perl>, L<Bio::DB::HTS>, L<Bio::DB::HTS::Constants>
 =cut
 
 package Bio::DB::HTS::PileupWrapper;
-$Bio::DB::HTS::PileupWrapper::VERSION = '2.10';
+$Bio::DB::HTS::PileupWrapper::VERSION = '2.11';
 
 use strict;
 use warnings;

@@ -1,3 +1,13 @@
+2.11
+  * VCF/BCF interface enhancements:
+    - retrieve header formatted text
+    - fetch all info/format fields in a row
+    - query arbitrary regions over tabix indexed VCF or CSI indexed BCF files
+  PR#68 - https://github.com/Ensembl/Bio-DB-HTS/pull/68 courtesy of John Marshall
+  * Refcount-based fix for index memory releasing problem
+  PR#71 - https://github.com/Ensembl/Bio-DB-HTS/pull/71 courtesy of Rob Aganrab
+  * fix minor POD issues
+  
 2.10
   * Tabix changes: header represented as empty string when none is available;
     querying over an unrecognised seq region returns undefined, not an iterator

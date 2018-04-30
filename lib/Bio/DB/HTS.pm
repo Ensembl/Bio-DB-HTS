@@ -1292,7 +1292,7 @@ Alessandro Vullo C<< <avullo at cpan.org> >>, the current developer and maintain
 
 =head1 CONTRIBUTORS
 
-Andy Yates, Keiran Raine, John Marshall, Zhicheng Liu, Can Wood, Dietmar Rieder, Chris Fields, David Jones, James Gilbert, Alex Hodgkins (Congenica Ltd.)
+Andy Yates, Keiran Raine, John Marshall, Zhicheng Liu, Can Wood, Dietmar Rieder, Chris Fields, David Jones, James Gilbert, Alex Hodgkins (Congenica Ltd.), Rob Aganrab
 
 =head1 KNOWN BUGS
 
@@ -1346,7 +1346,7 @@ L<http://search.cpan.org/dist/Bio-DB-HTS/>
 =cut
 
 package Bio::DB::HTS;
-$Bio::DB::HTS::VERSION = '2.10';
+$Bio::DB::HTS::VERSION = '2.11';
 
 use strict;
 use warnings;
@@ -2139,7 +2139,7 @@ sub _glob_match {
 
 package Bio::DB::HTS::Fai;
 
-$Bio::DB::HTS::Fai::VERSION = '2.10';
+$Bio::DB::HTS::Fai::VERSION = '2.11';
 
 sub open { shift->load(@_) }
 
@@ -2156,7 +2156,7 @@ package Bio::SeqFeature::HTSCoverage;
 
 use base 'Bio::SeqFeature::Lite';
 
-$Bio::SeqFeature::HTSCoverage::VERSION = '2.10';
+$Bio::SeqFeature::HTSCoverage::VERSION = '2.11';
 
 sub coverage {
     my $self = shift;
@@ -2188,7 +2188,7 @@ sub gff3_string {
 
 package Bio::DB::HTSfile;
 
-$Bio::DB::HTS::HTSfile::VERSION = '2.10';
+$Bio::DB::HTS::HTSfile::VERSION = '2.11';
 
 use File::Spec;
 use Cwd;

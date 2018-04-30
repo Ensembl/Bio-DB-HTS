@@ -19,7 +19,7 @@ limitations under the License.
 package Bio::DB::HTS::Tabix::Iterator;
 
 use Bio::DB::HTS; #load the XS
-$Bio::DB::HTS::Tabix::Iterator::VERSION = '2.10';
+$Bio::DB::HTS::Tabix::Iterator::VERSION = '2.11';
 
 use strict;
 use warnings;

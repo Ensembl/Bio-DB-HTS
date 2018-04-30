@@ -33,7 +33,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::Target;
-$Bio::DB::HTS::Target::VERSION = '2.10';
+$Bio::DB::HTS::Target::VERSION = '2.11';
 
 use strict;
 use warnings;

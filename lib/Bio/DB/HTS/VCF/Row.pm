@@ -1,6 +1,6 @@
 package Bio::DB::HTS::VCF::Row;
 
-$Bio::DB::HTS::VCF::Row::VERSION = '2.10';
+$Bio::DB::HTS::VCF::Row::VERSION = '2.11';
 
 use Bio::DB::HTS;
 
