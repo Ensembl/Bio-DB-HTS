@@ -222,6 +222,7 @@ follows:
  * Bio::DB::HTS::Pileup    -- Methods for manipulating the pileup data structure.
  * Bio::DB::HTS::Fai       -- Methods for creating and reading from indexed Fasta
                               files.
+
 =head1 METHODS
 
 We cover the high-level API first. The high-level API code can be
