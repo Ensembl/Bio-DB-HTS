@@ -69,7 +69,6 @@ typedef khash_t(vdict) vdict_t;
 #define BAM_MAX_REGION 1<<29
 
 typedef htsFile*        Bio__DB__HTSfile;
-typedef htsFile*        Bio__DB__HTS__VCFfile;
 typedef bam_hdr_t*      Bio__DB__HTS__Header;
 typedef bam1_t*         Bio__DB__HTS__Alignment;
 typedef hts_idx_t*      Bio__DB__HTS__Index;
