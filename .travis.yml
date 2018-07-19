@@ -11,6 +11,7 @@ env:
     - HTSLIB_VERSION=1.5
     - HTSLIB_VERSION=1.7
     - HTSLIB_VERSION=1.8
+    - HTSLIB_VERSION=1.9
 
 sudo: false
 
