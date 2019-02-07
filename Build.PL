@@ -27,7 +27,7 @@ my $build = $class->new(
 
     module_name        => 'Bio::DB::HTS',
     dist_version_from  => 'lib/Bio/DB/HTS.pm',
-    dist_author        => 'Rishi Nag',
+    dist_author        => 'Alessandro Vullo',
     dist_abstract      => 'Perl interface to HTS library for DNA sequencing',
     license            => 'Apache_2_0',
 
