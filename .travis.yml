@@ -23,7 +23,7 @@ addons:
         - libbz2-dev
 
 before_install:
-    # - git clone -b bioperl-release-1-6-1 --depth 1 https://github.com/bioperl/bioperl-live.git
+    - git clone -b BioPerl-v1.7.4 --depth 1 https://github.com/bioperl/bioperl-live.git
     - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
 
 install:
@@ -33,17 +33,17 @@ install:
     - export HTSLIB_DIR=
     - cd ..
     # manually install items listed from cpanfile so we can skip BioPerl
-    # - cpanm -f -n Carp
-    # - cpanm -f -n Test::Most
-    # - cpanm -f -n Test::LeakTrace
-    # - cpanm -f -n Module::Build
-    # - cpanm -f -n Log::Log4perl
-    # - cpanm -f -n Try::Tiny
-    - cpanm -v --installdeps --notest .
+    - cpanm -f -n Carp
+    - cpanm -f -n Test::Most
+    - cpanm -f -n Test::LeakTrace
+    - cpanm -f -n Module::Build
+    - cpanm -f -n Log::Log4perl
+    - cpanm -f -n Try::Tiny
+    # - cpanm -v --installdeps --notest .
     # install the modules just used here
     - cpanm --notest Perl::Tidy
     - cpanm --notest Test::Code::TidyAll
-    # - export PERL5LIB=$PERL5LIB:$PWD/bioperl-live
+    - export PERL5LIB=$PERL5LIB:$PWD/bioperl-live
     - perl Build.PL --prefix=~/biodbhts
     - ./Build
     - ./Build test
