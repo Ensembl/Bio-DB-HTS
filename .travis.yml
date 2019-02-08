@@ -43,7 +43,7 @@ install:
     # install the modules just used here
     - cpanm --notest Perl::Tidy
     - cpanm --notest Test::Code::TidyAll
-    - export PERL5LIB=$PERL5LIB:$PWD/bioperl-live
+    - export PERL5LIB=$PERL5LIB:$PWD/bioperl-live/lib
     - perl Build.PL --prefix=~/biodbhts
     - ./Build
     - ./Build test
