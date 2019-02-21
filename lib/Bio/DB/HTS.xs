@@ -2102,7 +2102,9 @@ vcfrow_get_format(row, header, ...)
       int* buf_i = NULL;
       float* buf_f = NULL;
       char* buf_c = NULL;
-      int result;
+      int mbuf_i = 0;
+      int mbuf_f = 0;
+      int mbuf_c = 0;
 
       vdict_t *d;
       khint_t k;
@@ -2126,34 +2128,28 @@ vcfrow_get_format(row, header, ...)
 	  } else {
 	    AV* av_ref = (AV*) sv_2mortal((SV*) newAV() );
 
-	    int ndst = 0;
 	    if( fmt->type == BCF_BT_FLOAT ) {
-	      result = bcf_get_format_float(header, row, SvPVX(ST(2)), &buf_f, &ndst) ;
-	      if ( result < 0 )
+	      int ndst = bcf_get_format_float(header, row, SvPVX(ST(2)), &buf_f, &mbuf_f) ;
+	      if ( ndst < 0 )
 		croak ("Couldn't read float format");
 
 	      for( i=0 ; i<ndst ; i++ )
 		av_push(av_ref, newSVnv(buf_f[i]));
 
-	      free(buf_f);
-
 	    } else if( fmt->type == BCF_BT_CHAR ) {
-	      result = bcf_get_format_char(header, row, SvPVX(ST(2)), &buf_c, &ndst) ;
-	      if ( result < 0 )
+	      int ndst = bcf_get_format_char(header, row, SvPVX(ST(2)), &buf_c, &mbuf_c) ;
+	      if ( ndst < 0 )
 		croak ("Couldn't read string format");
 
 	      av_push(av_ref, newSVpv(buf_c, ndst+1));
-	      free(buf_c);
 
 	    } else if( fmt->type == BCF_BT_INT8 || fmt->type == BCF_BT_INT16 || fmt->type == BCF_BT_INT32 ) {
-	      result = bcf_get_format_int32(header, row, SvPVX(ST(2)), &buf_i, &ndst) ;
-	      if ( result < 0 )
+	      int ndst = bcf_get_format_int32(header, row, SvPVX(ST(2)), &buf_i, &mbuf_i) ;
+	      if ( ndst < 0 )
 		croak ("Couldn't read int format");
 
 	      for( i=0 ; i<ndst ; i++ )
 		av_push(av_ref, newSViv(buf_i[i]));
-
-	      free(buf_i);
 	    }
 
 	    RETVAL = newRV((SV*)av_ref);
@@ -2172,34 +2168,28 @@ vcfrow_get_format(row, header, ...)
 
 	    AV* av_ref = (AV*) sv_2mortal((SV*) newAV() );
 
-	    int ndst = 0;
 	    if( fmt->type == BCF_BT_FLOAT ) {
-	      result = bcf_get_format_float(header, row, kh_key(d, k), &buf_f, &ndst) ;
-	      if ( result < 0 )
+	      int ndst = bcf_get_format_float(header, row, kh_key(d, k), &buf_f, &mbuf_f) ;
+	      if ( ndst < 0 )
 		croak ("Couldn't read float format");
 
 	      for( i=0 ; i<ndst ; i++ )
 		av_push(av_ref, newSVnv(buf_f[i]));
 
-	      free(buf_f);
-
 	    } else if( fmt->type == BCF_BT_CHAR ) {
-	      result = bcf_get_format_char(header, row, kh_key(d, k), &buf_c, &ndst) ;
-	      if ( result < 0 )
+	      int ndst = bcf_get_format_char(header, row, kh_key(d, k), &buf_c, &mbuf_c) ;
+	      if ( ndst < 0 )
 		croak ("Couldn't read string format");
 
 	      av_push(av_ref, newSVpv(buf_c, ndst+1));
-	      free(buf_c);
 
 	    } else if( fmt->type == BCF_BT_INT8 || fmt->type == BCF_BT_INT16 || fmt->type == BCF_BT_INT32 ) {
-	      result = bcf_get_format_int32(header, row, kh_key(d, k), &buf_i, &ndst) ;
-	      if ( result < 0 )
+	      int ndst = bcf_get_format_int32(header, row, kh_key(d, k), &buf_i, &mbuf_i) ;
+	      if ( ndst < 0 )
 		croak ("Couldn't read int format");
 
 	      for( i=0 ; i<ndst ; i++ )
 		av_push(av_ref, newSViv(buf_i[i]));
-
-	      free(buf_i);
 	    }
 
 	    char* key = savepv((const char*) kh_key(d, k));
@@ -2208,6 +2198,10 @@ vcfrow_get_format(row, header, ...)
 
 	RETVAL = newRV((SV*) fmt_data);
       }
+
+      free(buf_i);
+      free(buf_f);
+      free(buf_c);
 
   OUTPUT:
       RETVAL
