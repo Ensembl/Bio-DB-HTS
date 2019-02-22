@@ -25,5 +25,6 @@ nytprof.out
 *.o
 /pm_to_blib
 t/data/*ai
+t/data/*.gzi
 t/data/write_test_07.cram
 t/data/write_test_08.bam
