@@ -48,6 +48,13 @@ my $build = $class->new(
             'repository' => 'https://github.com/Ensembl/Bio-DB-HTS',
             },
         },
+
+    add_to_cleanup => [
+        't/data/*ai',
+        't/data/*.gzi',
+        't/data/write_test_07.cram',
+        't/data/write_test_08.bam',
+        ],
 );
 
 $build->find_hts;
