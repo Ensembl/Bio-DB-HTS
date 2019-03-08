@@ -180,33 +180,42 @@ info("Building Bio::DB::HTS");
 chdir "$install_dir/Bio-DB-HTS";
 my $cmd;
 if(defined $prefix_path) {
-  if(!$opts->{'static'}){
+  if(!$opts->{'static'}) {
     $cmd = "env HTSLIB_DIR=$prefix_path/lib perl Build.PL --install_base=$prefix_path";
-  }else{
+  } else {
     $cmd = "env HTSLIB_DIR=$install_dir/htslib perl Build.PL --install_base=$prefix_path";
   }
-}else{
+} else {
   $cmd = "env HTSLIB_DIR=$install_dir/htslib perl Build.PL";
 }
-if($opts->{'static'}){
+
+if($opts->{'static'}) {
   $cmd .= " --static=1";
 }
+
 warn "***CMD*** : $cmd\n";
 system $cmd;
+
 -e "./Build" or die "Build.PL didn't execute properly: no Build file found";
 system "./Build";
 `./Build test` =~ /Result: PASS/ or die "Build test failed. Not continuing";
 
 # Step 6: Install
+my $sudo = `which sudo`; chomp($sudo);
+
 if(defined $prefix_path) {
   info("Installing Bio::DB::HTS to $prefix_path.");
-  system "./Build install";
-}
-else {
+  `./Build install` =~ /Installing.+?HTS\.pm/ or die "Couldn't install to $prefix_path: $?";
+} elsif ($sudo) {
   info("Installing Bio::DB::HTS using sudo. You will be asked for your password.");
   info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
-  system "sudo ./Build install";
+  `sudo ./Build install` =~ /Installing.+?HTS\.pm/ or die "Couldn't install system-wide: $?";
+} else {
+  info("Installing Bio::DB::HTS system wide without sudo.");
+  info("Make sure you have the right privileges.");
+  `./Build install` or die "Couldn't install system-wide without sudo: $?";
 }
+
 if($opts->{'static'}){
   system "rm -f $install_dir/htslib/libhts.a";
 }
