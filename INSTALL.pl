@@ -209,11 +209,11 @@ if(defined $prefix_path) {
 } elsif ($sudo) {
   info("Installing Bio::DB::HTS using sudo. You will be asked for your password.");
   info("If this step fails because sudo isn't installed, go back and run this script again as superuser.");
-  `sudo ./Build install` =~ /Installing.+?HTS\.pm/ or die "Couldn't install system-wide: $?";
+  system "sudo ./Build install";;
 } else {
   info("Installing Bio::DB::HTS system wide without sudo.");
   info("Make sure you have the right privileges.");
-  `./Build install` or die "Couldn't install system-wide without sudo: $?";
+  `./Build install` =~ /Installing.+?HTS\.pm/ or die "Couldn't install at system level without sudo: $?";
 }
 
 if($opts->{'static'}){
