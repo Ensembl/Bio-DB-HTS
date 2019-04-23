@@ -99,6 +99,6 @@ package Bio::DB::HTS::Pileup;
 use strict;
 use warnings;
 
-$Bio::DB::HTS::Pileup::VERSION = '2.11';
+$Bio::DB::HTS::Pileup::VERSION = '3.01';
 
 1;

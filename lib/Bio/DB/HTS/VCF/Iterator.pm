@@ -19,7 +19,7 @@ limitations under the License.
 package Bio::DB::HTS::VCF::Iterator;
 
 use Bio::DB::HTS; #load the XS
-$Bio::DB::HTS::VCF::Iterator::VERSION = '2.11';
+$Bio::DB::HTS::VCF::Iterator::VERSION = '3.01';
 
 use strict;
 use warnings;

@@ -22,7 +22,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::Segment;
-$Bio::DB::HTS::Segment::VERSION = '2.11';
+$Bio::DB::HTS::Segment::VERSION = '3.01';
 
 use strict;
 use warnings;
@@ -122,7 +122,7 @@ sub class { 'sequence' }
 
 package Bio::DB::HTS::Segment::Iterator;
 
-$Bio::DB::HTS::Segment::Iterator::VERSION = '2.11';
+$Bio::DB::HTS::Segment::Iterator::VERSION = '3.01';
 
 sub new {
     my $package  = shift;

@@ -22,7 +22,7 @@ Rishi Nag E<lt>rishi@ebi.ac.uk<gt>
 =cut
 
 package Bio::DB::HTS::FetchIterator;
-$Bio::DB::HTS::FetchIterator::VERSION = '2.11';
+$Bio::DB::HTS::FetchIterator::VERSION = '3.01';
 
 use strict;
 use warnings;
