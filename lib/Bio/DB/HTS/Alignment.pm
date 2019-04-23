@@ -236,7 +236,7 @@ Return a reference to an array representing the CIGAR string. This is
 an array of arrays, in which each subarray consists of a CIGAR
 operation and a count. Example:
 
- [ ['M',34], ['D',1], ['M1',1] ]
+ [ ['M',34], ['D',1], ['M',1] ]
 
 =item ($ref,$matches,$query) = $align->padded_alignment
 

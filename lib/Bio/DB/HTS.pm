@@ -868,9 +868,9 @@ methods:
 
  $pileup->is_refskip True if the base on the padded read is a gap relative to the reference (denoted as < or > in the pileup)
 
- $pileup->is_head Undocumented field in the bam.h header file.
+ $pileup->is_head True if this is the first base in the query sequence.
 
- $pileup->is_tail Undocumented field in the bam.h header file.
+ $pileup->is_tail True if this is the last base in the query sequence.
 
 See L</Examples> for a very simple SNP caller.
 
@@ -1265,10 +1265,11 @@ True if the base on the padded read is a gap relative to the reference (denoted 
 
 =item $flag = $pileup->is_head
 
-=item $flag = $pileup->is_del
+True if this is the first base in the query sequence.
 
-These fields are undocumented in the BAM documentation, but are
-exported to the Perl API just in case.
+=item $flag = $pileup->is_tail
+
+True if this is the last base in the query sequence.
 
 =back
 
