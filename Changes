@@ -1,3 +1,16 @@
+3.01
+  * HTSlib 1.9 compatibility
+  * CentOS 7 compatible installation, courtesy of John Marshall
+  * BioPerl version agnostic installation process
+  * bugfix #75: reset versioning to avoid confusing perl runtime
+  * bugfix #81: install in sudo-less environments, e.g. docker containers
+  PR#83 - https://github.com/Ensembl/Bio-DB-HTS/pull/83, courtesy of John Marshall
+  * bugfix #76, #82 - memory leaks due to improper use of bcf_get_format_float/_char/_int32() buffers
+  PR#84 - https://github.com/Ensembl/Bio-DB-HTS/pull/84, courtesy of John Marshall
+  * Ignore .gzi index files and clean test output files
+  PR#87 - https://github.com/Ensembl/Bio-DB-HTS/pull/87, courtesy of John Marshall
+  * Documentation fixes
+
 2.11
   * VCF/BCF interface enhancements:
     - retrieve header formatted text
