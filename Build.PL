@@ -113,6 +113,9 @@ sub find_hts {
     }
     return 1 if $found;
 
+    # Try pkgconfig again but this time trust whatever it returns, without extra verification
+    return 1 if $self->find_hts_with_pkgconfig();
+
     $self->die_hts_not_found();
 }
 
@@ -122,12 +125,15 @@ sub set_include_and_compiler_flags {
     my $hts_include = $self->config_data('hts_include');
     my $hts_lib     = $self->config_data('hts_lib');
     my $static      = $self->args('static');
-    $self->include_dirs([$hts_include]);
-    if($static){
-      $self->extra_linker_flags("-L$hts_lib", '-lhts', '-lpthread', '-lz');
-    }else{
-      $self->extra_linker_flags("-L$hts_lib", "-Wl,-rpath,$hts_lib", '-lhts', '-lpthread', '-lz');
+
+    $self->include_dirs([$hts_include]) if $hts_include;
+
+    my @linker_dirflags;
+    if ($hts_lib) {
+      push @linker_dirflags, "-L$hts_lib";
+      push @linker_dirflags, "-Wl,-rpath,$hts_lib" unless $static;
     }
+    $self->extra_linker_flags(@linker_dirflags, '-lhts', '-lpthread', '-lz');
 }
 
 sub hts_dev_files_exist {
@@ -190,6 +196,31 @@ sub find_hts_in_split_install_dirs {
     }
 }
 
+sub find_hts_with_pkgconfig {
+    my ($self) = @_;
+
+    return 0 unless can_load(
+        modules => { 'ExtUtils::PkgConfig' => undef }
+    );
+    my $pkg_name = 'htslib';
+    return 0 unless ExtUtils::PkgConfig->exists($pkg_name);
+
+    if (my $libs_only_L = ExtUtils::PkgConfig->libs_only_L($pkg_name)) {
+        # For compatibility with other htslib search methods. Note that this
+        # assumes there will be at most one each of -I/-L directories, which
+        # is true as of htslib-1.5 but might change in the future.
+        $libs_only_L =~ s{^-L}{};
+        $self->config_data('hts_lib' => $libs_only_L);
+    }
+    if (my $cflags_only_I = ExtUtils::PkgConfig->cflags_only_I($pkg_name)) {
+        # See above
+        $cflags_only_I =~ s{^-I}{};
+        $self->config_data('hts_include' => $cflags_only_I);
+    }
+
+    return 1;
+}
+
 sub die_hts_not_found {
     my ($self, $msg) = @_;
 
@@ -209,6 +240,10 @@ and libhts.a / libhts.so in:
   5. Alien::HTSlib dependency resolver
   6. pkg-config (extra directories can be set in PKG_CONFIG_PATH environment variable)
   7. common library locations: /usr /usr/local, /usr/share, /opt/local
+
+If none of the above succeeds but htslib is registered with pkg-config, the script
+will try using pkg-config paths (via ExtUtils::PkgConfig) without checking if header
+and library files exist.
 
 END
 
