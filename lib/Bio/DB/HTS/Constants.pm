@@ -1,7 +1,7 @@
 
 =head1 LICENSE
 
-Copyright [2015-2020] EMBL-European Bioinformatics Institute
+Copyright [2015-2021] EMBL-European Bioinformatics Institute
 
 
 Licensed under the Apache License, Version 2.0 (the "License");
