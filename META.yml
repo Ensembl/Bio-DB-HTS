@@ -5,7 +5,7 @@ author:
 build_requires:
   ExtUtils::CBuilder: '0'
 configure_requires:
-  Module::Build: '0.42'
+  Module::Build: '0.38'
 dynamic_config: 1
 generated_by: 'Module::Build version 0.4224, CPAN::Meta::Converter version 2.150010'
 license: apache

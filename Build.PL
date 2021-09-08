@@ -41,7 +41,7 @@ my $build = $class->new(
         '-Wno-unused-result',  ],
 
     build_requires => { 'ExtUtils::CBuilder' => 0, },
-    configure_requires => { 'Module::Build' => 0.42, },
+    configure_requires => { 'Module::Build' => 0.38, },
     requires => { 'perl' => '5.008', 'Bio::Root::Version' => '1.006001', },
     meta_merge => {
         'resources' => {
