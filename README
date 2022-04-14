@@ -3,7 +3,7 @@ This is a Perl interface to the HTS Library. See http://htslib.org
 Bio::DB::HTS supports a wide range of install configurations, with two scripts - Build.PL and INSTALL.pl.
 
 For a list of the ways it can be used, with examples in action see
-https://github.com/Ensembl/Bio-DB-HTS/blob/master/scripts/build_options.sh
+https://github.com/Ensembl/Bio-DB-HTS/blob/main/scripts/build_options.sh
 (link to scripts/build_options.sh in the Bio::DB::HTS GitHub repo at https://github.com/Ensembl/Bio-DB-HTS)
 
 ## ONE-STEP INSTALLATION (INSTALL.pl)

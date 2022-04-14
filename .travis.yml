@@ -23,7 +23,7 @@ addons:
 
 before_install:
     - git clone -b BioPerl-v1.7.4 --depth 1 https://github.com/bioperl/bioperl-live.git
-    - git clone --branch master --depth 1 https://github.com/Ensembl/ensembl-test.git
+    - git clone --branch main --depth 1 https://github.com/Ensembl/ensembl-test.git
 
 install:
     - git clone --branch $HTSLIB_VERSION --depth=1 https://github.com/samtools/htslib.git

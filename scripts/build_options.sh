@@ -17,7 +17,7 @@
 #
 # Script for testing/installing various build configurations of Bio::DB::HTS
 # $1 - clone command for Bio::DB::HTS from GitHub
-#    e.g. "git clone -b master https://github.com/Ensembl/Bio-DB-HTS.git"
+#    e.g. "git clone -b main https://github.com/Ensembl/Bio-DB-HTS.git"
 #    Set this to be an alternative clone command if required
 # $2 - the test to be run, to match one of the options below
 #
