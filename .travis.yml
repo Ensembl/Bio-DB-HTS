@@ -1,55 +1,54 @@
+dist: focal
+
 language: "perl"
 
 perl:
   - "5.26"
-  - "5.14"
+  - "5.32"
 
 env:
-  matrix:
-    - HTSLIB_VERSION=1.3.1
-    - HTSLIB_VERSION=1.5
-    - HTSLIB_VERSION=1.7
-    - HTSLIB_VERSION=1.8
-    - HTSLIB_VERSION=1.9
+  global:
+      - ENSDIR=$TRAVIS_BUILD_DIR/..
+      - COVERALLS="false"
+  jobs:
+      - HTSLIB_VERSION=1.9
+      - HTSLIB_VERSION=1.10
+      - HTSLIB_VERSION=1.11
+      - HTSLIB_VERSION=1.12
+      - HTSLIB_VERSION=1.13
 
 sudo: false
 
 addons:
-    apt:
-        packages:
-        - unzip
-        - liblzma-dev
-        - libbz2-dev
+  apt:
+    packages:
+      - unzip
+      - liblzma-dev
+      - libbz2-dev
+      - zlib1g-dev
+      - libcurl4-gnutls-dev
+      - libpng-dev
+      - libssl-dev
+      - openssl
+      - libexpat1-dev
 
 before_install:
-    - git clone -b BioPerl-v1.7.4 --depth 1 https://github.com/bioperl/bioperl-live.git
+    - cd $ENSDIR
     - git clone --branch main --depth 1 https://github.com/Ensembl/ensembl-test.git
+    - $TRAVIS_BUILD_DIR
 
 install:
-    - git clone --branch $HTSLIB_VERSION --depth=1 https://github.com/samtools/htslib.git
+    - git clone --branch $HTSLIB_VERSION --recurse-submodules --shallow-submodules https://github.com/samtools/htslib.git
     - cd htslib
     - make prefix=~/biodbhts install
     - export HTSLIB_DIR=
     - cd ..
-    # manually install items listed from cpanfile so we can skip BioPerl
-    - cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
-    - cpanm -f -n Carp
-    - cpanm -f -n Test::Most
-    - cpanm -f -n Test::LeakTrace
-    - cpanm -f -n Module::Build
-    - cpanm -f -n Log::Log4perl
-    - cpanm -f -n Try::Tiny
-    # - cpanm -v --installdeps --notest .
-    # install the modules just used here
-    - cpanm --notest Perl::Tidy
-    - cpanm --notest Test::Code::TidyAll
-    - export PERL5LIB=$PERL5LIB:$PWD/bioperl-live/lib
+    - cpanm -v --sudo --installdeps --notest .
     - perl Build.PL --prefix=~/biodbhts
     - ./Build
     - ./Build test
 
 script: "./travisci/harness.sh"
-
 
 notifications:
   email:
