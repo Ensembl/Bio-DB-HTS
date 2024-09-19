@@ -35,7 +35,7 @@ addons:
 before_install:
     - cd $ENSDIR
     - git clone --branch main --depth 1 https://github.com/Ensembl/ensembl-test.git
-    - $TRAVIS_BUILD_DIR
+    - cd $TRAVIS_BUILD_DIR
 
 install:
     - git clone --branch $HTSLIB_VERSION --recurse-submodules --shallow-submodules https://github.com/samtools/htslib.git
