@@ -1,5 +1,5 @@
 requires 'Carp';
-requires 'Bio::Perl';
+requires 'Bio::Perl', '1.7.4';
 requires 'Log::Log4perl';
 requires 'Try::Tiny';
 requires 'Test::Most';

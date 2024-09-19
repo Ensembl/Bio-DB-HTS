@@ -43,6 +43,7 @@ install:
     - make prefix=~/biodbhts install
     - export HTSLIB_DIR=
     - cd ..
+    - cpanm -v --sudo --notest XML::LibXML # https://github.com/shlomif/perl-XML-LibXML/pull/87
     - cpanm -v --sudo --installdeps --notest .
     - perl Build.PL --prefix=~/biodbhts
     - ./Build
