@@ -2,6 +2,6 @@ package Bio::DB::HTS::VCF::Header;
 
 use Bio::DB::HTS; #load the XS
 
-$Bio::DB::HTS::VCF::Header::VERSION = '3.01';
+$Bio::DB::HTS::VCF::Header::VERSION = '3.02';
 
 1;
