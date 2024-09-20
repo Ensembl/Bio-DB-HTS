@@ -71,7 +71,7 @@ package Bio::DB::HTS::Kseq;
 use Bio::DB::HTS; #load the XS
 use Bio::DB::HTS::Kseq::Record;
 
-$Bio::DB::HTS::Kseq::VERSION = '3.01';
+$Bio::DB::HTS::Kseq::VERSION = '3.02';
 
 use strict;
 use warnings;
