@@ -2,7 +2,6 @@ Build.PL
 INSTALL.pl
 Changes
 cpanfile
-DISCLAIMER
 lib/Bio/DB/HTS/Alignment.pm
 lib/Bio/DB/HTS/AlignWrapper.pm
 lib/Bio/DB/HTS/Constants.pm
@@ -32,6 +31,7 @@ LICENSE
 MANIFEST			This list of files
 META.json
 META.yml
+NOTICE
 ppport.h
 README
 scripts/build_options.sh
@@ -47,6 +47,7 @@ t/07cramwrite.t
 t/08bamwrite.t
 t/09sam.t
 t/10leak.t
+t/11housekeeping_apache2.t
 t/kseq_data/bug2335.fastq
 t/kseq_data/evil_wrapping.fastq
 t/kseq_data/example.fasta

@@ -4,6 +4,8 @@
 ,v$
 \B\.svn\b
 \B\.cvsignore$
+\B\.git\b
+\B\.gitignore$
 
 # Avoid Makemaker generated and utility files.
 \bMakefile$
@@ -68,6 +70,10 @@ tar\.gz$
 # avoid these directories
 ^test_gbrowse_db
 ^timing_tests
+
+# avoid CI/CD files and directories
+^travisci
+^\.travis\.yml$
 
 # avoid top level fa, bam, bed and fai files
 ^[^/]+\.(?:bam|fa|sam|fai|bed)
