@@ -2,7 +2,8 @@ package Bio::DB::HTS::Kseq::Record;
 
 =head1 LICENSE
 
-Copyright [2015-2024] EMBL-European Bioinformatics Institute
+See the NOTICE file distributed with this work for additional information
+regarding copyright ownership.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
