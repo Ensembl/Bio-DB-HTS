@@ -10,6 +10,8 @@ env:
   global:
       - ENSDIR=$TRAVIS_BUILD_DIR/..
       - COVERALLS="false"
+      - HTSLIB_DIR=$TRAVIS_BUILD_DIR/../htslib
+      - PERL5LIB=$TRAVIS_BUILD_DIR/../ensembl-test/modules:$TRAVIS_BUILD_DIR/../ensembl/modules
   jobs:
       - HTSLIB_VERSION=1.9
       - HTSLIB_VERSION=1.10
@@ -22,7 +24,6 @@ sudo: false
 addons:
   apt:
     packages:
-      - unzip
       - liblzma-dev
       - libbz2-dev
       - zlib1g-dev
@@ -36,14 +37,13 @@ addons:
 before_install:
     - cd $ENSDIR
     - git clone --branch main --depth 1 https://github.com/Ensembl/ensembl-test.git
-    - cd $TRAVIS_BUILD_DIR
+    - git clone --branch main --depth 1 https://github.com/Ensembl/ensembl.git
+    - git clone --branch $HTSLIB_VERSION --recurse-submodules --shallow-submodules https://github.com/samtools/htslib.git
 
 install:
-    - git clone --branch $HTSLIB_VERSION --recurse-submodules --shallow-submodules https://github.com/samtools/htslib.git
     - cd htslib
     - make prefix=~/biodbhts install
-    - export HTSLIB_DIR=
-    - cd ..
+    - cd $TRAVIS_BUILD_DIR
     - cpanm -v --sudo --notest XML::LibXML # https://github.com/shlomif/perl-XML-LibXML/pull/87
     - cpanm -v --sudo --installdeps --notest .
     - perl Build.PL --prefix=~/biodbhts

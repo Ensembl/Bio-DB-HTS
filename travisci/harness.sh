@@ -1,8 +1,6 @@
 #!/bin/bash
 
-ENSDIR="${ENSDIR:-$PWD}"
-
-export PERL5LIB=$ENSDIR/ensembl-test/modules:$PWD/lib:$PWD/blib/arch/auto/Bio/DB/HTS/:$PWD/blib/arch/auto/Bio/DB/HTS/Faidx
+export PERL5LIB=$PERL5LIB:$PWD/lib:$PWD/blib/arch/auto/Bio/DB/HTS/:$PWD/blib/arch/auto/Bio/DB/HTS/Faidx
 
 export TEST_AUTHOR=$USER
 

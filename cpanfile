@@ -6,3 +6,6 @@ requires 'Test::Most';
 requires 'Test::LeakTrace';
 requires 'Module::Build';
 requires 'Test::Warnings';
+
+test_requires 'Devel::Cycle';
+test_requires 'PadWalker';
